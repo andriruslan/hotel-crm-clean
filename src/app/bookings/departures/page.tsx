@@ -1,7 +1,7 @@
-import { ArrivalsGroups } from '@/components/bookings/arrivals-groups'
+import { DeparturesGroups } from '@/components/bookings/departures-groups'
 import { isoDateToInputValue } from '@/lib/dates'
 
-export default async function ArrivalsPage({
+export default async function DeparturesPage({
   searchParams,
 }: {
   searchParams: Promise<{ date?: string }>
@@ -9,5 +9,5 @@ export default async function ArrivalsPage({
   const resolvedSearchParams = await searchParams
   const initialDate = resolvedSearchParams.date ? isoDateToInputValue(resolvedSearchParams.date) : ''
 
-  return <ArrivalsGroups initialDate={initialDate} />
+  return <DeparturesGroups initialDate={initialDate} />
 }

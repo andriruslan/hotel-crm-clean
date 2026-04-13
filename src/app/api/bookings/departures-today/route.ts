@@ -4,7 +4,7 @@ import { getPaymentStatus } from '@/lib/payment-status'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 import { getTodayDate } from '@/lib/dates'
 
-type ArrivalRow = {
+type DepartureRow = {
   id: string
   room_id: string
   check_in_date: string
@@ -61,8 +61,9 @@ export async function GET(request: NextRequest) {
           building_name
         )
       `)
-      .eq('check_in_date', date)
+      .eq('check_out_date', date)
       .neq('status', 'canceled')
+      .in('occupancy_status', ['checked_in', 'checked_out'])
       .order('occupancy_status', { ascending: true })
       .order('room_id', { ascending: true })
 
@@ -70,7 +71,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ ok: false, error: error.message }, { status: 500 })
     }
 
-    const items = ((data || []) as ArrivalRow[]).map((item) => {
+    const items = ((data || []) as DepartureRow[]).map((item) => {
       const bookingMeta = parseBookingNoteMeta(item.booking_note)
       const priceTotal = Number(item.price_total || 0)
       const paymentCashAmount = Number(item.payment_cash_amount || 0)

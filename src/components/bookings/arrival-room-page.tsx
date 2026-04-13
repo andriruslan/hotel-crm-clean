@@ -1,0 +1,235 @@
+'use client'
+
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { ArrivalRoomDetailCard, type ArrivalRoomDetailItem } from '@/components/bookings/arrival-room-detail-card'
+import { getVisibleGuestName } from '@/components/bookings/arrival-shared'
+import type { PaymentDueStage } from '@/lib/booking-note-meta'
+import { dateInputToIso, getTodayDate, isoDateToInputValue, isCompleteDateInput } from '@/lib/dates'
+import { normalizePhone } from '@/lib/phone'
+
+type ArrivalsResponse = {
+  ok: boolean
+  items?: ArrivalRoomDetailItem[]
+  error?: string
+}
+
+type UpdateResponse = {
+  ok: boolean
+  error?: string
+}
+
+type PaymentResponse = {
+  ok: boolean
+  error?: string
+}
+
+const sectionClass = 'rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-4 py-4 shadow-sm sm:px-5 sm:py-5'
+const secondaryButtonClass =
+  'h-12 w-full rounded-2xl border border-[var(--crm-wine)] bg-[var(--crm-wine-soft)] px-4 text-sm font-semibold text-[var(--crm-wine)] shadow-sm transition hover:bg-[var(--crm-wine-soft-hover)] disabled:opacity-60'
+
+export function ArrivalRoomPage({
+  bookingId,
+  initialDate,
+}: {
+  bookingId: string
+  initialDate: string
+}) {
+  const router = useRouter()
+  const today = isoDateToInputValue(getTodayDate())
+  const safeInitialDate = isCompleteDateInput(initialDate) ? initialDate : today
+
+  const [item, setItem] = useState<ArrivalRoomDetailItem | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [savingKey, setSavingKey] = useState('')
+
+  useEffect(() => {
+    if (!isCompleteDateInput(safeInitialDate)) {
+      setItem(null)
+      return
+    }
+
+    let isCancelled = false
+
+    async function loadArrival() {
+      setLoading(true)
+      setError('')
+
+      try {
+        const response = await fetch(`/api/bookings/arrivals-today?date=${encodeURIComponent(dateInputToIso(safeInitialDate))}`)
+        const data: ArrivalsResponse = await response.json()
+
+        if (!response.ok || !data.ok) {
+          throw new Error(data.error || 'Не вдалося отримати дані по номеру')
+        }
+
+        if (isCancelled) {
+          return
+        }
+
+        const foundItem = (data.items || []).find((entry) => entry.id === bookingId) || null
+        setItem(foundItem)
+
+        if (!foundItem) {
+          setError('На вибрану дату цей номер не знайдено у списку заїздів.')
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          setError(err instanceof Error ? err.message : 'Сталася помилка')
+        }
+      } finally {
+        if (!isCancelled) {
+          setLoading(false)
+        }
+      }
+    }
+
+    void loadArrival()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [bookingId, safeInitialDate])
+
+  async function updateBookingStatus(nextBookingId: string, paymentDueStage?: PaymentDueStage) {
+    const response = await fetch('/api/bookings/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bookingId: nextBookingId, occupancyStatus: 'checked_in', paymentDueStage }),
+    })
+
+    const data: UpdateResponse = await response.json()
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || 'Не вдалося оновити статус заселення')
+    }
+  }
+
+  async function savePayment(nextBookingId: string, cashAmount: number, cardAmount: number, comment: string, paymentDueStage?: PaymentDueStage) {
+    const response = await fetch('/api/payments/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bookingId: nextBookingId, cashAmount, cardAmount, comment, paymentDueStage }),
+    })
+
+    const data: PaymentResponse = await response.json()
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || 'Не вдалося зберегти оплату')
+    }
+  }
+
+  async function runItemAction(nextBookingId: string, actionKey: string, callback: () => Promise<void>) {
+    setSavingKey(`${nextBookingId}:${actionKey}`)
+    setError('')
+
+    try {
+      await callback()
+      router.push(`/bookings/arrivals?date=${encodeURIComponent(dateInputToIso(safeInitialDate))}`)
+      return true
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Сталася помилка')
+      return false
+    } finally {
+      setSavingKey('')
+    }
+  }
+
+  async function handleCheckIn(nextBookingId: string) {
+    return runItemAction(nextBookingId, 'check-in', async () => {
+      await updateBookingStatus(nextBookingId)
+    })
+  }
+
+  async function handleCheckInWithPayment(nextItem: ArrivalRoomDetailItem, cashAmount: number, cardAmount: number) {
+    if (cashAmount <= 0 && cardAmount <= 0) {
+      setError('Вкажи суму оплати готівкою або карткою.')
+      return false
+    }
+
+    return runItemAction(nextItem.id, 'check-in-pay', async () => {
+      await savePayment(nextItem.id, cashAmount, cardAmount, 'Оплата при заселенні', 'at_check_in')
+      await updateBookingStatus(nextItem.id, 'at_check_in')
+    })
+  }
+
+  async function handleDeferPaymentToCheckOut(nextBookingId: string) {
+    return runItemAction(nextBookingId, 'defer', async () => {
+      await updateBookingStatus(nextBookingId, 'at_check_out')
+    })
+  }
+
+  async function handleAddPayment(nextBookingId: string, cashAmount: number, cardAmount: number) {
+    if (cashAmount <= 0 && cardAmount <= 0) {
+      setError('Вкажи суму оплати готівкою або карткою.')
+      return false
+    }
+
+    return runItemAction(nextBookingId, 'pay', async () => {
+      await savePayment(nextBookingId, cashAmount, cardAmount, 'Дооплата по бронюванню')
+    })
+  }
+
+  const visibleGuestName = getVisibleGuestName(item?.guest_name)
+
+  return (
+    <main className="min-h-screen bg-[var(--background)] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-8">
+      <div className="mx-auto max-w-5xl space-y-3">
+        <section className={sectionClass}>
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Картка заселення</h1>
+                {item?.occupancy_status === 'checked_in' ? (
+                  <span className="rounded-full bg-[var(--crm-vine)] px-3 py-1.5 text-xs font-semibold text-white shadow-sm">
+                    Заселено
+                  </span>
+                ) : null}
+              </div>
+              {item ? (
+                <div className="mt-3 space-y-1 text-sm text-neutral-700">
+                  <div className="text-base font-semibold text-neutral-900">{normalizePhone(item.guest_phone || '') || 'Телефон не вказано'}</div>
+                  {visibleGuestName ? <div>{visibleGuestName}</div> : null}
+                </div>
+              ) : null}
+            </div>
+
+            <div>
+              <Link href={`/bookings/arrivals?date=${encodeURIComponent(dateInputToIso(safeInitialDate))}`} className={`inline-flex min-h-11 items-center justify-center rounded-2xl px-4 ${secondaryButtonClass}`}>
+                Повернутися до заїздів
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {error ? <div className="rounded-3xl border border-[var(--crm-danger)] bg-[var(--crm-danger-soft)] px-4 py-3 text-sm text-[var(--crm-danger)]">{error}</div> : null}
+
+        {loading ? (
+          <section className={sectionClass}>
+            <div className="text-sm text-neutral-600">Завантаження картки заселення...</div>
+          </section>
+        ) : item ? (
+          <ArrivalRoomDetailCard
+            item={item}
+            savingKey={savingKey}
+            onCheckIn={handleCheckIn}
+            onCheckInWithPayment={handleCheckInWithPayment}
+            onDeferPaymentToCheckOut={handleDeferPaymentToCheckOut}
+            onAddPayment={handleAddPayment}
+          />
+        ) : (
+          <section className={sectionClass}>
+            <div className="text-sm text-neutral-600">На вибрану дату картка заселення не знайдена.</div>
+            <div className="mt-4">
+              <Link href={`/bookings/arrivals?date=${encodeURIComponent(dateInputToIso(safeInitialDate))}`} className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-[var(--crm-wine)] bg-[var(--crm-wine-soft)] px-4 text-sm font-semibold text-[var(--crm-wine)] shadow-sm transition hover:bg-[var(--crm-wine-soft-hover)]">
+                Повернутися до заїздів
+              </Link>
+            </div>
+          </section>
+        )}
+      </div>
+    </main>
+  )
+}

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getPaidExtraBedsCount } from '@/lib/guest-composition'
+import { getDatesInRange } from '@/lib/dates'
 import { calculateBookingPrice } from '@/lib/pricing'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
@@ -17,12 +19,21 @@ type RoomRow = {
   } | null
 }
 
+type BookingRangeRow = {
+  room_id: string
+  check_in_date: string
+  check_out_date: string
+}
+
 export async function GET(request: NextRequest) {
   try {
     const checkIn = request.nextUrl.searchParams.get('checkIn') || ''
     const checkOut = request.nextUrl.searchParams.get('checkOut') || ''
     const guestsCountRaw = request.nextUrl.searchParams.get('guestsCount') || '1'
     const guestsCount = Number(guestsCountRaw)
+    const adultsCount = Number(request.nextUrl.searchParams.get('adultsCount') || '0')
+    const childrenUnder6Count = Number(request.nextUrl.searchParams.get('childrenUnder6Count') || '0')
+    const children6PlusCount = Number(request.nextUrl.searchParams.get('children6PlusCount') || '0')
 
     if (!checkIn || !checkOut) {
       return NextResponse.json({ ok: false, error: 'Потрібно вказати дату заїзду і дату виїзду' }, { status: 400 })
@@ -60,7 +71,7 @@ export async function GET(request: NextRequest) {
 
     const { data: conflictingBookings, error: bookingsError } = await supabaseAdmin
       .from('bookings')
-      .select('room_id')
+      .select('room_id, check_in_date, check_out_date')
       .neq('status', 'canceled')
       .lt('check_in_date', checkOut)
       .gt('check_out_date', checkIn)
@@ -69,14 +80,36 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ ok: false, error: bookingsError.message }, { status: 500 })
     }
 
-    const busyRoomIds = new Set((conflictingBookings || []).map((item) => item.room_id))
+    const requestedDates = getDatesInRange(checkIn, checkOut)
+    const bookingsByRoomId = new Map<string, BookingRangeRow[]>()
+
+    for (const booking of (conflictingBookings || []) as BookingRangeRow[]) {
+      const currentBookings = bookingsByRoomId.get(booking.room_id) || []
+      currentBookings.push(booking)
+      bookingsByRoomId.set(booking.room_id, currentBookings)
+    }
 
     const availableItems = ((rooms || []) as RoomRow[])
       .filter((room) => room.room_types)
-      .filter((room) => !busyRoomIds.has(room.id))
       .filter((room) => guestsCount <= Number(room.room_types!.max_capacity))
       .map((room) => {
         const roomType = room.room_types!
+        const roomBookings = bookingsByRoomId.get(room.id) || []
+        const freeDates = requestedDates.filter((requestedDate) =>
+          roomBookings.every((booking) => !(booking.check_in_date <= requestedDate && booking.check_out_date > requestedDate))
+        )
+        const isFullyAvailable = freeDates.length === requestedDates.length
+        const paidExtraBedsCount =
+          Number.isFinite(adultsCount) && Number.isFinite(childrenUnder6Count) && Number.isFinite(children6PlusCount)
+            ? getPaidExtraBedsCount(
+                {
+                  adultsCount: Math.max(0, adultsCount),
+                  childrenUnder6Count: Math.max(0, childrenUnder6Count),
+                  children6PlusCount: Math.max(0, children6PlusCount),
+                },
+                Number(roomType.base_capacity)
+              )
+            : undefined
         const pricing = calculateBookingPrice({
           checkInDate: checkIn,
           checkOutDate: checkOut,
@@ -84,6 +117,7 @@ export async function GET(request: NextRequest) {
           baseCapacity: Number(roomType.base_capacity),
           basePricePerNight: Number(roomType.base_price_per_night),
           extraBedPricePerNight: Number(roomType.extra_bed_price_per_night),
+          paidExtraBedsCount,
         })
 
         return {
@@ -98,12 +132,27 @@ export async function GET(request: NextRequest) {
           guests_count: guestsCount,
           nights: pricing.nights,
           extra_beds_count: pricing.extraBedsCount,
+          free_extra_beds_count: pricing.freeExtraBedsCount,
           price_base_total: pricing.priceBaseTotal,
           price_extra_total: pricing.priceExtraTotal,
           price_total: pricing.priceTotal,
+          free_dates: freeDates,
+          free_dates_count: freeDates.length,
+          is_fully_available: isFullyAvailable,
         }
       })
-      .sort((a, b) => a.price_total - b.price_total)
+      .filter((room) => room.free_dates_count > 0)
+      .sort((left, right) => {
+        if (left.is_fully_available !== right.is_fully_available) {
+          return left.is_fully_available ? -1 : 1
+        }
+
+        if (left.free_dates_count !== right.free_dates_count) {
+          return right.free_dates_count - left.free_dates_count
+        }
+
+        return left.price_total - right.price_total
+      })
 
     return NextResponse.json({ ok: true, items: availableItems })
   } catch (error) {

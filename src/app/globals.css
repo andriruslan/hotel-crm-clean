@@ -1,8 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f5f5;
-  --foreground: #171717;
+  --background: #f7f0eb;
+  --foreground: #2d1c23;
+  --crm-wine: #6f2031;
+  --crm-wine-dark: #551725;
+  --crm-wine-soft: #f3e3e8;
+  --crm-wine-soft-hover: #ebd0d8;
+  --crm-wine-border: #d9b2bc;
+  --crm-panel: #fcf5f1;
+  --crm-vine: #6f8c45;
+  --crm-vine-dark: #587038;
+  --crm-vine-soft: #eef4e5;
+  --crm-vine-border: #c9d7ae;
+  --crm-danger: #b34848;
+  --crm-danger-soft: #faeceb;
+  --crm-warning: #b97a2a;
+  --crm-warning-soft: #fcf1dc;
 }
 
 html,
@@ -13,6 +27,18 @@ body {
   padding: 0;
   min-height: 100%;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+  background-image:
+    radial-gradient(circle at top left, rgba(111, 140, 69, 0.1), transparent 26%),
+    radial-gradient(circle at top right, rgba(111, 32, 49, 0.14), transparent 28%),
+    linear-gradient(180deg, #fbf6f2 0%, #f6ede8 100%);
+}
+
+::selection {
+  background: rgba(111, 32, 49, 0.18);
+  color: var(--foreground);
 }
 
 * {

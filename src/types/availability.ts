@@ -10,7 +10,11 @@ export type AvailabilityItem = {
   guests_count: number
   nights: number
   extra_beds_count: number
+  free_extra_beds_count: number
   price_base_total: number
   price_extra_total: number
   price_total: number
+  free_dates: string[]
+  free_dates_count: number
+  is_fully_available: boolean
 }
