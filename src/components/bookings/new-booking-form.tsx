@@ -73,6 +73,11 @@ type QueryRoomPayload = {
   extraBedPricePerNight: number
 }
 
+type QueryRoomSelectionPayload = QueryRoomPayload & {
+  checkIn: string
+  checkOut: string
+}
+
 const sectionClass = 'rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-3.5 py-3.5 shadow-sm sm:px-5 sm:py-5'
 const fieldClass =
   'mt-1.5 h-12 w-full rounded-2xl border border-neutral-300 bg-white px-3.5 text-[16px] text-neutral-900 outline-none transition focus:border-neutral-700 focus:ring-4 focus:ring-neutral-200'
@@ -376,6 +381,34 @@ function buildDraftRoomFromQueryPayload(
   )
 }
 
+function createQueryRoomSelectionPayload(value: unknown): QueryRoomSelectionPayload | null {
+  const room = createQueryRoomPayload(value)
+
+  if (!room || !value || typeof value !== 'object') {
+    return null
+  }
+
+  const payload = value as Record<string, unknown>
+
+  if (typeof payload.checkIn !== 'string' || typeof payload.checkOut !== 'string') {
+    return null
+  }
+
+  return {
+    ...room,
+    checkIn: payload.checkIn,
+    checkOut: payload.checkOut,
+  }
+}
+
+function buildDraftRoomFromSelectionPayload(
+  queryRoom: QueryRoomSelectionPayload,
+  guestsCount: number,
+  composition: GuestComposition
+) {
+  return buildDraftRoomFromQueryPayload(queryRoom, queryRoom.checkIn, queryRoom.checkOut, guestsCount, composition)
+}
+
 function readDraftRoomsFromQuery() {
   if (typeof window === 'undefined') {
     return []
@@ -389,7 +422,7 @@ function readDraftRoomsFromQuery() {
   const childrenUnder6Count = parsePositiveNumber(params.get('childrenUnder6Count'))
   const children6PlusCount = parsePositiveNumber(params.get('children6PlusCount'))
 
-  if (!checkIn || !checkOut || !guestsCount) {
+  if (!guestsCount) {
     return []
   }
 
@@ -397,6 +430,37 @@ function readDraftRoomsFromQuery() {
     adultsCount !== null && childrenUnder6Count !== null && children6PlusCount !== null
       ? getSearchComposition(adultsCount, childrenUnder6Count, children6PlusCount)
       : getDefaultCompositionFromGuestsCount(guestsCount)
+
+  const serializedRoomSelections = params.get('roomSelections')
+
+  if (serializedRoomSelections) {
+    try {
+      const parsedSelections = JSON.parse(serializedRoomSelections)
+
+      if (Array.isArray(parsedSelections)) {
+        const draftRooms = parsedSelections.reduce<DraftRoom[]>((result, currentSelection) => {
+          const queryRoomSelection = createQueryRoomSelectionPayload(currentSelection)
+
+          if (!queryRoomSelection) {
+            return result
+          }
+
+          result.push(buildDraftRoomFromSelectionPayload(queryRoomSelection, guestsCount, composition))
+          return result
+        }, [])
+
+        if (draftRooms.length > 0) {
+          return draftRooms
+        }
+      }
+    } catch {
+      return []
+    }
+  }
+
+  if (!checkIn || !checkOut) {
+    return []
+  }
 
   const serializedRooms = params.get('rooms')
 
@@ -872,7 +936,7 @@ export function NewBookingForm() {
                   <span className="text-sm font-medium">ПІБ</span>
                   <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} className={fieldClass} />
                 </label>
-                <label className="block">
+                <label className="block min-w-0">
                   <span className="text-sm font-medium">Дата народження</span>
                   <DatePickerField value={birthDate} onChange={setBirthDate} className={fieldClass} />
                 </label>
@@ -897,12 +961,12 @@ export function NewBookingForm() {
 
               {isAddRoomSectionOpen ? (
                 <>
-                  <div className="mt-4 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
-                    <label className="block">
+                  <div className="mt-4 grid min-w-0 gap-3 md:grid-cols-2 2xl:grid-cols-3">
+                    <label className="block min-w-0">
                       <span className="text-sm font-medium">Дата заїзду</span>
                       <DatePickerField value={checkIn} onChange={setCheckIn} className={fieldClass} />
                     </label>
-                    <label className="block">
+                    <label className="block min-w-0">
                       <span className="text-sm font-medium">Дата виїзду</span>
                       <DatePickerField value={checkOut} onChange={setCheckOut} className={fieldClass} />
                     </label>
@@ -1014,8 +1078,8 @@ export function NewBookingForm() {
                           </div>
                         </div>
 
-                        <div className="mt-4 grid gap-3 md:grid-cols-2">
-                          <label className="block">
+                        <div className="mt-4 grid min-w-0 gap-3 md:grid-cols-2">
+                          <label className="block min-w-0">
                             <span className="text-sm font-medium">Дата заїзду</span>
                             <DatePickerField
                               value={draftRoom.checkIn}
@@ -1023,7 +1087,7 @@ export function NewBookingForm() {
                               className={fieldClass}
                             />
                           </label>
-                          <label className="block">
+                          <label className="block min-w-0">
                             <span className="text-sm font-medium">Дата виїзду</span>
                             <DatePickerField
                               value={draftRoom.checkOut}

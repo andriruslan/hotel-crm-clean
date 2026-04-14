@@ -345,7 +345,7 @@ export function DeparturesGroups({ initialDate = '' }: { initialDate?: string })
             <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Виїзди</h1>
 
             <div className="mt-4 space-y-3">
-              <label className="block">
+              <label className="block min-w-0">
                 <span className="text-sm font-medium text-neutral-800">Дата</span>
                 <DatePickerField value={selectedDate} onChange={setSelectedDate} className={fieldClass} />
               </label>
