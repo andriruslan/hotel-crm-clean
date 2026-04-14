@@ -26,14 +26,19 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100%;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
   font-family: Arial, Helvetica, sans-serif;
 }
 
 body {
+  position: relative;
   background-image:
     radial-gradient(circle at top left, rgba(111, 140, 69, 0.1), transparent 26%),
     radial-gradient(circle at top right, rgba(111, 32, 49, 0.14), transparent 28%),
     linear-gradient(180deg, #fbf6f2 0%, #f6ede8 100%);
+  overscroll-behavior-x: none;
 }
 
 ::selection {
@@ -43,4 +48,5 @@ body {
 
 * {
   box-sizing: border-box;
+  max-width: 100%;
 }

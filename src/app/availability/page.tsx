@@ -231,7 +231,10 @@ function MultiDayAvailabilityMatrix({
       <div className="text-xs font-medium text-neutral-500 sm:text-sm">На телефоні таблицю можна гортати вліво та вправо.</div>
 
       <div className="-mx-1 overflow-hidden rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] shadow-sm sm:mx-0">
-        <div className="overflow-x-auto px-1 pb-1 sm:px-0 sm:pb-0">
+        <div
+          className="overflow-x-auto px-1 pb-1 sm:px-0 sm:pb-0"
+          style={{ overscrollBehaviorX: 'contain', touchAction: 'pan-x pinch-zoom' }}
+        >
           <div className="min-w-max">
             <div className="grid border-b border-[var(--crm-wine-border)] bg-[var(--crm-panel)]" style={{ gridTemplateColumns: columnTemplate }}>
               <div className="sticky left-0 z-20 flex min-h-[64px] items-center border-r border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-2.5 py-2.5 sm:px-3 sm:py-3">
