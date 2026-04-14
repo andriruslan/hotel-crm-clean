@@ -11,7 +11,7 @@ type RoomRow = {
   room_number: string
   building_name: string
   is_active: boolean
-  room_types: RoomTypeRow[] | null
+  room_types: RoomTypeRow[] | RoomTypeRow | null
 }
 
 type RoomTypeRow = {
@@ -27,6 +27,14 @@ type BookingRangeRow = {
   room_id: string
   check_in_date: string
   check_out_date: string
+}
+
+function getRoomType(value: RoomRow['room_types']) {
+  if (!value) {
+    return null
+  }
+
+  return Array.isArray(value) ? value[0] || null : value
 }
 
 export async function GET(request: NextRequest) {
@@ -95,7 +103,7 @@ export async function GET(request: NextRequest) {
 
     const availableItems = ((rooms || []) as RoomRow[])
       .map((room) => {
-        const roomType = room.room_types?.[0] || null
+        const roomType = getRoomType(room.room_types)
 
         if (!roomType) {
           return null
