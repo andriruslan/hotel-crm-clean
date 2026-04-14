@@ -25,6 +25,7 @@ type BookingInput = {
   status: 'new' | 'confirmed' | 'canceled' | 'completed'
   payment_cash_amount: number
   payment_card_amount: number
+  certificate_amount?: number
   price_base_total: number
   price_extra_total: number
   price_total: number
@@ -128,7 +129,8 @@ export async function POST(request: NextRequest) {
     for (const bookingInput of bookingInputs) {
       const paymentCash = Number(bookingInput.payment_cash_amount || 0)
       const paymentCard = Number(bookingInput.payment_card_amount || 0)
-      const totalPaid = paymentCash + paymentCard
+      const certificateAmount = Math.max(0, Number(bookingInput.certificate_amount || 0))
+      const totalPaid = paymentCash + paymentCard + certificateAmount
       const priceTotal = Number(bookingInput.price_total || 0)
       const paymentStatus = getPaymentStatus(priceTotal, totalPaid)
       const paymentDueStage = bookingInput.payment_due_stage || getDefaultPaymentDueStage()
@@ -140,6 +142,7 @@ export async function POST(request: NextRequest) {
         paymentDueStage,
         bookingGroupId,
         reserveUntilDate,
+        certificateAmount,
       })
 
       const { data: booking, error: bookingError } = await supabaseAdmin

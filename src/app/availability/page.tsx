@@ -13,6 +13,17 @@ type ApiResponse = {
   error?: string
 }
 
+type BookingRoomQueryItem = {
+  roomId: string
+  roomNumber: string
+  buildingName: string
+  roomTypeName: string
+  baseCapacity: number
+  maxCapacity: number
+  basePricePerNight: number
+  extraBedPricePerNight: number
+}
+
 const fieldClass =
   'mt-1.5 h-12 w-full rounded-2xl border border-neutral-300 bg-white px-3.5 text-[16px] text-neutral-900 outline-none transition focus:border-neutral-700 focus:ring-4 focus:ring-neutral-200'
 
@@ -77,18 +88,27 @@ function createBookingHref(
   checkOut: string,
   composition: GuestComposition
 ) {
+  const params = createBaseBookingParams(checkIn, checkOut, composition)
+  const serializedRoom = serializeBookingRoom(item)
+
+  params.set('roomId', serializedRoom.roomId)
+  params.set('roomNumber', serializedRoom.roomNumber)
+  params.set('buildingName', serializedRoom.buildingName)
+  params.set('roomTypeName', serializedRoom.roomTypeName)
+  params.set('baseCapacity', String(serializedRoom.baseCapacity))
+  params.set('maxCapacity', String(serializedRoom.maxCapacity))
+  params.set('basePricePerNight', String(serializedRoom.basePricePerNight))
+  params.set('extraBedPricePerNight', String(serializedRoom.extraBedPricePerNight))
+
+  return `/bookings/new?${params.toString()}`
+}
+
+function createBaseBookingParams(checkIn: string, checkOut: string, composition: GuestComposition) {
   const guestsCount = getTotalGuestsCount(composition)
   const checkInIso = dateInputToIso(checkIn)
   const checkOutIso = dateInputToIso(checkOut)
-  const params = new URLSearchParams({
-    roomId: item.room_id,
-    roomNumber: item.room_number,
-    buildingName: item.building_name,
-    roomTypeName: item.room_type_name,
-    baseCapacity: String(item.base_capacity),
-    maxCapacity: String(item.max_capacity),
-    basePricePerNight: String(item.base_price_per_night),
-    extraBedPricePerNight: String(item.extra_bed_price_per_night),
+
+  return new URLSearchParams({
     checkIn: checkInIso,
     checkOut: checkOutIso,
     guestsCount: String(guestsCount),
@@ -96,8 +116,38 @@ function createBookingHref(
     childrenUnder6Count: String(composition.childrenUnder6Count),
     children6PlusCount: String(composition.children6PlusCount),
   })
+}
+
+function serializeBookingRoom(item: AvailabilityItem): BookingRoomQueryItem {
+  return {
+    roomId: item.room_id,
+    roomNumber: item.room_number,
+    buildingName: item.building_name,
+    roomTypeName: item.room_type_name,
+    baseCapacity: item.base_capacity,
+    maxCapacity: item.max_capacity,
+    basePricePerNight: item.base_price_per_night,
+    extraBedPricePerNight: item.extra_bed_price_per_night,
+  }
+}
+
+function createMultiRoomBookingHref(
+  items: AvailabilityItem[],
+  checkIn: string,
+  checkOut: string,
+  composition: GuestComposition
+) {
+  const params = createBaseBookingParams(checkIn, checkOut, composition)
+  params.set('rooms', JSON.stringify(items.map(serializeBookingRoom)))
 
   return `/bookings/new?${params.toString()}`
+}
+
+function createDailyBookingHref(item: AvailabilityItem, dateValue: string, composition: GuestComposition) {
+  const checkIn = isoDateToInputValue(dateValue)
+  const checkOut = isoDateToInputValue(addOneDay(dateValue))
+
+  return createBookingHref(item, checkIn, checkOut, composition)
 }
 
 function getWeekdayShortLabel(value: string) {
@@ -110,72 +160,146 @@ function getWeekdayShortLabel(value: string) {
   return new Intl.DateTimeFormat('uk-UA', { weekday: 'short' }).format(parsed)
 }
 
-function DailyAvailabilityTimeline({
+function getCompactDateLabel(value: string) {
+  const parsed = new Date(`${value}T00:00:00`)
+
+  if (Number.isNaN(parsed.getTime())) {
+    return isoDateToInputValue(value)
+  }
+
+  return new Intl.DateTimeFormat('uk-UA', { day: '2-digit', month: '2-digit' }).format(parsed)
+}
+
+function MultiDayAvailabilityMatrix({
   items,
   selectedDates,
-  createHref,
+  createCellHref,
+  isMultiSelectEnabled,
+  selectedRoomIds,
+  selectedBookingDate,
+  onToggleRoomAtDate,
 }: {
   items: AvailabilityItem[]
   selectedDates: string[]
-  createHref: (item: AvailabilityItem) => string
+  createCellHref: (item: AvailabilityItem, dateValue: string) => string
+  isMultiSelectEnabled: boolean
+  selectedRoomIds: string[]
+  selectedBookingDate: string
+  onToggleRoomAtDate: (roomId: string, dateValue: string) => void
 }) {
+  const columnTemplate = `minmax(164px, 164px) repeat(${selectedDates.length}, minmax(84px, 84px))`
+  const selectedRoomIdsSet = new Set(selectedRoomIds)
+
   return (
-    <div>
-      <div className="mb-2 text-xs font-medium text-neutral-500 sm:hidden">Гортай стрічку вліво або вправо</div>
-      <div className="mb-3 rounded-2xl bg-[var(--crm-panel)] px-3 py-3 text-sm leading-6 text-neutral-600">
-        Бордові номери можна бронювати на весь вибраний період. Світлі номери вільні лише в окремі дні.
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <span className="rounded-full bg-[var(--crm-vine-soft)] px-3 py-1.5 font-semibold text-[var(--crm-vine-dark)]">
+          Клітинка зелена = вільно
+        </span>
+        <span className="rounded-full bg-neutral-100 px-3 py-1.5 font-semibold text-neutral-600">
+          Сіра = зайнято
+        </span>
       </div>
-      <div className="-mx-4 overflow-x-auto px-4 pb-2 [touch-action:pan-x] [scrollbar-width:none] [-ms-overflow-style:none] sm:mx-0 sm:px-0">
-        <div className="flex min-w-max snap-x snap-mandatory gap-2 sm:gap-3">
-        {selectedDates.map((dateValue) => {
-          const freeItems = items
-            .filter((item) => item.free_dates.includes(dateValue))
-            .sort((left, right) => left.room_number.localeCompare(right.room_number, 'uk-UA', { numeric: true }))
 
-          return (
-            <section
-              key={dateValue}
-              className="w-[172px] shrink-0 snap-start rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3 py-3 shadow-sm sm:w-[220px]"
-            >
-              <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
-                <div className="text-base font-bold text-neutral-900 sm:text-lg">{isoDateToInputValue(dateValue)}</div>
-                <div className="mt-1 text-sm font-medium lowercase text-[var(--crm-wine)]">{getWeekdayShortLabel(dateValue)}</div>
+      <div className="overflow-hidden rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] shadow-sm">
+        <div className="overflow-x-auto">
+          <div className="min-w-max">
+            <div className="grid border-b border-[var(--crm-wine-border)] bg-[var(--crm-panel)]" style={{ gridTemplateColumns: columnTemplate }}>
+              <div className="sticky left-0 z-20 flex min-h-[72px] items-center border-r border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3 py-3">
+                <div>
+                  <div className="text-sm font-semibold text-neutral-900">Номер</div>
+                  <div className="text-xs text-neutral-500">Тицни по даті</div>
+                </div>
               </div>
+              {selectedDates.map((dateValue) => (
+                <div
+                  key={dateValue}
+                  className="flex min-h-[72px] flex-col items-center justify-center border-l border-[var(--crm-wine-border)] px-2 py-3 text-center"
+                >
+                  <div className="text-base font-bold leading-none text-neutral-900">{getCompactDateLabel(dateValue)}</div>
+                  <div className="mt-1 text-xs font-medium uppercase text-neutral-500">{getWeekdayShortLabel(dateValue)}</div>
+                </div>
+              ))}
+            </div>
 
-              <div className="mt-3 text-xs font-semibold uppercase tracking-wide text-neutral-500">
-                {freeItems.length > 0 ? `${freeItems.length} вільн.` : 'Немає вільних'}
-              </div>
+            {items.map((item) => {
+              const freeDatesSet = new Set(item.free_dates)
+              const isSelected = selectedRoomIdsSet.has(item.room_id)
+              const leftCellClassName = `sticky left-0 z-10 flex min-h-[88px] flex-col justify-center border-r border-[var(--crm-wine-border)] px-3 py-3 ${
+                item.is_fully_available ? 'bg-[var(--crm-wine-soft)]' : 'bg-white/95'
+              }`
 
-              <div className="mt-3 flex flex-wrap gap-2">
-                {freeItems.length > 0 ? (
-                  freeItems.map((item) =>
-                    item.is_fully_available ? (
-                      <Link
-                        key={`${dateValue}-${item.room_id}`}
-                        href={createHref(item)}
-                        className="rounded-full bg-[var(--crm-wine)] px-3 py-1.5 text-[13px] font-semibold text-white shadow-sm transition hover:bg-[var(--crm-wine-dark)] sm:text-sm"
-                      >
-                        {item.room_number}
-                      </Link>
-                    ) : (
-                      <span
-                        key={`${dateValue}-${item.room_id}`}
-                        className="rounded-full border border-[var(--crm-vine-border)] bg-white px-3 py-1.5 text-[13px] font-semibold text-[var(--crm-vine-dark)] shadow-sm sm:text-sm"
-                      >
-                        {item.room_number}
-                      </span>
-                    )
-                  )
-                ) : (
-                  <div className="rounded-2xl bg-white px-3 py-3 text-sm leading-6 text-neutral-500 shadow-sm">
-                    У цей день вільних номерів немає.
+              return (
+                <div
+                  key={item.room_id}
+                  className="grid border-b border-[var(--crm-wine-border)] last:border-b-0"
+                  style={{ gridTemplateColumns: columnTemplate }}
+                >
+                  <div
+                    className={`${leftCellClassName} ${isSelected ? 'ring-2 ring-[var(--crm-wine)] ring-inset' : ''}`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="text-lg font-bold leading-tight text-neutral-900">Номер {item.room_number}</div>
+                      {isMultiSelectEnabled && isSelected ? (
+                        <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full border border-[var(--crm-wine)] bg-[var(--crm-wine)] px-2 text-[11px] font-semibold text-white">
+                          Обрано
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="mt-1 text-xs leading-5 text-neutral-500">
+                      {item.building_name}, {item.room_type_name}
+                    </div>
                   </div>
-                )}
-              </div>
-            </section>
-          )
-        })}
-      </div>
+
+                  {selectedDates.map((dateValue) => {
+                    const isFree = freeDatesSet.has(dateValue)
+                    const isSelectedDate = isMultiSelectEnabled && isSelected && selectedBookingDate === dateValue
+                    const cellClassName = `min-h-[88px] border-l border-[var(--crm-wine-border)] px-2 py-2 ${
+                      isFree ? 'bg-[var(--crm-vine-soft)]' : 'bg-neutral-100'
+                    } ${isSelectedDate ? 'ring-2 ring-[var(--crm-wine)] ring-inset' : ''}`
+                    const contentClassName = `flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold shadow-sm ${
+                      isFree
+                        ? 'bg-white text-[var(--crm-vine-dark)]'
+                        : 'bg-neutral-200 text-neutral-400'
+                    }`
+
+                    if (!isFree) {
+                      return (
+                        <div key={`${item.room_id}-${dateValue}`} className={`flex items-center justify-center ${cellClassName}`}>
+                          <div className={contentClassName}>—</div>
+                        </div>
+                      )
+                    }
+
+                    if (isMultiSelectEnabled) {
+                      return (
+                        <button
+                          key={`${item.room_id}-${dateValue}`}
+                          type="button"
+                          onClick={() => onToggleRoomAtDate(item.room_id, dateValue)}
+                          className={`flex w-full items-center justify-center transition hover:brightness-[0.98] ${cellClassName}`}
+                        >
+                          <div className={contentClassName}>•</div>
+                        </button>
+                      )
+                    }
+
+                    return (
+                      <Link
+                        key={`${item.room_id}-${dateValue}`}
+                        href={createCellHref(item, dateValue)}
+                        className={`flex items-center justify-center transition hover:brightness-[0.98] ${cellClassName}`}
+                        scroll={false}
+                      >
+                        <div className={contentClassName}>•</div>
+                      </Link>
+                    )
+                  })}
+                </div>
+              )
+            })}
+          </div>
+        </div>
       </div>
     </div>
   )
@@ -184,34 +308,78 @@ function DailyAvailabilityTimeline({
 function SingleDayAvailabilityGrid({
   items,
   createHref,
+  isMultiSelectEnabled,
+  selectedRoomIds,
+  onToggleRoom,
 }: {
   items: AvailabilityItem[]
   createHref: (item: AvailabilityItem) => string
+  isMultiSelectEnabled: boolean
+  selectedRoomIds: string[]
+  onToggleRoom: (roomId: string) => void
 }) {
   return (
     <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-      {items.map((item) => (
-        <Link
-          key={item.room_id}
-          href={createHref(item)}
-          className="rounded-3xl border border-[var(--crm-wine-border)] bg-white/90 px-4 py-4 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-md"
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
-              <div className="truncate text-lg font-bold leading-tight">Номер {item.room_number}</div>
-              <div className="mt-1 text-xs leading-5 text-neutral-500">{item.building_name} · {item.room_type_name}</div>
-            </div>
-            <div className="rounded-full bg-[var(--crm-wine)] px-2.5 py-1 text-[11px] font-medium text-white shadow-sm">
-              {item.guests_count} гост.
-            </div>
-          </div>
+      {items.map((item) => {
+        const isSelected = selectedRoomIds.includes(item.room_id)
 
-          <div className="mt-3 flex flex-wrap gap-2 text-[12px] text-neutral-700">
-            <span className="rounded-full bg-white px-2.5 py-1 shadow-sm">доп. місць: {item.extra_beds_count + item.free_extra_beds_count}</span>
-            <span className="rounded-full bg-white px-2.5 py-1 shadow-sm">вільний на {isoDateToInputValue(item.free_dates[0] || '')}</span>
-          </div>
-        </Link>
-      ))}
+        if (isMultiSelectEnabled) {
+          return (
+            <button
+              key={item.room_id}
+              type="button"
+              onClick={() => onToggleRoom(item.room_id)}
+              className={`w-full rounded-3xl border bg-white/90 px-4 py-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--crm-panel)] hover:shadow-md ${
+                isSelected
+                  ? 'border-[var(--crm-wine)] ring-2 ring-[var(--crm-wine)] ring-inset'
+                  : 'border-[var(--crm-wine-border)] hover:border-[var(--crm-wine)]'
+              }`}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="truncate text-lg font-bold leading-tight">Номер {item.room_number}</div>
+                  <div className="mt-1 text-xs leading-5 text-neutral-500">{item.building_name} · {item.room_type_name}</div>
+                </div>
+                <span
+                  className={`rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-sm ${
+                    isSelected ? 'bg-[var(--crm-wine)] text-white' : 'bg-white text-[var(--crm-wine)]'
+                  }`}
+                >
+                  {isSelected ? 'Обрано' : 'Обрати'}
+                </span>
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-2 text-[12px] text-neutral-700">
+                <span className="rounded-full bg-white px-2.5 py-1 shadow-sm">доп. місць: {item.extra_beds_count + item.free_extra_beds_count}</span>
+                <span className="rounded-full bg-white px-2.5 py-1 shadow-sm">вільний на {isoDateToInputValue(item.free_dates[0] || '')}</span>
+              </div>
+            </button>
+          )
+        }
+
+        return (
+          <Link
+            key={item.room_id}
+            href={createHref(item)}
+            className="rounded-3xl border border-[var(--crm-wine-border)] bg-white/90 px-4 py-4 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-md"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="truncate text-lg font-bold leading-tight">Номер {item.room_number}</div>
+                <div className="mt-1 text-xs leading-5 text-neutral-500">{item.building_name} · {item.room_type_name}</div>
+              </div>
+              <div className="rounded-full bg-[var(--crm-wine)] px-2.5 py-1 text-[11px] font-medium text-white shadow-sm">
+                {item.guests_count} гост.
+              </div>
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-2 text-[12px] text-neutral-700">
+              <span className="rounded-full bg-white px-2.5 py-1 shadow-sm">доп. місць: {item.extra_beds_count + item.free_extra_beds_count}</span>
+              <span className="rounded-full bg-white px-2.5 py-1 shadow-sm">вільний на {isoDateToInputValue(item.free_dates[0] || '')}</span>
+            </div>
+          </Link>
+        )
+      })}
     </div>
   )
 }
@@ -227,6 +395,9 @@ export default function AvailabilityPage() {
   const [children6PlusCount, setChildren6PlusCount] = useState(0)
   const [loading, setLoading] = useState(false)
   const [items, setItems] = useState<AvailabilityItem[]>([])
+  const [isMultiSelectEnabled, setIsMultiSelectEnabled] = useState(false)
+  const [selectedRoomIds, setSelectedRoomIds] = useState<string[]>([])
+  const [selectedBookingDate, setSelectedBookingDate] = useState('')
   const [error, setError] = useState('')
   const [searched, setSearched] = useState(false)
 
@@ -301,6 +472,8 @@ export default function AvailabilityPage() {
       })
 
       setItems(nextItems)
+      setSelectedRoomIds([])
+      setSelectedBookingDate('')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Сталася помилка')
     } finally {
@@ -329,11 +502,54 @@ export default function AvailabilityPage() {
     () => (selectedCheckInIso && selectedCheckOutIso ? getDatesInRange(selectedCheckInIso, selectedCheckOutIso) : []),
     [selectedCheckInIso, selectedCheckOutIso]
   )
+  const selectedItems = useMemo(
+    () => items.filter((item) => selectedRoomIds.includes(item.room_id)),
+    [items, selectedRoomIds]
+  )
   const showDailyBreakdown =
     Boolean(selectedCheckInIso) && Boolean(selectedCheckOutIso) && getNights(selectedCheckInIso, selectedCheckOutIso) > 1
-  const availabilityDescription = showDailyBreakdown
-    ? `Обраний період: ${checkIn} - ${checkOut}.`
-    : `Вільні номери на дату ${checkIn}.`
+
+  function handleToggleMultiSelect(enabled: boolean) {
+    setIsMultiSelectEnabled(enabled)
+
+    if (!enabled) {
+      setSelectedRoomIds([])
+      setSelectedBookingDate('')
+    }
+  }
+
+  function handleToggleRoom(roomId: string) {
+    setSelectedRoomIds((current) => {
+      const nextSelectedRoomIds = current.includes(roomId)
+        ? current.filter((currentRoomId) => currentRoomId !== roomId)
+        : [...current, roomId]
+
+      if (nextSelectedRoomIds.length === 0) {
+        setSelectedBookingDate('')
+      }
+
+      return nextSelectedRoomIds
+    })
+  }
+
+  function handleToggleRoomAtDate(roomId: string, dateValue: string) {
+    setSelectedRoomIds((current) => {
+      if (!selectedBookingDate || selectedBookingDate !== dateValue) {
+        setSelectedBookingDate(dateValue)
+        return [roomId]
+      }
+
+      const nextSelectedRoomIds = current.includes(roomId)
+        ? current.filter((currentRoomId) => currentRoomId !== roomId)
+        : [...current, roomId]
+
+      if (nextSelectedRoomIds.length === 0) {
+        setSelectedBookingDate('')
+      }
+
+      return nextSelectedRoomIds
+    })
+  }
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-8">
@@ -419,22 +635,62 @@ export default function AvailabilityPage() {
                 <div className="flex flex-col gap-1 border-b border-neutral-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <div className="text-lg font-semibold text-neutral-900">{showDailyBreakdown ? 'Вільні номери по днях' : 'Вільні номери'}</div>
-                    <div className="text-sm text-neutral-600">{availabilityDescription}</div>
                   </div>
                   <div className="text-sm font-medium text-neutral-500">{showDailyBreakdown ? `${selectedDates.length} дн.` : `${items.length} номер(и)`}</div>
                 </div>
 
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <label className="inline-flex min-h-11 items-center gap-3 rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-2 text-sm font-semibold text-neutral-900 shadow-sm">
+                    <input
+                      type="checkbox"
+                      checked={isMultiSelectEnabled}
+                      onChange={(e) => handleToggleMultiSelect(e.target.checked)}
+                      className="h-5 w-5 rounded border-[var(--crm-wine-border)] text-[var(--crm-wine)] accent-[var(--crm-wine)]"
+                    />
+                    Обрати кілька номерів
+                  </label>
+
+                  {isMultiSelectEnabled ? (
+                    selectedItems.length > 0 && (!showDailyBreakdown || selectedBookingDate) ? (
+                      <Link
+                        href={createMultiRoomBookingHref(
+                          selectedItems,
+                          showDailyBreakdown ? isoDateToInputValue(selectedBookingDate) : checkIn,
+                          showDailyBreakdown ? isoDateToInputValue(addOneDay(selectedBookingDate)) : checkOut,
+                          searchComposition
+                        )}
+                        className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-[var(--crm-wine)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--crm-wine-dark)]"
+                      >
+                        {showDailyBreakdown
+                          ? `Перейти з ${selectedItems.length} номер(и) на ${isoDateToInputValue(selectedBookingDate)}`
+                          : `Перейти з ${selectedItems.length} номер(и)`}
+                      </Link>
+                    ) : (
+                      <div className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-100 px-4 py-2 text-sm font-semibold text-neutral-500">
+                        {showDailyBreakdown ? 'Обери зелені клітинки на одну дату' : 'Обери номери'}
+                      </div>
+                    )
+                  ) : null}
+                </div>
+
                 <div className="mt-4">
                   {showDailyBreakdown ? (
-                    <DailyAvailabilityTimeline
+                    <MultiDayAvailabilityMatrix
                       items={items}
                       selectedDates={selectedDates}
-                      createHref={(item) => createBookingHref(item, checkIn, checkOut, searchComposition)}
+                      createCellHref={(item, dateValue) => createDailyBookingHref(item, dateValue, searchComposition)}
+                      isMultiSelectEnabled={isMultiSelectEnabled}
+                      selectedRoomIds={selectedRoomIds}
+                      selectedBookingDate={selectedBookingDate}
+                      onToggleRoomAtDate={handleToggleRoomAtDate}
                     />
                   ) : (
                     <SingleDayAvailabilityGrid
                       items={items.filter((item) => item.is_fully_available)}
                       createHref={(item) => createBookingHref(item, checkIn, checkOut, searchComposition)}
+                      isMultiSelectEnabled={isMultiSelectEnabled}
+                      selectedRoomIds={selectedRoomIds}
+                      onToggleRoom={handleToggleRoom}
                     />
                   )}
                 </div>

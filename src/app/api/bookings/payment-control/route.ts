@@ -8,6 +8,14 @@ import { getPaymentStatus } from '@/lib/payment-status'
 import { normalizePhone } from '@/lib/phone'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
+type PaymentControlRelationRow = {
+  id: string
+  full_name?: string | null
+  phone?: string | null
+  room_number?: string | null
+  building_name?: string | null
+}
+
 type PaymentControlRow = {
   id: string
   room_id: string
@@ -23,16 +31,8 @@ type PaymentControlRow = {
   status: 'new' | 'confirmed' | 'canceled' | 'completed'
   occupancy_status: 'not_checked_in' | 'checked_in' | 'checked_out'
   created_at: string | null
-  guest: {
-    id: string
-    full_name: string | null
-    phone: string | null
-  } | null
-  room: {
-    id: string
-    room_number: string | null
-    building_name: string | null
-  } | null
+  guest: PaymentControlRelationRow[] | null
+  room: PaymentControlRelationRow[] | null
 }
 
 function matchesSearch(
@@ -112,10 +112,14 @@ export async function GET(request: NextRequest) {
     const items = ((data || []) as PaymentControlRow[])
       .map((item) => {
         const bookingMeta = parseBookingNoteMeta(item.booking_note)
+        const guest = item.guest?.[0] || null
+        const room = item.room?.[0] || null
         const priceTotal = Number(item.price_total || 0)
         const paymentCashAmount = Number(item.payment_cash_amount || 0)
         const paymentCardAmount = Number(item.payment_card_amount || 0)
-        const paymentTotalReceived = Number(item.payment_total_received ?? paymentCashAmount + paymentCardAmount)
+        const paymentTotalReceived = Number(
+          item.payment_total_received ?? paymentCashAmount + paymentCardAmount + Number(bookingMeta.certificateAmount || 0)
+        )
         const paymentStatus = item.payment_status || getPaymentStatus(priceTotal, paymentTotalReceived)
         const createdDate = item.created_at ? item.created_at.slice(0, 10) : today
         const reserveUntilDate =
@@ -129,11 +133,11 @@ export async function GET(request: NextRequest) {
         return {
           id: item.id,
           room_id: item.room_id,
-          room_number: item.room?.room_number || '—',
-          building_name: item.room?.building_name || '',
-          guest_id: item.guest?.id || '',
-          guest_name: item.guest?.full_name || '',
-          guest_phone: item.guest?.phone || '',
+          room_number: room?.room_number || '—',
+          building_name: room?.building_name || '',
+          guest_id: guest?.id || '',
+          guest_name: guest?.full_name || '',
+          guest_phone: guest?.phone || '',
           check_in_date: item.check_in_date,
           check_out_date: item.check_out_date,
           guests_count: item.guests_count,
@@ -148,6 +152,7 @@ export async function GET(request: NextRequest) {
           payment_cash_amount: paymentCashAmount,
           payment_card_amount: paymentCardAmount,
           payment_total_received: paymentTotalReceived,
+          certificate_amount: Number(bookingMeta.certificateAmount || 0),
           payment_status: paymentStatus,
           payment_progress_percent: priceTotal > 0 ? Math.min(100, Math.round((paymentTotalReceived / priceTotal) * 100)) : 0,
           status: item.status,

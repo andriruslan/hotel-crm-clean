@@ -56,8 +56,21 @@ type DraftRoom = {
   bookingNote: string
   priceBaseTotal: string
   priceExtraTotal: string
+  certificateApplied: boolean
+  certificateAmount: string
   paymentCash: string
   paymentCard: string
+}
+
+type QueryRoomPayload = {
+  roomId: string
+  roomNumber: string
+  buildingName: string
+  roomTypeName: string
+  baseCapacity: number
+  maxCapacity: number
+  basePricePerNight: number
+  extraBedPricePerNight: number
 }
 
 const sectionClass = 'rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-4 py-4 shadow-sm sm:px-5 sm:py-5'
@@ -164,6 +177,8 @@ function createDraftRoom(
     bookingNote: '',
     priceBaseTotal: String(pricing.priceBaseTotal),
     priceExtraTotal: String(pricing.priceExtraTotal),
+    certificateApplied: false,
+    certificateAmount: '',
     paymentCash: '',
     paymentCard: '',
   }
@@ -204,6 +219,56 @@ function recalculateDraftRoom(
   }
 }
 
+function recalculateDraftRoomDates(
+  room: DraftRoom,
+  patch: Partial<Pick<DraftRoom, 'checkIn' | 'checkOut'>>
+): DraftRoom {
+  const nextCheckIn = patch.checkIn ?? room.checkIn
+  const nextCheckOut = patch.checkOut ?? room.checkOut
+
+  if (!isCompleteDateInput(nextCheckIn) || !isCompleteDateInput(nextCheckOut)) {
+    return {
+      ...room,
+      checkIn: nextCheckIn,
+      checkOut: nextCheckOut,
+    }
+  }
+
+  const checkInIso = dateInputToIso(nextCheckIn)
+  const checkOutIso = dateInputToIso(nextCheckOut)
+
+  if (!checkInIso || !checkOutIso || checkOutIso <= checkInIso) {
+    return {
+      ...room,
+      checkIn: nextCheckIn,
+      checkOut: nextCheckOut,
+    }
+  }
+
+  const composition = getSearchComposition(room.adultsCount, room.childrenUnder6Count, room.children6PlusCount)
+  const guestsCount = getTotalGuestsCount(composition)
+  const paidExtraBedsCount = getPaidExtraBedsCount(composition, room.room.base_capacity)
+  const pricing = calculateBookingPrice({
+    checkInDate: checkInIso,
+    checkOutDate: checkOutIso,
+    guestsCount,
+    baseCapacity: room.room.base_capacity,
+    basePricePerNight: room.room.base_price_per_night,
+    extraBedPricePerNight: room.room.extra_bed_price_per_night,
+    paidExtraBedsCount,
+  })
+
+  return {
+    ...room,
+    checkIn: nextCheckIn,
+    checkOut: nextCheckOut,
+    paidExtraBedsCount: pricing.paidExtraBedsCount,
+    freeExtraBedsCount: pricing.freeExtraBedsCount,
+    priceBaseTotal: String(pricing.priceBaseTotal),
+    priceExtraTotal: String(pricing.priceExtraTotal),
+  }
+}
+
 function buildBookingNoteWithGuestSummary(note: string, room: DraftRoom) {
   const visibleNote = note.trim()
   const summary = `Склад гостей: ${buildGuestCompositionSummary({
@@ -212,73 +277,88 @@ function buildBookingNoteWithGuestSummary(note: string, room: DraftRoom) {
     children6PlusCount: room.children6PlusCount,
   })}`
   const extraInfo = `Додаткові місця: платних ${room.paidExtraBedsCount}, безкоштовних ${room.freeExtraBedsCount}`
+  const certificateAmount = room.certificateApplied ? parseIntegerValue(room.certificateAmount) : 0
+  const certificateInfo = certificateAmount > 0 ? `Оплата сертифікатом: ${certificateAmount} грн` : ''
 
-  return [visibleNote, summary, extraInfo].filter(Boolean).join('\n')
+  return [visibleNote, certificateInfo, summary, extraInfo].filter(Boolean).join('\n')
 }
 
-function readRoomFromQuery() {
-  if (typeof window === 'undefined') {
+function getDraftRoomCertificateAmount(room: DraftRoom) {
+  return room.certificateApplied ? parseIntegerValue(room.certificateAmount) : 0
+}
+
+function getDraftRoomTotalPrice(room: DraftRoom) {
+  return parseIntegerValue(room.priceBaseTotal) + parseIntegerValue(room.priceExtraTotal)
+}
+
+function getDraftRoomDirectPaid(room: DraftRoom) {
+  return parseIntegerValue(room.paymentCash) + parseIntegerValue(room.paymentCard)
+}
+
+function createQueryRoomPayload(value: unknown): QueryRoomPayload | null {
+  if (!value || typeof value !== 'object') {
     return null
   }
 
-  const params = new URLSearchParams(window.location.search)
-  const roomId = params.get('roomId')
-  const roomNumber = params.get('roomNumber')
-  const buildingName = params.get('buildingName')
-  const roomTypeName = params.get('roomTypeName')
-  const checkIn = params.get('checkIn')
-  const checkOut = params.get('checkOut')
-  const guestsCount = parsePositiveNumber(params.get('guestsCount'))
-  const adultsCount = parsePositiveNumber(params.get('adultsCount'))
-  const childrenUnder6Count = parsePositiveNumber(params.get('childrenUnder6Count'))
-  const children6PlusCount = parsePositiveNumber(params.get('children6PlusCount'))
-  const baseCapacity = parsePositiveNumber(params.get('baseCapacity'))
-  const maxCapacity = parsePositiveNumber(params.get('maxCapacity'))
-  const basePricePerNight = parsePositiveNumber(params.get('basePricePerNight'))
-  const extraBedPricePerNight = parsePositiveNumber(params.get('extraBedPricePerNight'))
+  const room = value as Record<string, unknown>
 
   if (
-    !roomId ||
-    !roomNumber ||
-    !buildingName ||
-    !roomTypeName ||
-    !checkIn ||
-    !checkOut ||
-    !guestsCount ||
-    !baseCapacity ||
-    !maxCapacity ||
-    basePricePerNight === null ||
-    extraBedPricePerNight === null
+    typeof room.roomId !== 'string' ||
+    typeof room.roomNumber !== 'string' ||
+    typeof room.buildingName !== 'string' ||
+    typeof room.roomTypeName !== 'string' ||
+    typeof room.baseCapacity !== 'number' ||
+    !Number.isFinite(room.baseCapacity) ||
+    typeof room.maxCapacity !== 'number' ||
+    !Number.isFinite(room.maxCapacity) ||
+    typeof room.basePricePerNight !== 'number' ||
+    !Number.isFinite(room.basePricePerNight) ||
+    typeof room.extraBedPricePerNight !== 'number' ||
+    !Number.isFinite(room.extraBedPricePerNight)
   ) {
     return null
   }
 
-  const composition =
-    adultsCount !== null && childrenUnder6Count !== null && children6PlusCount !== null
-      ? getSearchComposition(adultsCount, childrenUnder6Count, children6PlusCount)
-      : getDefaultCompositionFromGuestsCount(guestsCount)
-  const paidExtraBedsCount = getPaidExtraBedsCount(composition, baseCapacity)
+  return {
+    roomId: room.roomId,
+    roomNumber: room.roomNumber,
+    buildingName: room.buildingName,
+    roomTypeName: room.roomTypeName,
+    baseCapacity: room.baseCapacity,
+    maxCapacity: room.maxCapacity,
+    basePricePerNight: room.basePricePerNight,
+    extraBedPricePerNight: room.extraBedPricePerNight,
+  }
+}
 
+function buildDraftRoomFromQueryPayload(
+  queryRoom: QueryRoomPayload,
+  checkInIso: string,
+  checkOutIso: string,
+  guestsCount: number,
+  composition: GuestComposition
+) {
+  const paidExtraBedsCount = getPaidExtraBedsCount(composition, queryRoom.baseCapacity)
   const pricing = calculateBookingPrice({
-    checkInDate: checkIn,
-    checkOutDate: checkOut,
+    checkInDate: checkInIso,
+    checkOutDate: checkOutIso,
     guestsCount,
-    baseCapacity,
-    basePricePerNight,
-    extraBedPricePerNight,
+    baseCapacity: queryRoom.baseCapacity,
+    basePricePerNight: queryRoom.basePricePerNight,
+    extraBedPricePerNight: queryRoom.extraBedPricePerNight,
     paidExtraBedsCount,
   })
 
   return createDraftRoom(
     {
-      room_id: roomId,
-      room_number: roomNumber,
-      building_name: buildingName,
-      room_type_name: roomTypeName,
-      base_capacity: baseCapacity,
-      max_capacity: maxCapacity,
-      base_price_per_night: basePricePerNight,
-      extra_bed_price_per_night: extraBedPricePerNight,
+      room_id: queryRoom.roomId,
+      room_number: queryRoom.roomNumber,
+      building_name: queryRoom.buildingName,
+      room_type_name: queryRoom.roomTypeName,
+      base_capacity: queryRoom.baseCapacity,
+      max_capacity: queryRoom.maxCapacity,
+      base_price_per_night: queryRoom.basePricePerNight,
+      extra_bed_price_per_night: queryRoom.extraBedPricePerNight,
       guests_count: guestsCount,
       nights: pricing.nights,
       extra_beds_count: pricing.extraBedsCount,
@@ -286,11 +366,81 @@ function readRoomFromQuery() {
       price_base_total: pricing.priceBaseTotal,
       price_extra_total: pricing.priceExtraTotal,
       price_total: pricing.priceTotal,
+      free_dates: [],
+      free_dates_count: 0,
+      is_fully_available: true,
     },
-    isoDateToInputValue(checkIn),
-    isoDateToInputValue(checkOut),
+    isoDateToInputValue(checkInIso),
+    isoDateToInputValue(checkOutIso),
     composition
   )
+}
+
+function readDraftRoomsFromQuery() {
+  if (typeof window === 'undefined') {
+    return []
+  }
+
+  const params = new URLSearchParams(window.location.search)
+  const checkIn = params.get('checkIn')
+  const checkOut = params.get('checkOut')
+  const guestsCount = parsePositiveNumber(params.get('guestsCount'))
+  const adultsCount = parsePositiveNumber(params.get('adultsCount'))
+  const childrenUnder6Count = parsePositiveNumber(params.get('childrenUnder6Count'))
+  const children6PlusCount = parsePositiveNumber(params.get('children6PlusCount'))
+
+  if (!checkIn || !checkOut || !guestsCount) {
+    return []
+  }
+
+  const composition =
+    adultsCount !== null && childrenUnder6Count !== null && children6PlusCount !== null
+      ? getSearchComposition(adultsCount, childrenUnder6Count, children6PlusCount)
+      : getDefaultCompositionFromGuestsCount(guestsCount)
+
+  const serializedRooms = params.get('rooms')
+
+  if (serializedRooms) {
+    try {
+      const parsedRooms = JSON.parse(serializedRooms)
+
+      if (Array.isArray(parsedRooms)) {
+        const draftRooms = parsedRooms.reduce<DraftRoom[]>((result, currentRoom) => {
+          const queryRoom = createQueryRoomPayload(currentRoom)
+
+          if (!queryRoom) {
+            return result
+          }
+
+          result.push(buildDraftRoomFromQueryPayload(queryRoom, checkIn, checkOut, guestsCount, composition))
+          return result
+        }, [])
+
+        if (draftRooms.length > 0) {
+          return draftRooms
+        }
+      }
+    } catch {
+      return []
+    }
+  }
+
+  const singleRoom = createQueryRoomPayload({
+    roomId: params.get('roomId'),
+    roomNumber: params.get('roomNumber'),
+    buildingName: params.get('buildingName'),
+    roomTypeName: params.get('roomTypeName'),
+    baseCapacity: parsePositiveNumber(params.get('baseCapacity')),
+    maxCapacity: parsePositiveNumber(params.get('maxCapacity')),
+    basePricePerNight: parsePositiveNumber(params.get('basePricePerNight')),
+    extraBedPricePerNight: parsePositiveNumber(params.get('extraBedPricePerNight')),
+  })
+
+  if (!singleRoom) {
+    return []
+  }
+
+  return [buildDraftRoomFromQueryPayload(singleRoom, checkIn, checkOut, guestsCount, composition)]
 }
 
 function CompositionField({
@@ -384,26 +534,29 @@ export function NewBookingForm() {
   }
 
   useEffect(() => {
-    const draftRoom = readRoomFromQuery()
+    const nextDraftRooms = readDraftRoomsFromQuery()
 
-    if (draftRoom) {
-      setCheckIn(draftRoom.checkIn)
-      setCheckOut(draftRoom.checkOut)
-      setAdultsCount(draftRoom.adultsCount)
-      setChildrenUnder6Count(draftRoom.childrenUnder6Count)
-      setChildren6PlusCount(draftRoom.children6PlusCount)
-      setDraftRooms([draftRoom])
+    if (nextDraftRooms.length > 0) {
+      const firstDraftRoom = nextDraftRooms[0]
+
+      setCheckIn(firstDraftRoom.checkIn)
+      setCheckOut(firstDraftRoom.checkOut)
+      setAdultsCount(firstDraftRoom.adultsCount)
+      setChildrenUnder6Count(firstDraftRoom.childrenUnder6Count)
+      setChildren6PlusCount(firstDraftRoom.children6PlusCount)
+      setDraftRooms(nextDraftRooms)
       setIsAddRoomSectionOpen(false)
-      setRoomsMessage('Номер додано з екрана доступності.')
+      setRoomsMessage(nextDraftRooms.length > 1 ? 'Номери додано з екрана доступності.' : 'Номер додано з екрана доступності.')
     }
   }, [])
 
   const totalPrice = draftRooms.reduce(
-    (sum, room) => sum + parseIntegerValue(room.priceBaseTotal) + parseIntegerValue(room.priceExtraTotal),
+    (sum, room) => sum + getDraftRoomTotalPrice(room),
     0
   )
+  const totalCertificate = draftRooms.reduce((sum, room) => sum + getDraftRoomCertificateAmount(room), 0)
   const totalPaid = draftRooms.reduce(
-    (sum, room) => sum + parseIntegerValue(room.paymentCash) + parseIntegerValue(room.paymentCard),
+    (sum, room) => sum + getDraftRoomDirectPaid(room) + getDraftRoomCertificateAmount(room),
     0
   )
   const paymentStatus = getPaymentStatus(totalPrice, totalPaid)
@@ -556,6 +709,33 @@ export function NewBookingForm() {
     setError('')
   }
 
+  function updateDraftRoomDates(key: string, patch: Partial<Pick<DraftRoom, 'checkIn' | 'checkOut'>>) {
+    let nextError = ''
+
+    setDraftRooms((current) =>
+      current.map((room) => {
+        if (room.key !== key) {
+          return room
+        }
+
+        const nextRoom = recalculateDraftRoomDates(room, patch)
+
+        if (isCompleteDateInput(nextRoom.checkIn) && isCompleteDateInput(nextRoom.checkOut)) {
+          const checkInIso = dateInputToIso(nextRoom.checkIn)
+          const checkOutIso = dateInputToIso(nextRoom.checkOut)
+
+          if (!checkInIso || !checkOutIso || checkOutIso <= checkInIso) {
+            nextError = `У номері ${room.room.room_number} дата виїзду має бути пізніше за дату заїзду.`
+          }
+        }
+
+        return nextRoom
+      })
+    )
+
+    setError(nextError)
+  }
+
   async function handleCreateBooking(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError('')
@@ -574,6 +754,21 @@ export function NewBookingForm() {
     if (draftRooms.length === 0) {
       setError('Додай хоча б один номер у бронювання.')
       return
+    }
+
+    for (const room of draftRooms) {
+      if (!isCompleteDateInput(room.checkIn) || !isCompleteDateInput(room.checkOut)) {
+        setError(`Перевір дати у номері ${room.room.room_number}.`)
+        return
+      }
+
+      const checkInIso = dateInputToIso(room.checkIn)
+      const checkOutIso = dateInputToIso(room.checkOut)
+
+      if (!checkInIso || !checkOutIso || checkOutIso <= checkInIso) {
+        setError(`У номері ${room.room.room_number} дата виїзду має бути пізніше за дату заїзду.`)
+        return
+      }
     }
 
     setSaving(true)
@@ -597,10 +792,11 @@ export function NewBookingForm() {
             guests_count: room.guestsCount,
             extra_beds_count: room.paidExtraBedsCount,
             booking_note: buildBookingNoteWithGuestSummary(room.bookingNote, room),
-            payment_due_stage: paymentDueStage,
+            payment_due_stage: room.certificateApplied ? 'before_check_in' : paymentDueStage,
             status,
             payment_cash_amount: parseIntegerValue(room.paymentCash),
             payment_card_amount: parseIntegerValue(room.paymentCard),
+            certificate_amount: getDraftRoomCertificateAmount(room),
             price_base_total: parseIntegerValue(room.priceBaseTotal),
             price_extra_total: parseIntegerValue(room.priceExtraTotal),
             price_total: parseIntegerValue(room.priceBaseTotal) + parseIntegerValue(room.priceExtraTotal),
@@ -743,8 +939,12 @@ export function NewBookingForm() {
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div>
-                              <div className="text-base font-bold">Номер {room.room_number}</div>
-                              <div className="mt-1 text-xs text-neutral-500">{room.building_name} · {room.room_type_name}</div>
+                              <div className="text-base font-bold">
+                                <span>{`Номер ${room.room_number} `}</span>
+                                <span className="text-sm font-medium text-neutral-600">
+                                  {`(${room.building_name}, ${room.room_type_name})`}
+                                </span>
+                              </div>
                             </div>
                             <div className="text-base font-semibold">{formatMoney(room.price_total)}</div>
                           </div>
@@ -775,74 +975,159 @@ export function NewBookingForm() {
                 <div className="mt-4 rounded-2xl bg-neutral-50 px-4 py-4 text-sm text-neutral-600">Поки що жодного номера не додано.</div>
               ) : (
                 <div className="mt-4 space-y-3">
-                  {draftRooms.map((draftRoom, index) => (
-                    <article key={draftRoom.key} className="rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-4 shadow-sm">
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                          <div className="text-base font-bold">Номер {index + 1}: {draftRoom.room.room_number}</div>
-                          <div className="mt-1 text-sm text-neutral-600">{draftRoom.room.building_name} · {draftRoom.room.room_type_name}</div>
-                          <div className="mt-1 text-xs text-neutral-500">{draftRoom.checkIn} - {draftRoom.checkOut} · {draftRoom.guestsCount} гост.</div>
-                        </div>
-                        <button type="button" onClick={() => setDraftRooms((current) => current.filter((room) => room.key !== draftRoom.key))} className="inline-flex rounded-2xl bg-white px-3 py-2 text-sm font-semibold text-[var(--crm-wine)] shadow-sm">
-                          Прибрати
-                        </button>
-                      </div>
+                  {draftRooms.map((draftRoom, index) => {
+                    const certificateAmount = getDraftRoomCertificateAmount(draftRoom)
+                    const roomTotalPrice = getDraftRoomTotalPrice(draftRoom)
+                    const directPaid = getDraftRoomDirectPaid(draftRoom)
+                    const roomTotalPaid = directPaid + certificateAmount
+                    const roomBalance = Math.max(0, roomTotalPrice - roomTotalPaid)
+                    const roomCertificateSurplus = Math.max(0, certificateAmount - roomTotalPrice)
 
-                      <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-                        <div className="rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">
-                          <div className="text-xs uppercase tracking-wide text-neutral-500">Всього</div>
-                          <div className="mt-1 text-lg font-semibold text-neutral-900">{draftRoom.guestsCount}</div>
+                    return (
+                      <article key={draftRoom.key} className="rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-4 shadow-sm">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <div className="text-base font-bold">
+                              {`Номер ${index + 1}: ${draftRoom.room.room_number} (${draftRoom.room.room_type_name}, ${draftRoom.room.building_name})`}
+                            </div>
+                            <div className="mt-1 text-xs text-neutral-500">{draftRoom.checkIn} - {draftRoom.checkOut} · {draftRoom.guestsCount} гост.</div>
+                          </div>
+                          <button type="button" onClick={() => setDraftRooms((current) => current.filter((room) => room.key !== draftRoom.key))} className="inline-flex rounded-2xl bg-white px-3 py-2 text-sm font-semibold text-[var(--crm-wine)] shadow-sm">
+                            Прибрати
+                          </button>
                         </div>
-                        <div className="rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">
-                          <div className="text-xs uppercase tracking-wide text-neutral-500">Додаткові місця</div>
-                          <div className="mt-1 font-medium text-neutral-900">
-                            {getExtraBedSummaryLabel(draftRoom.paidExtraBedsCount, draftRoom.freeExtraBedsCount)}
+
+                        <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                          <div className="rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">
+                            <div className="text-xs uppercase tracking-wide text-neutral-500">Всього</div>
+                            <div className="mt-1 text-lg font-semibold text-neutral-900">{draftRoom.guestsCount}</div>
+                          </div>
+                          <div className="rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">
+                            <div className="text-xs uppercase tracking-wide text-neutral-500">Додаткові місця</div>
+                            <div className="mt-1 font-medium text-neutral-900">
+                              {getExtraBedSummaryLabel(draftRoom.paidExtraBedsCount, draftRoom.freeExtraBedsCount)}
+                            </div>
+                          </div>
+                          <div className="rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">
+                            <div className="text-xs uppercase tracking-wide text-neutral-500">До сплати</div>
+                            <div className="mt-1 text-lg font-semibold text-neutral-900">{formatMoney(roomTotalPrice)}</div>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="mt-4 grid gap-3 lg:grid-cols-3">
-                        <CompositionField
-                          label="Гості"
-                          value={draftRoom.adultsCount}
-                          onChange={(nextValue) => updateDraftRoomComposition(draftRoom.key, { adultsCount: nextValue })}
-                        />
-                        <CompositionField
-                          label="Додаткові гості"
-                          value={draftRoom.children6PlusCount}
-                          onChange={(nextValue) => updateDraftRoomComposition(draftRoom.key, { children6PlusCount: nextValue })}
-                        />
-                        <CompositionField
-                          label="До 6 років"
-                          value={draftRoom.childrenUnder6Count}
-                          onChange={(nextValue) => updateDraftRoomComposition(draftRoom.key, { childrenUnder6Count: nextValue })}
-                        />
-                      </div>
+                        <div className="mt-4 grid gap-3 md:grid-cols-2">
+                          <label className="block">
+                            <span className="text-sm font-medium">Дата заїзду</span>
+                            <DatePickerField
+                              value={draftRoom.checkIn}
+                              onChange={(value) => updateDraftRoomDates(draftRoom.key, { checkIn: value })}
+                              className={fieldClass}
+                            />
+                          </label>
+                          <label className="block">
+                            <span className="text-sm font-medium">Дата виїзду</span>
+                            <DatePickerField
+                              value={draftRoom.checkOut}
+                              onChange={(value) => updateDraftRoomDates(draftRoom.key, { checkOut: value })}
+                              className={fieldClass}
+                            />
+                          </label>
+                        </div>
 
-                      <div className="mt-4 grid gap-3 md:grid-cols-2">
-                        <label className="block">
-                          <span className="text-sm font-medium">Базова сума, грн</span>
-                          <input type="text" inputMode="numeric" value={draftRoom.priceBaseTotal} onChange={(e) => updateDraftRoom(draftRoom.key, { priceBaseTotal: sanitizeIntegerInput(e.target.value) })} className={fieldClass} />
-                        </label>
-                        <label className="block">
-                          <span className="text-sm font-medium">Доп. місця, грн</span>
-                          <input type="text" inputMode="numeric" value={draftRoom.priceExtraTotal} onChange={(e) => updateDraftRoom(draftRoom.key, { priceExtraTotal: sanitizeIntegerInput(e.target.value) })} className={fieldClass} />
-                        </label>
-                        <label className="block">
-                          <span className="text-sm font-medium">Оплата готівкою, грн</span>
-                          <input type="text" inputMode="numeric" value={draftRoom.paymentCash} onChange={(e) => updateDraftRoom(draftRoom.key, { paymentCash: sanitizeIntegerInput(e.target.value) })} className={fieldClass} />
-                        </label>
-                        <label className="block">
-                          <span className="text-sm font-medium">Оплата карткою, грн</span>
-                          <input type="text" inputMode="numeric" value={draftRoom.paymentCard} onChange={(e) => updateDraftRoom(draftRoom.key, { paymentCard: sanitizeIntegerInput(e.target.value) })} className={fieldClass} />
-                        </label>
-                        <label className="block md:col-span-2">
-                          <span className="text-sm font-medium">Коментар по номеру</span>
-                          <textarea value={draftRoom.bookingNote} onChange={(e) => updateDraftRoom(draftRoom.key, { bookingNote: e.target.value })} rows={3} className={textAreaClass} />
-                        </label>
-                      </div>
-                    </article>
-                  ))}
+                        <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                          <CompositionField
+                            label="Гості"
+                            value={draftRoom.adultsCount}
+                            onChange={(nextValue) => updateDraftRoomComposition(draftRoom.key, { adultsCount: nextValue })}
+                          />
+                          <CompositionField
+                            label="Додаткові гості"
+                            value={draftRoom.children6PlusCount}
+                            onChange={(nextValue) => updateDraftRoomComposition(draftRoom.key, { children6PlusCount: nextValue })}
+                          />
+                          <CompositionField
+                            label="До 6 років"
+                            value={draftRoom.childrenUnder6Count}
+                            onChange={(nextValue) => updateDraftRoomComposition(draftRoom.key, { childrenUnder6Count: nextValue })}
+                          />
+                        </div>
+
+                        <div className="mt-4 rounded-3xl border border-[var(--crm-wine-border)] bg-white px-4 py-4 shadow-sm">
+                          <label className="inline-flex min-h-11 items-center gap-3 text-sm font-semibold text-neutral-900">
+                            <input
+                              type="checkbox"
+                              checked={draftRoom.certificateApplied}
+                              onChange={(e) =>
+                                updateDraftRoom(draftRoom.key, {
+                                  certificateApplied: e.target.checked,
+                                  certificateAmount: e.target.checked
+                                    ? draftRoom.certificateAmount || String(roomTotalPrice)
+                                    : '',
+                                })
+                              }
+                              className="h-5 w-5 rounded border-[var(--crm-wine-border)] text-[var(--crm-wine)] accent-[var(--crm-wine)]"
+                            />
+                            Проживання по сертифікату
+                          </label>
+
+                          {draftRoom.certificateApplied ? (
+                            <div className="mt-3 grid gap-3 md:grid-cols-2">
+                              <label className="block">
+                                <span className="text-sm font-medium">Сума сертифіката, грн</span>
+                                <input
+                                  type="text"
+                                  inputMode="numeric"
+                                  value={draftRoom.certificateAmount}
+                                  onChange={(e) =>
+                                    updateDraftRoom(draftRoom.key, {
+                                      certificateAmount: sanitizeIntegerInput(e.target.value),
+                                    })
+                                  }
+                                  className={fieldClass}
+                                />
+                              </label>
+                              <div className="rounded-2xl bg-[var(--crm-vine-soft)] px-3 py-3 text-sm text-[var(--crm-vine-dark)] shadow-sm">
+                                <div className="font-semibold">Сертифікат враховано в оплаті</div>
+                                <div className="mt-1">Покриття: {formatMoney(certificateAmount)}</div>
+                                {roomBalance > 0 ? <div className="mt-1">Гість має доплатити: {formatMoney(roomBalance)}</div> : null}
+                                {roomCertificateSurplus > 0 ? <div className="mt-1">Сертифікат перекриває на: {formatMoney(roomCertificateSurplus)}</div> : null}
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+
+                        <div className="mt-4 grid gap-3 md:grid-cols-2">
+                          <label className="block">
+                            <span className="text-sm font-medium">Базова сума, грн</span>
+                            <input type="text" inputMode="numeric" value={draftRoom.priceBaseTotal} onChange={(e) => updateDraftRoom(draftRoom.key, { priceBaseTotal: sanitizeIntegerInput(e.target.value) })} className={fieldClass} />
+                          </label>
+                          <label className="block">
+                            <span className="text-sm font-medium">Доп. місця, грн</span>
+                            <input type="text" inputMode="numeric" value={draftRoom.priceExtraTotal} onChange={(e) => updateDraftRoom(draftRoom.key, { priceExtraTotal: sanitizeIntegerInput(e.target.value) })} className={fieldClass} />
+                          </label>
+                          <label className="block">
+                            <span className="text-sm font-medium">Оплата готівкою, грн</span>
+                            <input type="text" inputMode="numeric" value={draftRoom.paymentCash} onChange={(e) => updateDraftRoom(draftRoom.key, { paymentCash: sanitizeIntegerInput(e.target.value) })} className={fieldClass} />
+                          </label>
+                          <label className="block">
+                            <span className="text-sm font-medium">Оплата карткою, грн</span>
+                            <input type="text" inputMode="numeric" value={draftRoom.paymentCard} onChange={(e) => updateDraftRoom(draftRoom.key, { paymentCard: sanitizeIntegerInput(e.target.value) })} className={fieldClass} />
+                          </label>
+                          <div className="rounded-2xl bg-neutral-50 px-3 py-3 text-sm text-neutral-700 shadow-sm">
+                            <div className="text-xs uppercase tracking-wide text-neutral-500">Вже покрито</div>
+                            <div className="mt-1 font-semibold text-neutral-900">{formatMoney(roomTotalPaid)}</div>
+                          </div>
+                          <div className="rounded-2xl bg-neutral-50 px-3 py-3 text-sm text-neutral-700 shadow-sm">
+                            <div className="text-xs uppercase tracking-wide text-neutral-500">Залишок гостя</div>
+                            <div className="mt-1 font-semibold text-neutral-900">{formatMoney(roomBalance)}</div>
+                          </div>
+                          <label className="block md:col-span-2">
+                            <span className="text-sm font-medium">Коментар по номеру</span>
+                            <textarea value={draftRoom.bookingNote} onChange={(e) => updateDraftRoom(draftRoom.key, { bookingNote: e.target.value })} rows={3} className={textAreaClass} />
+                          </label>
+                        </div>
+                      </article>
+                    )
+                  })}
                 </div>
               )}
             </section>
@@ -877,6 +1162,7 @@ export function NewBookingForm() {
                 <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Орієнтовно платних доп. місць</span><span className="font-medium">{paidSearchExtraBedsCount}</span></div>
                 <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Номерів</span><span className="font-medium">{draftRooms.length}</span></div>
                 <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Вартість</span><span className="font-medium">{formatMoney(totalPrice)}</span></div>
+                <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Сертифікати</span><span className="font-medium">{formatMoney(totalCertificate)}</span></div>
                 <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Оплачено</span><span className="font-medium">{formatMoney(totalPaid)}</span></div>
                 <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Статус оплати</span><span className="font-medium">{getPaymentStatusLabel(paymentStatus)}</span></div>
                 <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Оплата очікується</span><span className="font-medium">{getPaymentDueStageLabel(paymentDueStage)}</span></div>

@@ -1,4 +1,5 @@
 const UA_COUNTRY_CODE = '380'
+const UA_DISPLAY_PREFIX = '38'
 
 export function getPhoneDigits(phone: string): string {
   return phone.replace(/\D/g, '')
@@ -9,6 +10,10 @@ function normalizeUkrainianPhoneDigits(phone: string): string {
 
   if (!digits) {
     return ''
+  }
+
+  if (digits.startsWith(UA_DISPLAY_PREFIX)) {
+    return digits.slice(0, 12)
   }
 
   if (digits.startsWith(UA_COUNTRY_CODE)) {
@@ -23,8 +28,8 @@ function normalizeUkrainianPhoneDigits(phone: string): string {
     return `38${digits.slice(0, 10)}`
   }
 
-  if (digits.length === 9) {
-    return `${UA_COUNTRY_CODE}${digits}`
+  if (digits.length <= 10) {
+    return `${UA_DISPLAY_PREFIX}${digits.slice(0, 10)}`
   }
 
   return digits.slice(0, 12)

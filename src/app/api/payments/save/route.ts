@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     const { data: booking, error: bookingError } = await supabaseAdmin
       .from('bookings')
-      .select('id, price_total, payment_cash_amount, payment_card_amount, booking_note, status')
+      .select('id, price_total, payment_cash_amount, payment_card_amount, payment_total_received, booking_note, status')
       .eq('id', bookingId)
       .single()
 
@@ -40,9 +40,13 @@ export async function POST(request: NextRequest) {
 
     const newCashAmount = Number(booking.payment_cash_amount || 0) + cashAmount
     const newCardAmount = Number(booking.payment_card_amount || 0) + cardAmount
-    const totalPaid = newCashAmount + newCardAmount
-    const paymentStatus = getPaymentStatus(Number(booking.price_total || 0), totalPaid)
     const bookingMeta = parseBookingNoteMeta(booking.booking_note)
+    const existingTotalPaid = Number(
+      booking.payment_total_received ??
+        Number(booking.payment_cash_amount || 0) + Number(booking.payment_card_amount || 0) + Number(bookingMeta.certificateAmount || 0)
+    )
+    const totalPaid = existingTotalPaid + cashAmount + cardAmount
+    const paymentStatus = getPaymentStatus(Number(booking.price_total || 0), totalPaid)
     const bookingNote = buildBookingNoteWithMeta(
       bookingMeta.visibleNote,
       {
@@ -50,6 +54,7 @@ export async function POST(request: NextRequest) {
         bookingGroupId: bookingMeta.bookingGroupId,
         reserveUntilDate: bookingMeta.reserveUntilDate,
         lastReminderAt: bookingMeta.lastReminderAt,
+        certificateAmount: bookingMeta.certificateAmount,
       }
     )
     const nextStatus = booking.status === 'new' && totalPaid > 0 ? 'confirmed' : booking.status
