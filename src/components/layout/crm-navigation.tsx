@@ -1,11 +1,13 @@
 'use client'
 
+import LogoutButton from '@/components/auth/logout-button'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
 const STORAGE_KEY = 'crm-navigation-history'
 const HOME_PATH = '/'
+const LOGIN_PATH = '/login'
 
 function readHistory(): string[] {
   if (typeof window === 'undefined') {
@@ -14,6 +16,7 @@ function readHistory(): string[] {
 
   try {
     const value = window.sessionStorage.getItem(STORAGE_KEY)
+
     if (!value) {
       return []
     }
@@ -37,6 +40,7 @@ export default function CrmNavigation() {
   const router = useRouter()
   const pathname = usePathname()
   const isHome = pathname === HOME_PATH
+  const isLogin = pathname === LOGIN_PATH
 
   useEffect(() => {
     const history = readHistory()
@@ -61,14 +65,14 @@ export default function CrmNavigation() {
     router.push(previousPath)
   }
 
-  if (isHome) {
+  if (isHome || isLogin) {
     return null
   }
 
   return (
     <div className="sticky top-0 z-30 border-b border-[var(--crm-wine-border)] bg-white/90 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl justify-end px-3 py-3 sm:px-4 lg:px-6">
-        <div className="grid w-full max-w-md grid-cols-2 gap-2">
+        <div className="grid w-full max-w-3xl grid-cols-3 gap-2">
           <button
             type="button"
             onClick={handleBack}
@@ -84,6 +88,8 @@ export default function CrmNavigation() {
           >
             На Головний екран
           </Link>
+
+          <LogoutButton className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-[var(--crm-vine)] bg-[var(--crm-vine-soft)] px-3 text-center text-sm font-semibold leading-tight text-[var(--crm-vine-dark)] shadow-sm transition hover:border-[var(--crm-vine-dark)] hover:bg-[#e6efda] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70" />
         </div>
       </div>
     </div>

@@ -1,4 +1,7 @@
-﻿import Link from 'next/link'
+import LogoutButton from '@/components/auth/logout-button'
+import { AUTH_SESSION_COOKIE, getAuthSessionFromToken } from '@/lib/auth'
+import { cookies } from 'next/headers'
+import Link from 'next/link'
 
 const actions = [
   { href: '/availability', title: 'Доступність номерів' },
@@ -8,12 +11,26 @@ const actions = [
   { href: '/bookings/search', title: 'Контроль передоплат' },
 ]
 
-export default function HomePage() {
+export default async function HomePage() {
+  const cookieStore = await cookies()
+  const session = getAuthSessionFromToken(cookieStore.get(AUTH_SESSION_COOKIE)?.value)
+
   return (
     <main className="min-h-screen bg-[var(--background)] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-8">
       <div className="mx-auto max-w-6xl">
         <section className="rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-5 py-5 shadow-sm sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-          <h1 className="text-3xl font-bold leading-tight sm:text-4xl">CRM &quot;VILLAGE WINE&quot;</h1>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold leading-tight sm:text-4xl">CRM &quot;VILLAGE WINE&quot;</h1>
+              {session ? (
+                <div className="inline-flex items-center rounded-full bg-[var(--crm-wine-soft)] px-3 py-1 text-sm font-medium text-[var(--crm-wine)]">
+                  {session.displayName} · {session.role}
+                </div>
+              ) : null}
+            </div>
+
+            <LogoutButton className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-[var(--crm-vine)] bg-[var(--crm-vine-soft)] px-4 text-sm font-semibold text-[var(--crm-vine-dark)] shadow-sm transition hover:border-[var(--crm-vine-dark)] hover:bg-[#e6efda] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70" />
+          </div>
         </section>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
