@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { DatePickerField } from '@/components/ui/date-picker-field'
 import type { AvailabilityItem } from '@/types/availability'
 import { addDays, addOneDay, dateInputToIso, getDatesInRange, getNights, getTodayDate, isoDateToInputValue, isCompleteDateInput } from '@/lib/dates'
@@ -532,6 +532,7 @@ function SingleDayAvailabilityGrid({
 export default function AvailabilityPage() {
   const today = useMemo(() => isoDateToInputValue(getTodayDate()), [])
   const tomorrow = useMemo(() => isoDateToInputValue(addOneDay(getTodayDate())), [])
+  const resultsRef = useRef<HTMLElement | null>(null)
 
   const [checkIn, setCheckIn] = useState(today)
   const [checkOut, setCheckOut] = useState(tomorrow)
@@ -546,6 +547,7 @@ export default function AvailabilityPage() {
   const [selectedCellKeys, setSelectedCellKeys] = useState<string[]>([])
   const [error, setError] = useState('')
   const [searched, setSearched] = useState(false)
+  const [shouldScrollToResults, setShouldScrollToResults] = useState(false)
 
   const searchComposition = useMemo(
     () => getSearchComposition(adultsCount, childrenUnder6Count, children6PlusCount),
@@ -562,6 +564,7 @@ export default function AvailabilityPage() {
     setError('')
     setItems([])
     setSearched(true)
+    setShouldScrollToResults(false)
 
     try {
       if (!isCompleteDateInput(nextCheckIn) || !isCompleteDateInput(nextCheckOut)) {
@@ -619,12 +622,26 @@ export default function AvailabilityPage() {
       setItems(nextItems)
       setSelectedRoomIds([])
       setSelectedCellKeys([])
+      setShouldScrollToResults(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Сталася помилка')
     } finally {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (!shouldScrollToResults || loading || error || !resultsRef.current) {
+      return
+    }
+
+    resultsRef.current.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    })
+
+    setShouldScrollToResults(false)
+  }, [shouldScrollToResults, loading, error])
 
   async function handleSearch(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -773,7 +790,7 @@ export default function AvailabilityPage() {
             </form>
           </section>
 
-          <section className="min-w-0 space-y-3">
+          <section ref={resultsRef} className="min-w-0 space-y-3">
             {error ? (
               <div className="rounded-3xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700 shadow-sm sm:px-5">
                 {error}

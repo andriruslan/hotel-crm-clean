@@ -37,7 +37,7 @@ export function DatePickerField({ value, onChange, className, required, disabled
         onChange={(event) => onChange(isoDateToInputValue(event.target.value))}
         onClick={openPicker}
         onFocus={openPicker}
-        className={`crm-date-input block min-w-0 max-w-full ${normalizedClassName}`}
+        className={`crm-date-input block min-w-0 max-w-full text-center ${normalizedClassName}`}
         style={{ width: '100%', minWidth: 0, maxWidth: '100%' }}
         required={required}
         disabled={disabled}
