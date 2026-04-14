@@ -4,6 +4,8 @@ import { getDatesInRange } from '@/lib/dates'
 import { calculateBookingPrice } from '@/lib/pricing'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
+export const dynamic = 'force-dynamic'
+
 type RoomRow = {
   id: string
   room_number: string

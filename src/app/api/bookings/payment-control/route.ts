@@ -8,6 +8,8 @@ import { getPaymentStatus } from '@/lib/payment-status'
 import { normalizePhone } from '@/lib/phone'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
+export const dynamic = 'force-dynamic'
+
 type PaymentControlRelationRow = {
   id: string
   full_name?: string | null

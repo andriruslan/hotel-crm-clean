@@ -4,6 +4,8 @@ import { parseBookingNoteMeta } from '@/lib/booking-note-meta'
 import { getPaymentStatus } from '@/lib/payment-status'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
+export const dynamic = 'force-dynamic'
+
 type DepartureRelationRow = {
   id: string
   full_name?: string | null
