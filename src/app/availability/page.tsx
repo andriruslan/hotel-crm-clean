@@ -13,6 +13,33 @@ type ApiResponse = {
   error?: string
 }
 
+async function parseApiResponse(response: Response) {
+  const rawText = await response.text()
+
+  if (!rawText) {
+    if (!response.ok) {
+      throw new Error(`Сервер повернув помилку ${response.status}.`)
+    }
+
+    return { ok: true } as ApiResponse
+  }
+
+  try {
+    return JSON.parse(rawText) as ApiResponse
+  } catch {
+    const compactText = rawText
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+
+    if (!response.ok) {
+      throw new Error(compactText || `Сервер повернув помилку ${response.status}.`)
+    }
+
+    throw new Error('Сервер повернув неочікувану відповідь.')
+  }
+}
+
 type BookingRoomQueryItem = {
   roomId: string
   roomNumber: string
@@ -445,8 +472,7 @@ export default function AvailabilityPage() {
       })
 
       const response = await fetch(`/api/availability?${params.toString()}`)
-      const rawText = await response.text()
-      const data: ApiResponse = JSON.parse(rawText)
+      const data = await parseApiResponse(response)
 
       if (!response.ok || !data.ok) {
         throw new Error(data.error || 'Не вдалося отримати доступні номери')
