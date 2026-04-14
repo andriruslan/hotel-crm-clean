@@ -18,10 +18,10 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen bg-[var(--background)] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-8">
       <div className="mx-auto max-w-6xl">
-        <section className="rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-5 py-5 shadow-sm sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+        <section className="rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-4 py-4 shadow-sm sm:px-6 sm:py-6 lg:px-8 lg:py-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-2">
-              <h1 className="text-3xl font-bold leading-tight sm:text-4xl">CRM &quot;VILLAGE WINE&quot;</h1>
+              <h1 className="text-2xl font-bold leading-tight sm:text-3xl lg:text-4xl">CRM &quot;VILLAGE WINE&quot;</h1>
               {session ? (
                 <div className="inline-flex items-center rounded-full bg-[var(--crm-wine-soft)] px-3 py-1 text-sm font-medium text-[var(--crm-wine)]">
                   {session.displayName} · {session.role}
@@ -29,7 +29,7 @@ export default async function HomePage() {
               ) : null}
             </div>
 
-            <LogoutButton className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-[var(--crm-vine)] bg-[var(--crm-vine-soft)] px-4 text-sm font-semibold text-[var(--crm-vine-dark)] shadow-sm transition hover:border-[var(--crm-vine-dark)] hover:bg-[#e6efda] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70" />
+            <LogoutButton className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-[var(--crm-vine)] bg-[var(--crm-vine-soft)] px-3 text-xs font-semibold text-[var(--crm-vine-dark)] shadow-sm transition hover:border-[var(--crm-vine-dark)] hover:bg-[#e6efda] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:min-h-11 sm:px-4 sm:text-sm" />
           </div>
         </section>
 
@@ -38,9 +38,9 @@ export default async function HomePage() {
             <Link
               key={action.href}
               href={action.href}
-              className="flex min-h-32 items-center rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-5 py-5 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-md"
+              className="flex min-h-24 items-center rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-4 py-4 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-md sm:min-h-28 sm:px-5 sm:py-5 lg:min-h-32"
             >
-              <div className="text-lg font-semibold leading-tight sm:text-xl">{action.title}</div>
+              <div className="text-base font-semibold leading-tight sm:text-lg lg:text-xl">{action.title}</div>
             </Link>
           ))}
         </div>
