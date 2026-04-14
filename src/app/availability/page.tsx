@@ -218,7 +218,7 @@ function MultiDayAvailabilityMatrix({
   const selectedRoomIdsSet = new Set(selectedRoomIds)
 
   return (
-    <div className="space-y-3">
+    <div className="min-w-0 space-y-3">
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <span className="rounded-full bg-[var(--crm-vine-soft)] px-3 py-1.5 font-semibold text-[var(--crm-vine-dark)]">
           Клітинка зелена = вільно
@@ -230,10 +230,10 @@ function MultiDayAvailabilityMatrix({
 
       <div className="text-xs font-medium text-neutral-500 sm:text-sm">На телефоні таблицю можна гортати вліво та вправо.</div>
 
-      <div className="-mx-1 overflow-hidden rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] shadow-sm sm:mx-0">
+      <div className="-mx-1 w-full max-w-full overflow-hidden rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] shadow-sm sm:mx-0">
         <div
-          className="overflow-x-auto px-1 pb-1 sm:px-0 sm:pb-0"
-          style={{ overscrollBehaviorX: 'contain', touchAction: 'pan-x pinch-zoom' }}
+          className="w-full max-w-full overflow-x-auto px-1 pb-1 sm:px-0 sm:pb-0"
+          style={{ overscrollBehaviorX: 'contain', touchAction: 'pan-x pinch-zoom', WebkitOverflowScrolling: 'touch' }}
         >
           <div className="min-w-max">
             <div className="grid border-b border-[var(--crm-wine-border)] bg-[var(--crm-panel)]" style={{ gridTemplateColumns: columnTemplate }}>
@@ -310,6 +310,7 @@ function MultiDayAvailabilityMatrix({
                           type="button"
                           onClick={() => onToggleRoomAtDate(item.room_id, dateValue)}
                           className={`flex w-full items-center justify-center rounded-none transition hover:brightness-[0.98] ${cellClassName}`}
+                          style={{ touchAction: 'pan-x' }}
                         >
                           <div className={contentClassName}>•</div>
                         </button>
@@ -321,6 +322,7 @@ function MultiDayAvailabilityMatrix({
                         key={`${item.room_id}-${dateValue}`}
                         href={createCellHref(item, dateValue)}
                         className={`flex items-center justify-center rounded-none transition hover:brightness-[0.98] ${cellClassName}`}
+                        style={{ touchAction: 'pan-x' }}
                         scroll={false}
                       >
                         <div className={contentClassName}>•</div>
@@ -373,7 +375,7 @@ function SingleDayAvailabilityGrid({
                   <div className="mt-1 text-xs leading-5 text-neutral-500">{item.building_name} · {item.room_type_name}</div>
                 </div>
                 <span
-                  className={`rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-sm ${
+                  className={`inline-flex self-start rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-sm ${
                     isSelected ? 'bg-[var(--crm-wine)] text-white' : 'bg-white text-[var(--crm-wine)]'
                   }`}
                 >
@@ -400,7 +402,7 @@ function SingleDayAvailabilityGrid({
                 <div className="truncate text-base font-bold leading-tight sm:text-lg">Номер {item.room_number}</div>
                 <div className="mt-1 text-xs leading-5 text-neutral-500">{item.building_name} · {item.room_type_name}</div>
               </div>
-              <div className="rounded-full bg-[var(--crm-wine)] px-2.5 py-1 text-[11px] font-medium text-white shadow-sm">
+              <div className="inline-flex self-start rounded-full bg-[var(--crm-wine)] px-2.5 py-1 text-[11px] font-medium text-white shadow-sm">
                 {item.guests_count} гост.
               </div>
             </div>
@@ -642,7 +644,7 @@ export default function AvailabilityPage() {
             </form>
           </section>
 
-          <section className="space-y-3">
+          <section className="min-w-0 space-y-3">
             {error ? (
               <div className="rounded-3xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700 shadow-sm sm:px-5">
                 {error}

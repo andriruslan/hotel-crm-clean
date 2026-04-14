@@ -31,7 +31,8 @@ export function DatePickerField({ value, onChange, className, required, disabled
       onChange={(event) => onChange(isoDateToInputValue(event.target.value))}
       onClick={openPicker}
       onFocus={openPicker}
-      className={className}
+      className={`block min-w-0 max-w-full ${className}`}
+      style={{ width: '100%', minWidth: 0, maxWidth: '100%' }}
       required={required}
       disabled={disabled}
     />

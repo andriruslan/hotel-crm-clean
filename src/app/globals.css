@@ -51,6 +51,12 @@ body {
   max-width: 100%;
 }
 
+input[type="date"] {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+}
+
 button,
 input[type="button"],
 input[type="submit"],

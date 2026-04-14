@@ -38,9 +38,9 @@ export default async function HomePage() {
             <Link
               key={action.href}
               href={action.href}
-              className="flex min-h-24 items-center rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-4 py-4 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-md sm:min-h-28 sm:px-5 sm:py-5 lg:min-h-32"
+              className="flex min-h-24 items-center justify-center rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-4 py-4 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-md sm:min-h-28 sm:px-5 sm:py-5 lg:min-h-32"
             >
-              <div className="text-base font-semibold leading-tight sm:text-lg lg:text-xl">{action.title}</div>
+              <div className="w-full text-center text-base font-semibold leading-tight sm:text-lg lg:text-xl">{action.title}</div>
             </Link>
           ))}
         </div>
