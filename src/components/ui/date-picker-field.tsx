@@ -12,6 +12,11 @@ type DatePickerFieldProps = {
 }
 
 export function DatePickerField({ value, onChange, className, required, disabled }: DatePickerFieldProps) {
+  const normalizedClassName = className
+    .replace(/\bmt-1\.5\b/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+
   function openPicker(event: MouseEvent<HTMLInputElement> | FocusEvent<HTMLInputElement>) {
     const input = event.currentTarget
 
@@ -25,16 +30,18 @@ export function DatePickerField({ value, onChange, className, required, disabled
   }
 
   return (
-    <input
-      type="date"
-      value={dateInputToIso(value)}
-      onChange={(event) => onChange(isoDateToInputValue(event.target.value))}
-      onClick={openPicker}
-      onFocus={openPicker}
-      className={`block min-w-0 max-w-full ${className}`}
-      style={{ width: '100%', minWidth: 0, maxWidth: '100%' }}
-      required={required}
-      disabled={disabled}
-    />
+    <div className="mt-1.5 w-full min-w-0 max-w-full overflow-hidden rounded-2xl">
+      <input
+        type="date"
+        value={dateInputToIso(value)}
+        onChange={(event) => onChange(isoDateToInputValue(event.target.value))}
+        onClick={openPicker}
+        onFocus={openPicker}
+        className={`crm-date-input block min-w-0 max-w-full ${normalizedClassName}`}
+        style={{ width: '100%', minWidth: 0, maxWidth: '100%' }}
+        required={required}
+        disabled={disabled}
+      />
+    </div>
   )
 }
