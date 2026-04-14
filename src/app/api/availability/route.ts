@@ -9,14 +9,16 @@ type RoomRow = {
   room_number: string
   building_name: string
   is_active: boolean
-  room_types: {
-    id: string
-    name: string
-    base_capacity: number
-    max_capacity: number
-    base_price_per_night: number
-    extra_bed_price_per_night: number
-  } | null
+  room_types: RoomTypeRow[] | null
+}
+
+type RoomTypeRow = {
+  id: string
+  name: string
+  base_capacity: number
+  max_capacity: number
+  base_price_per_night: number
+  extra_bed_price_per_night: number
 }
 
 type BookingRangeRow = {
@@ -90,10 +92,17 @@ export async function GET(request: NextRequest) {
     }
 
     const availableItems = ((rooms || []) as RoomRow[])
-      .filter((room) => room.room_types)
-      .filter((room) => guestsCount <= Number(room.room_types!.max_capacity))
       .map((room) => {
-        const roomType = room.room_types!
+        const roomType = room.room_types?.[0] || null
+
+        if (!roomType) {
+          return null
+        }
+
+        if (guestsCount > Number(roomType.max_capacity)) {
+          return null
+        }
+
         const roomBookings = bookingsByRoomId.get(room.id) || []
         const freeDates = requestedDates.filter((requestedDate) =>
           roomBookings.every((booking) => !(booking.check_in_date <= requestedDate && booking.check_out_date > requestedDate))
@@ -141,6 +150,7 @@ export async function GET(request: NextRequest) {
           is_fully_available: isFullyAvailable,
         }
       })
+      .filter((room): room is NonNullable<typeof room> => Boolean(room))
       .filter((room) => room.free_dates_count > 0)
       .sort((left, right) => {
         if (left.is_fully_available !== right.is_fully_available) {
