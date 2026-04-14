@@ -57,6 +57,32 @@ input[type="date"] {
   width: 100%;
 }
 
+.crm-horizontal-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pinch-zoom;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(111, 32, 49, 0.55) rgba(111, 32, 49, 0.12);
+}
+
+.crm-horizontal-scroll::-webkit-scrollbar {
+  height: 10px;
+}
+
+.crm-horizontal-scroll::-webkit-scrollbar-track {
+  background: rgba(111, 32, 49, 0.12);
+  border-radius: 999px;
+}
+
+.crm-horizontal-scroll::-webkit-scrollbar-thumb {
+  background: rgba(111, 32, 49, 0.55);
+  border-radius: 999px;
+}
+
 button,
 input[type="button"],
 input[type="submit"],
