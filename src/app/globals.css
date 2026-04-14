@@ -50,3 +50,43 @@ body {
   box-sizing: border-box;
   max-width: 100%;
 }
+
+button,
+input[type="button"],
+input[type="submit"],
+a[href] {
+  -webkit-tap-highlight-color: rgba(111, 32, 49, 0.16);
+}
+
+button:not(:disabled),
+input[type="button"]:not(:disabled),
+input[type="submit"]:not(:disabled) {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+a[href][class*="rounded-2xl"],
+a[href][class*="rounded-3xl"],
+button:not(:disabled),
+input[type="button"]:not(:disabled),
+input[type="submit"]:not(:disabled) {
+  outline: 1px solid rgba(111, 32, 49, 0.12);
+  outline-offset: 0;
+}
+
+a[href][class*="rounded-2xl"]:active,
+a[href][class*="rounded-3xl"]:active,
+button:not(:disabled):active,
+input[type="button"]:not(:disabled):active,
+input[type="submit"]:not(:disabled):active {
+  transform: scale(0.99);
+}
+
+a[href][class*="rounded-2xl"]:focus-visible,
+a[href][class*="rounded-3xl"]:focus-visible,
+button:focus-visible,
+input[type="button"]:focus-visible,
+input[type="submit"]:focus-visible {
+  outline: 2px solid rgba(111, 32, 49, 0.42);
+  outline-offset: 2px;
+}

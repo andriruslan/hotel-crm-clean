@@ -26,11 +26,11 @@ export type ArrivalRoomDetailItem = {
 const fieldClass =
   'mt-1.5 h-12 w-full rounded-2xl border border-neutral-300 bg-white px-3.5 text-[16px] text-neutral-900 outline-none transition focus:border-neutral-700 focus:ring-4 focus:ring-neutral-200'
 const secondaryButtonClass =
-  'h-12 w-full rounded-2xl border border-[var(--crm-wine)] bg-[var(--crm-wine-soft)] px-4 text-sm font-semibold text-[var(--crm-wine)] shadow-sm transition hover:bg-[var(--crm-wine-soft-hover)] disabled:opacity-60'
+  'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(111,32,49,0.12)] px-4 text-sm font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(111,32,49,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)] disabled:opacity-60'
 const primaryButtonClass =
-  'inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-[var(--crm-wine)] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--crm-wine-dark)] disabled:opacity-60'
+  'inline-flex min-h-12 w-full items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(111,32,49,0.22)] transition hover:bg-[var(--crm-wine-dark)] disabled:opacity-60'
 const successButtonClass =
-  'inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-[var(--crm-vine)] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--crm-vine-dark)] disabled:opacity-60'
+  'inline-flex min-h-12 w-full items-center justify-center rounded-2xl border-2 border-[var(--crm-vine-dark)] bg-[var(--crm-vine)] px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(88,112,56,0.2)] transition hover:bg-[var(--crm-vine-dark)] disabled:opacity-60'
 
 function formatMoney(value: number) {
   return new Intl.NumberFormat('uk-UA', {
