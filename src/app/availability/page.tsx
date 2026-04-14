@@ -54,7 +54,7 @@ type BookingRoomQueryItem = {
 const fieldClass =
   'mt-1.5 h-12 w-full rounded-2xl border border-neutral-300 bg-white px-3.5 text-[16px] text-neutral-900 outline-none transition focus:border-neutral-700 focus:ring-4 focus:ring-neutral-200'
 
-const sectionClass = 'rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-4 py-4 shadow-sm sm:px-5 sm:py-5'
+const sectionClass = 'rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-3.5 py-3.5 shadow-sm sm:px-5 sm:py-5'
 const primaryButtonClass =
   'h-12 w-full rounded-2xl bg-[var(--crm-wine)] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--crm-wine-dark)] disabled:cursor-not-allowed disabled:opacity-60'
 const secondaryButtonClass =
@@ -214,7 +214,7 @@ function MultiDayAvailabilityMatrix({
   selectedBookingDate: string
   onToggleRoomAtDate: (roomId: string, dateValue: string) => void
 }) {
-  const columnTemplate = `minmax(164px, 164px) repeat(${selectedDates.length}, minmax(84px, 84px))`
+  const columnTemplate = `minmax(132px, 132px) repeat(${selectedDates.length}, minmax(72px, 72px))`
   const selectedRoomIdsSet = new Set(selectedRoomIds)
 
   return (
@@ -228,11 +228,13 @@ function MultiDayAvailabilityMatrix({
         </span>
       </div>
 
-      <div className="overflow-hidden rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] shadow-sm">
-        <div className="overflow-x-auto">
+      <div className="text-xs font-medium text-neutral-500 sm:text-sm">На телефоні таблицю можна гортати вліво та вправо.</div>
+
+      <div className="-mx-1 overflow-hidden rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] shadow-sm sm:mx-0">
+        <div className="overflow-x-auto px-1 pb-1 sm:px-0 sm:pb-0">
           <div className="min-w-max">
             <div className="grid border-b border-[var(--crm-wine-border)] bg-[var(--crm-panel)]" style={{ gridTemplateColumns: columnTemplate }}>
-              <div className="sticky left-0 z-20 flex min-h-[72px] items-center border-r border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3 py-3">
+              <div className="sticky left-0 z-20 flex min-h-[64px] items-center border-r border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-2.5 py-2.5 sm:px-3 sm:py-3">
                 <div>
                   <div className="text-sm font-semibold text-neutral-900">Номер</div>
                   <div className="text-xs text-neutral-500">Тицни по даті</div>
@@ -241,9 +243,9 @@ function MultiDayAvailabilityMatrix({
               {selectedDates.map((dateValue) => (
                 <div
                   key={dateValue}
-                  className="flex min-h-[72px] flex-col items-center justify-center border-l border-[var(--crm-wine-border)] px-2 py-3 text-center"
+                  className="flex min-h-[64px] flex-col items-center justify-center border-l border-[var(--crm-wine-border)] px-1.5 py-2 text-center sm:px-2 sm:py-3"
                 >
-                  <div className="text-base font-bold leading-none text-neutral-900">{getCompactDateLabel(dateValue)}</div>
+                  <div className="text-sm font-bold leading-none text-neutral-900 sm:text-base">{getCompactDateLabel(dateValue)}</div>
                   <div className="mt-1 text-xs font-medium uppercase text-neutral-500">{getWeekdayShortLabel(dateValue)}</div>
                 </div>
               ))}
@@ -252,7 +254,7 @@ function MultiDayAvailabilityMatrix({
             {items.map((item) => {
               const freeDatesSet = new Set(item.free_dates)
               const isSelected = selectedRoomIdsSet.has(item.room_id)
-              const leftCellClassName = `sticky left-0 z-10 flex min-h-[88px] flex-col justify-center border-r border-[var(--crm-wine-border)] px-3 py-3 ${
+              const leftCellClassName = `sticky left-0 z-10 flex min-h-[78px] flex-col justify-center border-r border-[var(--crm-wine-border)] px-2.5 py-2.5 sm:min-h-[88px] sm:px-3 sm:py-3 ${
                 item.is_fully_available ? 'bg-[var(--crm-wine-soft)]' : 'bg-white/95'
               }`
 
@@ -266,7 +268,7 @@ function MultiDayAvailabilityMatrix({
                     className={`${leftCellClassName} ${isSelected ? 'ring-2 ring-[var(--crm-wine)] ring-inset' : ''}`}
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <div className="text-lg font-bold leading-tight text-neutral-900">Номер {item.room_number}</div>
+                      <div className="text-base font-bold leading-tight text-neutral-900 sm:text-lg">Номер {item.room_number}</div>
                       {isMultiSelectEnabled && isSelected ? (
                         <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full border border-[var(--crm-wine)] bg-[var(--crm-wine)] px-2 text-[11px] font-semibold text-white">
                           Обрано
@@ -281,10 +283,10 @@ function MultiDayAvailabilityMatrix({
                   {selectedDates.map((dateValue) => {
                     const isFree = freeDatesSet.has(dateValue)
                     const isSelectedDate = isMultiSelectEnabled && isSelected && selectedBookingDate === dateValue
-                    const cellClassName = `min-h-[88px] border-l border-[var(--crm-wine-border)] px-2 py-2 ${
+                    const cellClassName = `min-h-[78px] border-l border-[var(--crm-wine-border)] px-1.5 py-1.5 sm:min-h-[88px] sm:px-2 sm:py-2 ${
                       isFree ? 'bg-[var(--crm-vine-soft)]' : 'bg-neutral-100'
                     } ${isSelectedDate ? 'ring-2 ring-[var(--crm-wine)] ring-inset' : ''}`
-                    const contentClassName = `flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold shadow-sm ${
+                    const contentClassName = `flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold shadow-sm sm:h-9 sm:w-9 ${
                       isFree
                         ? 'bg-white text-[var(--crm-vine-dark)]'
                         : 'bg-neutral-200 text-neutral-400'
@@ -346,7 +348,7 @@ function SingleDayAvailabilityGrid({
   onToggleRoom: (roomId: string) => void
 }) {
   return (
-    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-2 sm:gap-3 md:grid-cols-2 xl:grid-cols-3">
       {items.map((item) => {
         const isSelected = selectedRoomIds.includes(item.room_id)
 
@@ -356,15 +358,15 @@ function SingleDayAvailabilityGrid({
               key={item.room_id}
               type="button"
               onClick={() => onToggleRoom(item.room_id)}
-              className={`w-full rounded-3xl border bg-white/90 px-4 py-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--crm-panel)] hover:shadow-md ${
+              className={`w-full rounded-3xl border bg-white/90 px-3.5 py-3.5 text-left shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--crm-panel)] hover:shadow-md sm:px-4 sm:py-4 ${
                 isSelected
                   ? 'border-[var(--crm-wine)] ring-2 ring-[var(--crm-wine)] ring-inset'
                   : 'border-[var(--crm-wine-border)] hover:border-[var(--crm-wine)]'
               }`}
             >
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
-                  <div className="truncate text-lg font-bold leading-tight">Номер {item.room_number}</div>
+                  <div className="truncate text-base font-bold leading-tight sm:text-lg">Номер {item.room_number}</div>
                   <div className="mt-1 text-xs leading-5 text-neutral-500">{item.building_name} · {item.room_type_name}</div>
                 </div>
                 <span
@@ -388,11 +390,11 @@ function SingleDayAvailabilityGrid({
           <Link
             key={item.room_id}
             href={createHref(item)}
-            className="rounded-3xl border border-[var(--crm-wine-border)] bg-white/90 px-4 py-4 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-md"
+            className="rounded-3xl border border-[var(--crm-wine-border)] bg-white/90 px-3.5 py-3.5 shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-md sm:px-4 sm:py-4"
           >
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
-                <div className="truncate text-lg font-bold leading-tight">Номер {item.room_number}</div>
+                <div className="truncate text-base font-bold leading-tight sm:text-lg">Номер {item.room_number}</div>
                 <div className="mt-1 text-xs leading-5 text-neutral-500">{item.building_name} · {item.room_type_name}</div>
               </div>
               <div className="rounded-full bg-[var(--crm-wine)] px-2.5 py-1 text-[11px] font-medium text-white shadow-sm">
@@ -580,8 +582,8 @@ export default function AvailabilityPage() {
   return (
     <main className="min-h-screen bg-[var(--background)] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-8">
       <div className="mx-auto w-full max-w-6xl">
-        <div className="grid gap-3 lg:grid-cols-[minmax(320px,380px)_minmax(0,1fr)] lg:items-start">
-          <section className={`${sectionClass} lg:sticky lg:top-24`}>
+        <div className="grid gap-3 xl:grid-cols-[minmax(320px,380px)_minmax(0,1fr)] xl:items-start">
+          <section className={`${sectionClass} xl:sticky xl:top-24`}>
             <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Доступність номерів</h1>
             <form onSubmit={handleSearch} className="mt-5 space-y-3">
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
@@ -660,12 +662,16 @@ export default function AvailabilityPage() {
               <div className={sectionClass}>
                 <div className="flex flex-col gap-1 border-b border-neutral-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
                   <div>
-                    <div className="text-lg font-semibold text-neutral-900">{showDailyBreakdown ? 'Вільні номери по днях' : 'Вільні номери'}</div>
+                    <div className="text-lg font-semibold text-neutral-900">
+                      {showDailyBreakdown ? 'Вільні номери по днях' : 'Вільні номери'}
+                    </div>
                   </div>
-                  <div className="text-sm font-medium text-neutral-500">{showDailyBreakdown ? `${selectedDates.length} дн.` : `${items.length} номер(и)`}</div>
+                  <div className="text-sm font-medium text-neutral-500">
+                    {showDailyBreakdown ? `${selectedDates.length} дн.` : `${items.length} номер(и)`}
+                  </div>
                 </div>
 
-                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                   <label className="inline-flex min-h-11 items-center gap-3 rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-2 text-sm font-semibold text-neutral-900 shadow-sm">
                     <input
                       type="checkbox"

@@ -16,7 +16,7 @@ type DeparturesResponse = {
   error?: string
 }
 
-const sectionClass = 'rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-4 py-4 shadow-sm sm:px-5 sm:py-5'
+const sectionClass = 'rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-3.5 py-3.5 shadow-sm sm:px-5 sm:py-5'
 const fieldClass =
   'mt-1.5 h-12 w-full rounded-2xl border border-neutral-300 bg-white px-3.5 text-[16px] text-neutral-900 outline-none transition focus:border-neutral-700 focus:ring-4 focus:ring-neutral-200'
 const secondaryButtonClass =
@@ -69,10 +69,10 @@ function getRoomCardsGridClass(itemsCount: number) {
   }
 
   if (itemsCount === 2) {
-    return 'mt-4 grid gap-3 lg:grid-cols-2'
+    return 'mt-4 grid gap-3 xl:grid-cols-2'
   }
 
-  return 'mt-4 grid gap-3 md:grid-cols-2'
+  return 'mt-4 grid gap-3 lg:grid-cols-2'
 }
 
 function createDepartureDisplayGroup(
@@ -134,11 +134,11 @@ function DepartureBookingCard({
     return (
       <Link
         href={`/bookings/departures/${item.id}?date=${encodeURIComponent(appliedDate)}`}
-        className="block rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-4 py-4 text-left shadow-sm transition hover:border-[var(--crm-wine)] hover:shadow-md sm:px-5 sm:py-5"
+        className="block rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-3.5 py-3.5 text-left shadow-sm transition hover:border-[var(--crm-wine)] hover:shadow-md sm:px-5 sm:py-5"
       >
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <div className="text-lg font-bold text-neutral-900">{normalizePhone(group.guest_phone || '') || 'Телефон не вказано'}</div>
+            <div className="text-base font-bold text-neutral-900 sm:text-lg">{normalizePhone(group.guest_phone || '') || 'Телефон не вказано'}</div>
             {visibleGuestName ? <div className="mt-1 text-sm text-neutral-700">{visibleGuestName}</div> : null}
           </div>
 
@@ -147,9 +147,9 @@ function DepartureBookingCard({
           </span>
         </div>
 
-        <div className="mt-4 rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-4 shadow-sm">
+        <div className="mt-4 rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3.5 shadow-sm sm:px-4 sm:py-4">
           <div className="min-w-0">
-            <div className="text-2xl font-bold leading-tight text-neutral-900">Номер {item.room_number}</div>
+            <div className="text-xl font-bold leading-tight text-neutral-900 sm:text-2xl">Номер {item.room_number}</div>
             <div className="mt-1 text-sm leading-5 text-neutral-500">{item.building_name || 'Без корпусу'}</div>
           </div>
 
@@ -168,10 +168,10 @@ function DepartureBookingCard({
   }
 
   return (
-    <section className="rounded-3xl border border-neutral-200 bg-white px-4 py-4 shadow-sm sm:px-5 sm:py-5">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+    <section className="rounded-3xl border border-neutral-200 bg-white px-3.5 py-3.5 shadow-sm sm:px-5 sm:py-5">
+      <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
         <div>
-          <div className="text-lg font-bold text-neutral-900">{normalizePhone(group.guest_phone || '') || 'Телефон не вказано'}</div>
+          <div className="text-base font-bold text-neutral-900 sm:text-lg">{normalizePhone(group.guest_phone || '') || 'Телефон не вказано'}</div>
           {visibleGuestName ? <div className="mt-1 text-sm text-neutral-700">{visibleGuestName}</div> : null}
         </div>
 
@@ -186,7 +186,7 @@ function DepartureBookingCard({
       </div>
 
       {hasMultipleRoomsInBooking ? (
-        <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-4 grid grid-cols-2 gap-2 xl:grid-cols-4">
           <div className="rounded-2xl bg-neutral-50 px-3 py-3">
             <div className="text-xs uppercase tracking-wide text-neutral-500">У замовленні</div>
             <div className="mt-1 font-semibold text-neutral-900">{fullGroup.room_numbers.length} номерів</div>
@@ -239,11 +239,11 @@ function DepartureBookingCard({
             <Link
               key={item.id}
               href={`/bookings/departures/${item.id}?date=${encodeURIComponent(appliedDate)}`}
-              className="block w-full rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-4 text-left shadow-sm transition hover:border-[var(--crm-wine)] hover:shadow-md"
+              className="block w-full rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3.5 text-left shadow-sm transition hover:border-[var(--crm-wine)] hover:shadow-md sm:px-4 sm:py-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="text-xl font-bold leading-tight text-neutral-900">Номер {item.room_number}</div>
+                  <div className="text-lg font-bold leading-tight text-neutral-900 sm:text-xl">Номер {item.room_number}</div>
                   <div className="mt-1 text-sm leading-5 text-neutral-500">{item.building_name || 'Без корпусу'}</div>
                 </div>
               </div>
@@ -340,8 +340,8 @@ export function DeparturesGroups({ initialDate = '' }: { initialDate?: string })
   return (
     <main className="min-h-screen bg-[var(--background)] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-8">
       <div className="mx-auto max-w-6xl">
-        <div className="grid gap-3 lg:grid-cols-[minmax(320px,380px)_minmax(0,1fr)] lg:items-start">
-          <section className={`${sectionClass} lg:sticky lg:top-24`}>
+        <div className="grid gap-3 xl:grid-cols-[minmax(320px,380px)_minmax(0,1fr)] xl:items-start">
+          <section className={`${sectionClass} xl:sticky xl:top-24`}>
             <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Виїзди</h1>
 
             <div className="mt-4 space-y-3">
@@ -385,7 +385,6 @@ export function DeparturesGroups({ initialDate = '' }: { initialDate?: string })
               <div className="flex items-end justify-between gap-3">
                 <div>
                   <div className="text-lg font-semibold text-neutral-900">Очікують виїзд</div>
-                  <div className="text-sm text-neutral-600">Номери, які ще треба виселити.</div>
                 </div>
                 <div className="rounded-full bg-[var(--crm-wine-soft)] px-3 py-1.5 text-sm font-semibold text-[var(--crm-wine)]">{pendingGroups.length}</div>
               </div>
@@ -395,7 +394,7 @@ export function DeparturesGroups({ initialDate = '' }: { initialDate?: string })
               ) : pendingGroups.length === 0 ? (
                 <div className="mt-4 rounded-2xl bg-neutral-50 px-4 py-4 text-sm text-neutral-600">Немає номерів, які очікують виїзду.</div>
               ) : (
-                <div className="mt-4 grid items-start gap-3 xl:grid-cols-2">
+                <div className="mt-4 grid items-start gap-3 2xl:grid-cols-2">
                   {pendingGroups.map(({ fullGroup, displayGroup }) => (
                     <DepartureBookingCard
                       key={`${displayGroup.id}-pending`}
@@ -412,7 +411,6 @@ export function DeparturesGroups({ initialDate = '' }: { initialDate?: string })
               <div className="flex items-end justify-between gap-3">
                 <div>
                   <div className="text-lg font-semibold text-[var(--crm-vine-dark)]">Виселені</div>
-                  <div className="text-sm text-[var(--crm-vine-dark)]">Номери, які вже виселили.</div>
                 </div>
                 <div className="rounded-full bg-[var(--crm-vine)] px-3 py-1.5 text-sm font-semibold text-white">{checkedOutGroups.length}</div>
               </div>
@@ -420,7 +418,7 @@ export function DeparturesGroups({ initialDate = '' }: { initialDate?: string })
               {loading ? null : checkedOutGroups.length === 0 ? (
                 <div className="mt-4 rounded-2xl bg-[var(--crm-vine-soft)] px-4 py-4 text-sm text-[var(--crm-vine-dark)]">Поки немає номерів, які вже виселили на цю дату.</div>
               ) : (
-                <div className="mt-4 grid items-start gap-3 xl:grid-cols-2">
+                <div className="mt-4 grid items-start gap-3 2xl:grid-cols-2">
                   {checkedOutGroups.map(({ fullGroup, displayGroup }) => (
                     <DepartureBookingCard
                       key={`${displayGroup.id}-checked-out`}

@@ -73,7 +73,7 @@ type QueryRoomPayload = {
   extraBedPricePerNight: number
 }
 
-const sectionClass = 'rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-4 py-4 shadow-sm sm:px-5 sm:py-5'
+const sectionClass = 'rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-3.5 py-3.5 shadow-sm sm:px-5 sm:py-5'
 const fieldClass =
   'mt-1.5 h-12 w-full rounded-2xl border border-neutral-300 bg-white px-3.5 text-[16px] text-neutral-900 outline-none transition focus:border-neutral-700 focus:ring-4 focus:ring-neutral-200'
 const textAreaClass =
@@ -842,7 +842,7 @@ export function NewBookingForm() {
           <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Нове бронювання</h1>
         </section>
 
-        <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.95fr)] xl:items-start">
+        <div className="mt-3 grid gap-3 2xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.95fr)] 2xl:items-start">
           <form id="booking-form" onSubmit={handleCreateBooking} className="space-y-3">
             {error ? <div className="rounded-3xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div> : null}
             {success ? <div className="rounded-3xl border border-[var(--crm-vine-border)] bg-[var(--crm-vine-soft)] px-4 py-3 text-sm text-[var(--crm-vine-dark)]">{success}</div> : null}
@@ -897,7 +897,7 @@ export function NewBookingForm() {
 
               {isAddRoomSectionOpen ? (
                 <>
-                  <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                  <div className="mt-4 grid gap-3 md:grid-cols-2 2xl:grid-cols-3">
                     <label className="block">
                       <span className="text-sm font-medium">Дата заїзду</span>
                       <DatePickerField value={checkIn} onChange={setCheckIn} className={fieldClass} />
@@ -906,9 +906,9 @@ export function NewBookingForm() {
                       <span className="text-sm font-medium">Дата виїзду</span>
                       <DatePickerField value={checkOut} onChange={setCheckOut} className={fieldClass} />
                     </label>
-                    <div className="rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-4 md:col-span-2 xl:col-span-3">
+                    <div className="rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3.5 md:col-span-2 2xl:col-span-3 sm:px-4 sm:py-4">
                       <div className="text-sm font-semibold text-[var(--crm-wine)]">Склад гостей для пошуку номера</div>
-                      <div className="mt-3 grid gap-3 lg:grid-cols-3">
+                      <div className="mt-3 grid gap-3 md:grid-cols-3">
                         <CompositionField label="Гості" value={adultsCount} onChange={setAdultsCount} />
                         <CompositionField label="Додаткові гості" value={children6PlusCount} onChange={setChildren6PlusCount} />
                         <CompositionField label="До 6 років" value={childrenUnder6Count} onChange={setChildrenUnder6Count} />
@@ -920,24 +920,24 @@ export function NewBookingForm() {
                         </div>
                       </div>
                     </div>
-                    <div className="md:col-span-2 xl:col-span-3">
+                    <div className="md:col-span-2 2xl:col-span-3">
                       <button type="button" onClick={handleFindRooms} disabled={loadingRooms} className={primaryButtonClass}>
                         {loadingRooms ? 'Пошук номерів...' : 'Підібрати номер'}
                       </button>
                     </div>
-                    {roomsMessage ? <div className="rounded-2xl bg-neutral-100 px-3 py-3 text-sm text-neutral-700 md:col-span-2 xl:col-span-3">{roomsMessage}</div> : null}
+                    {roomsMessage ? <div className="rounded-2xl bg-neutral-100 px-3 py-3 text-sm text-neutral-700 md:col-span-2 2xl:col-span-3">{roomsMessage}</div> : null}
                   </div>
 
                   {availableRooms.length > 0 ? (
-                    <div className="mt-4 grid gap-3 lg:grid-cols-2">
+                    <div className="mt-4 grid gap-3 xl:grid-cols-2">
                       {availableRooms.map((room) => (
                         <button
                           key={`${room.room_id}-${room.room_number}`}
                           type="button"
                           onClick={() => addDraftRoom(room)}
-                          className="w-full rounded-3xl border border-[var(--crm-wine-border)] bg-white px-4 py-4 text-left text-neutral-900 shadow-sm transition hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)]"
+                          className="w-full rounded-3xl border border-[var(--crm-wine-border)] bg-white px-3.5 py-3.5 text-left text-neutral-900 shadow-sm transition hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] sm:px-4 sm:py-4"
                         >
-                          <div className="flex items-start justify-between gap-3">
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                             <div>
                               <div className="text-base font-bold">
                                 <span>{`Номер ${room.room_number} `}</span>
@@ -984,7 +984,7 @@ export function NewBookingForm() {
                     const roomCertificateSurplus = Math.max(0, certificateAmount - roomTotalPrice)
 
                     return (
-                      <article key={draftRoom.key} className="rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-4 shadow-sm">
+                      <article key={draftRoom.key} className="rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3.5 shadow-sm sm:px-4 sm:py-4">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div>
                             <div className="text-base font-bold">
@@ -1033,7 +1033,7 @@ export function NewBookingForm() {
                           </label>
                         </div>
 
-                        <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                        <div className="mt-4 grid gap-3 md:grid-cols-3">
                           <CompositionField
                             label="Гості"
                             value={draftRoom.adultsCount}
@@ -1051,7 +1051,7 @@ export function NewBookingForm() {
                           />
                         </div>
 
-                        <div className="mt-4 rounded-3xl border border-[var(--crm-wine-border)] bg-white px-4 py-4 shadow-sm">
+                        <div className="mt-4 rounded-3xl border border-[var(--crm-wine-border)] bg-white px-3.5 py-3.5 shadow-sm sm:px-4 sm:py-4">
                           <label className="inline-flex min-h-11 items-center gap-3 text-sm font-semibold text-neutral-900">
                             <input
                               type="checkbox"
@@ -1154,7 +1154,7 @@ export function NewBookingForm() {
             </section>
           </form>
 
-          <aside className="space-y-3 xl:sticky xl:top-24">
+          <aside className="space-y-3 2xl:sticky 2xl:top-24">
             <section className={sectionClass}>
               <div className="text-base font-semibold sm:text-lg">Підсумок</div>
               <div className="mt-4 space-y-2 text-sm text-neutral-700">
