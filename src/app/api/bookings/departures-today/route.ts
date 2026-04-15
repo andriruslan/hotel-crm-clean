@@ -14,6 +14,8 @@ type DepartureRelationRow = {
   building_name?: string | null
 }
 
+type DepartureRelationValue = DepartureRelationRow[] | DepartureRelationRow | null
+
 type DepartureRow = {
   id: string
   room_id: string
@@ -28,8 +30,20 @@ type DepartureRow = {
   payment_status: 'unpaid' | 'partial' | 'paid' | null
   status: 'new' | 'confirmed' | 'canceled' | 'completed'
   occupancy_status: 'not_checked_in' | 'checked_in' | 'checked_out'
-  guest: DepartureRelationRow[] | null
-  room: DepartureRelationRow[] | null
+  guest: DepartureRelationValue
+  room: DepartureRelationValue
+}
+
+function getRelationRecord(value: DepartureRelationValue): DepartureRelationRow | null {
+  if (!value) {
+    return null
+  }
+
+  if (Array.isArray(value)) {
+    return value[0] || null
+  }
+
+  return value
 }
 
 export async function GET(request: NextRequest) {
@@ -75,8 +89,8 @@ export async function GET(request: NextRequest) {
 
     const items = ((data || []) as DepartureRow[]).map((item) => {
       const bookingMeta = parseBookingNoteMeta(item.booking_note)
-      const guest = item.guest?.[0] || null
-      const room = item.room?.[0] || null
+      const guest = getRelationRecord(item.guest)
+      const room = getRelationRecord(item.room)
       const priceTotal = Number(item.price_total || 0)
       const paymentCashAmount = Number(item.payment_cash_amount || 0)
       const paymentCardAmount = Number(item.payment_card_amount || 0)
