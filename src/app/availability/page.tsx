@@ -737,9 +737,9 @@ export default function AvailabilityPage() {
           <section className={`${sectionClass} xl:sticky xl:top-24`}>
             <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Доступність номерів</h1>
             <form onSubmit={handleSearch} className="mt-5 space-y-3">
-              <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+              <div className="grid min-w-0 grid-cols-2 gap-3 xl:grid-cols-2">
                 <label className="block min-w-0">
-                  <span className="text-sm font-medium text-neutral-800">Дата заїзду</span>
+                  <span className="block text-center text-sm font-medium text-neutral-800">Дата заїзду</span>
                   <DatePickerField
                     value={checkIn}
                     onChange={(value) => {
@@ -751,7 +751,7 @@ export default function AvailabilityPage() {
                 </label>
 
                 <label className="block min-w-0">
-                  <span className="text-sm font-medium text-neutral-800">Дата виїзду</span>
+                  <span className="block text-center text-sm font-medium text-neutral-800">Дата виїзду</span>
                   <DatePickerField
                     value={checkOut}
                     onChange={(value) => {

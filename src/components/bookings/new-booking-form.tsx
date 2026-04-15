@@ -949,13 +949,13 @@ export function NewBookingForm() {
 
               {isAddRoomSectionOpen ? (
                 <>
-                  <div className="mt-4 grid min-w-0 gap-3 grid-cols-2 2xl:grid-cols-3">
+                  <div className="mt-4 grid min-w-0 grid-cols-2 gap-3 2xl:grid-cols-3">
                     <label className="block min-w-0">
-                      <span className="text-sm font-medium">Дата заїзду</span>
+                      <span className="block text-center text-sm font-medium">Дата заїзду</span>
                       <DatePickerField value={checkIn} onChange={setCheckIn} className={fieldClass} />
                     </label>
                     <label className="block min-w-0">
-                      <span className="text-sm font-medium">Дата виїзду</span>
+                      <span className="block text-center text-sm font-medium">Дата виїзду</span>
                       <DatePickerField value={checkOut} onChange={setCheckOut} className={fieldClass} />
                     </label>
                     <div className="rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3.5 md:col-span-2 2xl:col-span-3 sm:px-4 sm:py-4">
@@ -1049,7 +1049,7 @@ export function NewBookingForm() {
                           </button>
                         </div>
 
-                        <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                        <div className="mt-4 grid grid-cols-2 gap-2">
                           <div className="rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">
                             <div className="text-xs uppercase tracking-wide text-neutral-500">Всього</div>
                             <div className="mt-1 text-lg font-semibold text-neutral-900">{draftRoom.guestsCount}</div>
@@ -1060,7 +1060,7 @@ export function NewBookingForm() {
                               {getExtraBedSummaryLabel(draftRoom.paidExtraBedsCount, draftRoom.freeExtraBedsCount)}
                             </div>
                           </div>
-                          <div className="rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">
+                          <div className="col-span-2 rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">
                             <div className="text-xs uppercase tracking-wide text-neutral-500">До сплати</div>
                             <div className="mt-1 text-lg font-semibold text-neutral-900">{formatMoney(roomTotalPrice)}</div>
                           </div>
@@ -1068,7 +1068,7 @@ export function NewBookingForm() {
 
                         <div className="mt-4 grid min-w-0 grid-cols-2 gap-3">
                           <label className="block min-w-0">
-                            <span className="text-sm font-medium">Дата заїзду</span>
+                            <span className="block text-center text-sm font-medium">Дата заїзду</span>
                             <DatePickerField
                               value={draftRoom.checkIn}
                               onChange={(value) => updateDraftRoomDates(draftRoom.key, { checkIn: value })}
@@ -1076,7 +1076,7 @@ export function NewBookingForm() {
                             />
                           </label>
                           <label className="block min-w-0">
-                            <span className="text-sm font-medium">Дата виїзду</span>
+                            <span className="block text-center text-sm font-medium">Дата виїзду</span>
                             <DatePickerField
                               value={draftRoom.checkOut}
                               onChange={(value) => updateDraftRoomDates(draftRoom.key, { checkOut: value })}
@@ -1147,16 +1147,16 @@ export function NewBookingForm() {
                           ) : null}
                         </div>
 
-                        <div className="mt-4 grid gap-3 md:grid-cols-2">
+                        <div className="mt-4 grid grid-cols-2 gap-3">
                           <label className="block">
-                            <span className="text-sm font-medium">Базова сума, грн</span>
+                            <span className="text-sm font-medium">Вартість ном.</span>
                             <input type="text" inputMode="numeric" value={draftRoom.priceBaseTotal} onChange={(e) => updateDraftRoom(draftRoom.key, { priceBaseTotal: sanitizeIntegerInput(e.target.value) })} className={fieldClass} />
                           </label>
                           <label className="block">
                             <span className="text-sm font-medium">Доп. місця, грн</span>
                             <input type="text" inputMode="numeric" value={draftRoom.priceExtraTotal} onChange={(e) => updateDraftRoom(draftRoom.key, { priceExtraTotal: sanitizeIntegerInput(e.target.value) })} className={fieldClass} />
                           </label>
-                          <label className="block">
+                          <label className="block col-span-2">
                             <span className="text-sm font-medium">Оплата, грн</span>
                             <input type="text" inputMode="numeric" value={draftRoom.paymentAmount} onChange={(e) => updateDraftRoom(draftRoom.key, { paymentAmount: sanitizeIntegerInput(e.target.value) })} className={fieldClass} />
                           </label>
@@ -1209,22 +1209,22 @@ export function NewBookingForm() {
           <aside className="space-y-3 2xl:sticky 2xl:top-24">
             <section className={sectionClass}>
               <div className="text-base font-semibold sm:text-lg">Підсумок</div>
-              <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3 shadow-sm">
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3 py-2.5 shadow-sm">
                   <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-neutral-500">Номерів</div>
-                  <div className="mt-2 text-2xl font-bold leading-none text-neutral-900">{draftRooms.length}</div>
+                  <div className="mt-1.5 text-xl font-bold leading-none text-neutral-900">{draftRooms.length}</div>
                 </div>
-                <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3 shadow-sm">
+                <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3 py-2.5 shadow-sm">
                   <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-neutral-500">Гостей</div>
-                  <div className="mt-2 text-2xl font-bold leading-none text-neutral-900">{totalGuestsInBooking}</div>
+                  <div className="mt-1.5 text-xl font-bold leading-none text-neutral-900">{totalGuestsInBooking}</div>
                 </div>
-                <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3 shadow-sm">
+                <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3 py-2.5 shadow-sm">
                   <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-neutral-500">Доп. місця</div>
-                  <div className="mt-2 text-2xl font-bold leading-none text-neutral-900">{totalExtraBedsInBooking}</div>
+                  <div className="mt-1.5 text-xl font-bold leading-none text-neutral-900">{totalExtraBedsInBooking}</div>
                 </div>
-                <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-wine-soft)] px-3.5 py-3 shadow-sm">
+                <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-wine-soft)] px-3 py-2.5 shadow-sm">
                   <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--crm-wine-dark)]">Вартість</div>
-                  <div className="mt-2 text-xl font-bold leading-tight text-[var(--crm-wine-dark)]">{formatMoney(totalPrice)}</div>
+                  <div className="mt-1.5 text-base font-bold leading-tight text-[var(--crm-wine-dark)]">{formatMoney(totalPrice)}</div>
                 </div>
               </div>
 
