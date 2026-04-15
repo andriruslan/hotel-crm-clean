@@ -949,7 +949,7 @@ export function NewBookingForm() {
 
               {isAddRoomSectionOpen ? (
                 <>
-                  <div className="mt-4 grid min-w-0 gap-3 md:grid-cols-2 2xl:grid-cols-3">
+                  <div className="mt-4 grid min-w-0 gap-3 grid-cols-2 2xl:grid-cols-3">
                     <label className="block min-w-0">
                       <span className="text-sm font-medium">Дата заїзду</span>
                       <DatePickerField value={checkIn} onChange={setCheckIn} className={fieldClass} />
@@ -1066,7 +1066,7 @@ export function NewBookingForm() {
                           </div>
                         </div>
 
-                        <div className="mt-4 grid min-w-0 gap-3 md:grid-cols-2">
+                        <div className="mt-4 grid min-w-0 grid-cols-2 gap-3">
                           <label className="block min-w-0">
                             <span className="text-sm font-medium">Дата заїзду</span>
                             <DatePickerField
@@ -1209,11 +1209,23 @@ export function NewBookingForm() {
           <aside className="space-y-3 2xl:sticky 2xl:top-24">
             <section className={sectionClass}>
               <div className="text-base font-semibold sm:text-lg">Підсумок</div>
-              <div className="mt-4 space-y-2 text-sm text-neutral-700">
-                <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Номерів</span><span className="font-medium">{draftRooms.length}</span></div>
-                <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Гостей</span><span className="font-medium">{totalGuestsInBooking}</span></div>
-                <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Доп. місця</span><span className="font-medium">{totalExtraBedsInBooking}</span></div>
-                <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Вартість</span><span className="font-medium">{formatMoney(totalPrice)}</span></div>
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3 shadow-sm">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-neutral-500">Номерів</div>
+                  <div className="mt-2 text-2xl font-bold leading-none text-neutral-900">{draftRooms.length}</div>
+                </div>
+                <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3 shadow-sm">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-neutral-500">Гостей</div>
+                  <div className="mt-2 text-2xl font-bold leading-none text-neutral-900">{totalGuestsInBooking}</div>
+                </div>
+                <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3 shadow-sm">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-neutral-500">Доп. місця</div>
+                  <div className="mt-2 text-2xl font-bold leading-none text-neutral-900">{totalExtraBedsInBooking}</div>
+                </div>
+                <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-wine-soft)] px-3.5 py-3 shadow-sm">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--crm-wine-dark)]">Вартість</div>
+                  <div className="mt-2 text-xl font-bold leading-tight text-[var(--crm-wine-dark)]">{formatMoney(totalPrice)}</div>
+                </div>
               </div>
 
               <button type="submit" form="booking-form" disabled={saving} className={`mt-4 ${primaryButtonClass}`}>

@@ -60,17 +60,26 @@ input[type="date"] {
 .crm-date-input {
   appearance: none;
   -webkit-appearance: none;
+  text-align: center;
 }
 
 .crm-date-input::-webkit-date-and-time-value {
   min-width: 0;
   width: 100%;
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
 .crm-date-input::-webkit-datetime-edit {
   min-width: 0;
   width: 100%;
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 0;
   text-align: center;
 }
