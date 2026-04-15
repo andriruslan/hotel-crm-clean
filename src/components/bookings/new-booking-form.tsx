@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { DatePickerField } from '@/components/ui/date-picker-field'
 import { getDefaultPaymentDueStage, getPaymentDueStageLabel, type PaymentDueStage } from '@/lib/booking-note-meta'
-import { addOneDay, dateInputToIso, formatDateForDisplay, getTodayDate, isoDateToInputValue, isCompleteDateInput } from '@/lib/dates'
+import { addOneDay, dateInputToIso, formatDateForDisplay, formatDateInput, getTodayDate, isoDateToInputValue, isCompleteDateInput } from '@/lib/dates'
 import {
   buildGuestCompositionSummary,
   getPaidExtraBedsCount,
@@ -52,7 +52,6 @@ type DraftRoom = {
   guestsCount: number
   paidExtraBedsCount: number
   freeExtraBedsCount: number
-  bookingNote: string
   priceBaseTotal: string
   priceExtraTotal: string
   certificateApplied: boolean
@@ -177,7 +176,6 @@ function createDraftRoom(
     guestsCount,
     paidExtraBedsCount: pricing.paidExtraBedsCount,
     freeExtraBedsCount: pricing.freeExtraBedsCount,
-    bookingNote: '',
     priceBaseTotal: String(pricing.priceBaseTotal),
     priceExtraTotal: String(pricing.priceExtraTotal),
     certificateApplied: false,
@@ -843,7 +841,7 @@ export function NewBookingForm() {
             check_out_date: dateInputToIso(room.checkOut),
             guests_count: room.guestsCount,
             extra_beds_count: room.paidExtraBedsCount,
-            booking_note: buildBookingNoteWithGuestSummary(room.bookingNote, room),
+            booking_note: buildBookingNoteWithGuestSummary(guestNote, room),
             payment_due_stage: room.certificateApplied ? 'before_check_in' : paymentDueStage,
             status,
             payment_cash_amount: parseIntegerValue(room.paymentAmount),
@@ -926,7 +924,15 @@ export function NewBookingForm() {
                 </label>
                 <label className="block min-w-0">
                   <span className="text-sm font-medium">Дата народження</span>
-                  <DatePickerField value={birthDate} onChange={setBirthDate} className={fieldClass} />
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={birthDate}
+                    onChange={(e) => setBirthDate(formatDateInput(e.target.value))}
+                    placeholder="ДД-ММ-РРРР"
+                    className={fieldClass}
+                  />
                 </label>
                 <label className="block md:col-span-2">
                   <span className="text-sm font-medium">Коментар по гостю</span>
@@ -1172,10 +1178,6 @@ export function NewBookingForm() {
                               <div className="mt-1 font-semibold text-neutral-900">{formatMoney(roomBalance)}</div>
                             </div>
                           ) : null}
-                          <label className="block md:col-span-2">
-                            <span className="text-sm font-medium">Коментар по номеру</span>
-                            <textarea value={draftRoom.bookingNote} onChange={(e) => updateDraftRoom(draftRoom.key, { bookingNote: e.target.value })} rows={3} className={textAreaClass} />
-                          </label>
                         </div>
                       </article>
                     )

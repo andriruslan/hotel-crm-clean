@@ -763,7 +763,7 @@ export default function AvailabilityPage() {
                 </label>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid grid-cols-2 gap-3">
                 <button type="button" onClick={() => void handleQuickPeriod(7)} disabled={loading} className={secondaryButtonClass}>
                   Тиждень
                 </button>
