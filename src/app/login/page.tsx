@@ -16,7 +16,7 @@ export default async function LoginPage() {
   return (
     <main className="min-h-screen bg-[var(--background)] px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-5xl items-center gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(360px,460px)]">
-        <section className="hidden rounded-[2rem] border border-[var(--crm-wine-border)] bg-[linear-gradient(145deg,rgba(111,32,49,0.95),rgba(87,112,56,0.88))] p-8 text-white shadow-xl lg:block">
+        <section className="hidden rounded-[2rem] border border-[var(--crm-wine-border)] bg-[linear-gradient(145deg,rgba(143,45,86,0.95),rgba(95,112,54,0.88))] p-8 text-white shadow-xl lg:block">
           <div className="max-w-md space-y-4">
             <div className="inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold tracking-[0.18em] uppercase">
               Village Wine
@@ -35,7 +35,7 @@ export default async function LoginPage() {
               Вхід до системи
             </div>
             <h1 className="text-3xl font-bold leading-tight text-[var(--foreground)]">CRM &quot;VILLAGE WINE&quot;</h1>
-            <p className="text-sm leading-6 text-[color:rgba(45,28,35,0.72)]">
+            <p className="text-sm leading-6 text-[color:rgba(49,34,41,0.72)]">
               Введи логін і пароль, щоб відкрити екрани бронювань, заїздів, виїздів і пошуку номерів.
             </p>
           </div>

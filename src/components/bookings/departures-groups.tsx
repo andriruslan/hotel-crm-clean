@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
@@ -20,7 +20,7 @@ const sectionClass = 'rounded-3xl border border-[var(--crm-wine-border)] bg-whit
 const fieldClass =
   'mt-1.5 h-12 w-full rounded-2xl border border-neutral-300 bg-white px-3.5 text-[16px] text-neutral-900 outline-none transition focus:border-neutral-700 focus:ring-4 focus:ring-neutral-200'
 const secondaryButtonClass =
-  'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(111,32,49,0.12)] px-4 text-sm font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(111,32,49,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)] disabled:opacity-60'
+  'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] px-4 text-sm font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(143,45,86,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)] disabled:opacity-60'
 
 type DepartureDisplayGroup = DepartureGroup
 
@@ -134,7 +134,7 @@ function DepartureBookingCard({
     return (
       <Link
         href={`/bookings/departures/${item.id}?date=${encodeURIComponent(appliedDate)}`}
-        className="block rounded-3xl border-2 border-[var(--crm-wine-border)] bg-white/95 px-3.5 py-3.5 text-left shadow-[0_10px_24px_rgba(111,32,49,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:shadow-lg sm:px-5 sm:py-5"
+        className="block rounded-3xl border-2 border-[var(--crm-wine-border)] bg-white/95 px-3.5 py-3.5 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:shadow-lg sm:px-5 sm:py-5"
       >
         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
@@ -168,7 +168,7 @@ function DepartureBookingCard({
   }
 
   return (
-    <section className="rounded-3xl border-2 border-neutral-200 bg-white px-3.5 py-3.5 shadow-[0_10px_24px_rgba(111,32,49,0.08)] sm:px-5 sm:py-5">
+    <section className="rounded-3xl border-2 border-neutral-200 bg-white px-3.5 py-3.5 shadow-[0_10px_24px_rgba(143,45,86,0.08)] sm:px-5 sm:py-5">
       <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
         <div>
           <div className="text-base font-bold text-neutral-900 sm:text-lg">{normalizePhone(group.guest_phone || '') || 'Телефон не вказано'}</div>
@@ -239,7 +239,7 @@ function DepartureBookingCard({
             <Link
               key={item.id}
               href={`/bookings/departures/${item.id}?date=${encodeURIComponent(appliedDate)}`}
-              className="block w-full rounded-3xl border-2 border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3.5 text-left shadow-[0_10px_24px_rgba(111,32,49,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:shadow-lg sm:px-4 sm:py-4"
+              className="block w-full rounded-3xl border-2 border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3.5 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:shadow-lg sm:px-4 sm:py-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">

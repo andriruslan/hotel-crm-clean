@@ -29,7 +29,7 @@ export default async function HomePage() {
               ) : null}
             </div>
 
-            <LogoutButton className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-[var(--crm-vine)] bg-[var(--crm-vine-soft)] px-3 text-xs font-semibold text-[var(--crm-vine-dark)] shadow-sm transition hover:border-[var(--crm-vine-dark)] hover:bg-[#e6efda] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:min-h-11 sm:px-4 sm:text-sm" />
+            <LogoutButton className="inline-flex min-h-10 items-center justify-center rounded-2xl border border-[var(--crm-vine)] bg-[var(--crm-vine-soft)] px-3 text-xs font-semibold text-[var(--crm-vine-dark)] shadow-sm transition hover:border-[var(--crm-vine-dark)] hover:bg-[var(--crm-vine-soft-hover)] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70 sm:min-h-11 sm:px-4 sm:text-sm" />
           </div>
         </section>
 

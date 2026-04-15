@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useMemo, useState } from 'react'
 import type { PaymentStatus } from '@/constants/payment-status'
@@ -69,9 +69,9 @@ const sectionClass = 'rounded-3xl border border-[var(--crm-wine-border)] bg-whit
 const fieldClass =
   'mt-1.5 h-12 w-full rounded-2xl border border-neutral-300 bg-white px-3.5 text-[16px] text-neutral-900 outline-none transition focus:border-neutral-700 focus:ring-4 focus:ring-neutral-200'
 const secondaryButtonClass =
-  'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(111,32,49,0.12)] px-4 text-sm font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(111,32,49,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)] disabled:opacity-60'
+  'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] px-4 text-sm font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(143,45,86,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)] disabled:opacity-60'
 const primaryButtonClass =
-  'inline-flex min-h-12 w-full items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(111,32,49,0.22)] transition hover:bg-[var(--crm-wine-dark)] disabled:opacity-60'
+  'inline-flex min-h-12 w-full items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)] disabled:opacity-60'
 const warnButtonClass =
   'inline-flex min-h-12 w-full items-center justify-center rounded-2xl border-2 border-[#946222] bg-[var(--crm-warning)] px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(185,122,42,0.22)] transition hover:bg-[#946222] disabled:opacity-60'
 const dangerButtonClass =

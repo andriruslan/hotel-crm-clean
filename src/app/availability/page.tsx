@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -66,13 +66,13 @@ const fieldClass =
 
 const sectionClass = 'rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-3.5 py-3.5 shadow-sm sm:px-5 sm:py-5'
 const primaryButtonClass =
-  'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(111,32,49,0.22)] transition hover:bg-[var(--crm-wine-dark)] disabled:cursor-not-allowed disabled:opacity-60'
+  'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)] disabled:cursor-not-allowed disabled:opacity-60'
 const secondaryButtonClass =
-  'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(111,32,49,0.12)] px-4 text-sm font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(111,32,49,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)] disabled:cursor-not-allowed disabled:opacity-60'
+  'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] px-4 text-sm font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(143,45,86,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)] disabled:cursor-not-allowed disabled:opacity-60'
 const counterButtonClass =
-  'flex h-12 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(111,32,49,0.12)] text-xl font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(111,32,49,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)]'
+  'flex h-12 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] text-xl font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(143,45,86,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)]'
 const counterPrimaryButtonClass =
-  'flex h-12 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] text-xl font-semibold text-white shadow-[0_10px_24px_rgba(111,32,49,0.22)] transition hover:bg-[var(--crm-wine-dark)]'
+  'flex h-12 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] text-xl font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)]'
 
 function parseIntegerValue(value: string) {
   const digits = value.replace(/\D/g, '')
@@ -474,7 +474,7 @@ function SingleDayAvailabilityGrid({
               key={item.room_id}
               type="button"
               onClick={() => onToggleRoom(item.room_id)}
-              className={`w-full rounded-3xl border-2 bg-white/90 px-3.5 py-3.5 text-left shadow-[0_10px_24px_rgba(111,32,49,0.08)] transition hover:-translate-y-0.5 hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-4 sm:py-4 ${
+              className={`w-full rounded-3xl border-2 bg-white/90 px-3.5 py-3.5 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-4 sm:py-4 ${
                 isSelected
                   ? 'border-[var(--crm-wine)] ring-2 ring-[var(--crm-wine)] ring-inset'
                   : 'border-[var(--crm-wine-border)] hover:border-[var(--crm-wine)]'
@@ -506,7 +506,7 @@ function SingleDayAvailabilityGrid({
           <Link
             key={item.room_id}
             href={createHref(item)}
-            className="rounded-3xl border-2 border-[var(--crm-wine-border)] bg-white/90 px-3.5 py-3.5 shadow-[0_10px_24px_rgba(111,32,49,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-4 sm:py-4"
+            className="rounded-3xl border-2 border-[var(--crm-wine-border)] bg-white/90 px-3.5 py-3.5 shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-4 sm:py-4"
           >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
@@ -851,7 +851,7 @@ export default function AvailabilityPage() {
                     selectedRoomSelections.length > 0 ? (
                       <Link
                         href={createMatrixBookingHref(selectedRoomSelections, searchComposition)}
-                        className="inline-flex min-h-11 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(111,32,49,0.22)] transition hover:bg-[var(--crm-wine-dark)]"
+                        className="inline-flex min-h-11 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)]"
                       >
                         {`Перейти з ${selectedRoomSelections.length} вибором(и)`}
                       </Link>
@@ -873,7 +873,7 @@ export default function AvailabilityPage() {
                           checkOut,
                           searchComposition
                         )}
-                        className="inline-flex min-h-11 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(111,32,49,0.22)] transition hover:bg-[var(--crm-wine-dark)]"
+                        className="inline-flex min-h-11 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)]"
                       >
                         {`Перейти з ${selectedItems.length} номер(и)`}
                       </Link>
