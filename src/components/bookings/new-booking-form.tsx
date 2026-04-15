@@ -964,7 +964,7 @@ export function NewBookingForm() {
                       <span className="block text-center text-sm font-medium">Дата виїзду</span>
                       <DatePickerField value={checkOut} onChange={setCheckOut} className={fieldClass} />
                     </label>
-                    <div className="rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3.5 md:col-span-2 2xl:col-span-3 sm:px-4 sm:py-4">
+                    <div className="col-span-2 rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3.5 2xl:col-span-3 sm:px-4 sm:py-4">
                       <div className="text-sm font-semibold text-[var(--crm-wine)]">Склад гостей для пошуку номера</div>
                       <div className="mt-3 grid gap-3 md:grid-cols-3">
                         <CompositionField label="Гості" value={adultsCount} onChange={setAdultsCount} />
@@ -978,12 +978,12 @@ export function NewBookingForm() {
                         </div>
                       </div>
                     </div>
-                    <div className="md:col-span-2 2xl:col-span-3">
+                    <div className="col-span-2 2xl:col-span-3">
                       <button type="button" onClick={handleFindRooms} disabled={loadingRooms} className={primaryButtonClass}>
                         {loadingRooms ? 'Пошук номерів...' : 'Підібрати номер'}
                       </button>
                     </div>
-                    {roomsMessage ? <div className="rounded-2xl bg-neutral-100 px-3 py-3 text-sm text-neutral-700 md:col-span-2 2xl:col-span-3">{roomsMessage}</div> : null}
+                    {roomsMessage ? <div className="col-span-2 rounded-2xl bg-neutral-100 px-3 py-3 text-sm text-neutral-700 2xl:col-span-3">{roomsMessage}</div> : null}
                   </div>
 
                   {availableRooms.length > 0 ? (
