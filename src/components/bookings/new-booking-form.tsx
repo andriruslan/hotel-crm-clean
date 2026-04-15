@@ -1164,7 +1164,18 @@ export function NewBookingForm() {
                           </label>
                           <label className="block col-span-2">
                             <span className="text-sm font-medium">Оплата, грн</span>
-                            <input type="text" inputMode="numeric" value={draftRoom.paymentAmount} onChange={(e) => updateDraftRoom(draftRoom.key, { paymentAmount: sanitizeIntegerInput(e.target.value) })} className={fieldClass} />
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              value={draftRoom.paymentAmount}
+                              onFocus={() => {
+                                if (parseIntegerValue(draftRoom.paymentAmount) === 0) {
+                                  updateDraftRoom(draftRoom.key, { paymentAmount: '' })
+                                }
+                              }}
+                              onChange={(e) => updateDraftRoom(draftRoom.key, { paymentAmount: sanitizeIntegerInput(e.target.value) })}
+                              className={fieldClass}
+                            />
                           </label>
                           {draftRoom.certificateApplied ? (
                             <div className="rounded-2xl bg-neutral-50 px-3 py-3 text-sm text-neutral-700 shadow-sm">
@@ -1188,7 +1199,7 @@ export function NewBookingForm() {
 
             <section className={sectionClass}>
               <div className="text-base font-semibold sm:text-lg">4. Загальні параметри</div>
-              <div className="mt-4 grid gap-3 md:grid-cols-2">
+              <div className="mt-4 grid grid-cols-2 gap-3">
                 <label className="block">
                   <span className="text-sm font-medium">Статус бронювання</span>
                   <select value={status} onChange={(e) => setStatus(e.target.value as 'new' | 'confirmed')} className={fieldClass}>
