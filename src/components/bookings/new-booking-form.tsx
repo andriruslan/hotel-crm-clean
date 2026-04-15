@@ -11,7 +11,6 @@ import {
   getTotalGuestsCount,
   type GuestComposition,
 } from '@/lib/guest-composition'
-import { getPaymentStatus, getPaymentStatusLabel } from '@/lib/payment-status'
 import { formatPhoneInput, normalizePhone } from '@/lib/phone'
 import { calculateBookingPrice } from '@/lib/pricing'
 import { isValidPhone } from '@/lib/validators'
@@ -58,8 +57,7 @@ type DraftRoom = {
   priceExtraTotal: string
   certificateApplied: boolean
   certificateAmount: string
-  paymentCash: string
-  paymentCard: string
+  paymentAmount: string
 }
 
 type QueryRoomPayload = {
@@ -184,8 +182,7 @@ function createDraftRoom(
     priceExtraTotal: String(pricing.priceExtraTotal),
     certificateApplied: false,
     certificateAmount: '',
-    paymentCash: '',
-    paymentCard: '',
+    paymentAmount: '',
   }
 }
 
@@ -297,7 +294,7 @@ function getDraftRoomTotalPrice(room: DraftRoom) {
 }
 
 function getDraftRoomDirectPaid(room: DraftRoom) {
-  return parseIntegerValue(room.paymentCash) + parseIntegerValue(room.paymentCard)
+  return parseIntegerValue(room.paymentAmount)
 }
 
 function createQueryRoomPayload(value: unknown): QueryRoomPayload | null {
@@ -574,7 +571,6 @@ export function NewBookingForm() {
     [adultsCount, childrenUnder6Count, children6PlusCount]
   )
   const guestsCount = getTotalGuestsCount(searchComposition)
-  const paidSearchExtraBedsCount = useMemo(() => getPaidExtraBedsCount(searchComposition, 2), [searchComposition])
 
   function resetForm() {
     setPhone(formatPhoneInput(''))
@@ -614,17 +610,9 @@ export function NewBookingForm() {
     }
   }, [])
 
-  const totalPrice = draftRooms.reduce(
-    (sum, room) => sum + getDraftRoomTotalPrice(room),
-    0
-  )
-  const totalCertificate = draftRooms.reduce((sum, room) => sum + getDraftRoomCertificateAmount(room), 0)
-  const totalPaid = draftRooms.reduce(
-    (sum, room) => sum + getDraftRoomDirectPaid(room) + getDraftRoomCertificateAmount(room),
-    0
-  )
-  const paymentStatus = getPaymentStatus(totalPrice, totalPaid)
-  const balance = Math.max(0, totalPrice - totalPaid)
+  const totalPrice = draftRooms.reduce((sum, room) => sum + getDraftRoomTotalPrice(room), 0)
+  const totalGuestsInBooking = draftRooms.reduce((sum, room) => sum + room.guestsCount, 0)
+  const totalExtraBedsInBooking = draftRooms.reduce((sum, room) => sum + room.paidExtraBedsCount + room.freeExtraBedsCount, 0)
 
   async function handleFindGuest() {
     setGuestMessage('')
@@ -858,8 +846,8 @@ export function NewBookingForm() {
             booking_note: buildBookingNoteWithGuestSummary(room.bookingNote, room),
             payment_due_stage: room.certificateApplied ? 'before_check_in' : paymentDueStage,
             status,
-            payment_cash_amount: parseIntegerValue(room.paymentCash),
-            payment_card_amount: parseIntegerValue(room.paymentCard),
+            payment_cash_amount: parseIntegerValue(room.paymentAmount),
+            payment_card_amount: 0,
             certificate_amount: getDraftRoomCertificateAmount(room),
             price_base_total: parseIntegerValue(room.priceBaseTotal),
             price_extra_total: parseIntegerValue(room.priceExtraTotal),
@@ -1169,21 +1157,21 @@ export function NewBookingForm() {
                             <input type="text" inputMode="numeric" value={draftRoom.priceExtraTotal} onChange={(e) => updateDraftRoom(draftRoom.key, { priceExtraTotal: sanitizeIntegerInput(e.target.value) })} className={fieldClass} />
                           </label>
                           <label className="block">
-                            <span className="text-sm font-medium">Оплата готівкою, грн</span>
-                            <input type="text" inputMode="numeric" value={draftRoom.paymentCash} onChange={(e) => updateDraftRoom(draftRoom.key, { paymentCash: sanitizeIntegerInput(e.target.value) })} className={fieldClass} />
+                            <span className="text-sm font-medium">Оплата, грн</span>
+                            <input type="text" inputMode="numeric" value={draftRoom.paymentAmount} onChange={(e) => updateDraftRoom(draftRoom.key, { paymentAmount: sanitizeIntegerInput(e.target.value) })} className={fieldClass} />
                           </label>
-                          <label className="block">
-                            <span className="text-sm font-medium">Оплата карткою, грн</span>
-                            <input type="text" inputMode="numeric" value={draftRoom.paymentCard} onChange={(e) => updateDraftRoom(draftRoom.key, { paymentCard: sanitizeIntegerInput(e.target.value) })} className={fieldClass} />
-                          </label>
-                          <div className="rounded-2xl bg-neutral-50 px-3 py-3 text-sm text-neutral-700 shadow-sm">
-                            <div className="text-xs uppercase tracking-wide text-neutral-500">Вже покрито</div>
-                            <div className="mt-1 font-semibold text-neutral-900">{formatMoney(roomTotalPaid)}</div>
-                          </div>
-                          <div className="rounded-2xl bg-neutral-50 px-3 py-3 text-sm text-neutral-700 shadow-sm">
-                            <div className="text-xs uppercase tracking-wide text-neutral-500">Залишок гостя</div>
-                            <div className="mt-1 font-semibold text-neutral-900">{formatMoney(roomBalance)}</div>
-                          </div>
+                          {draftRoom.certificateApplied ? (
+                            <div className="rounded-2xl bg-neutral-50 px-3 py-3 text-sm text-neutral-700 shadow-sm">
+                              <div className="text-xs uppercase tracking-wide text-neutral-500">Вже покрито</div>
+                              <div className="mt-1 font-semibold text-neutral-900">{formatMoney(roomTotalPaid)}</div>
+                            </div>
+                          ) : null}
+                          {draftRoom.certificateApplied ? (
+                            <div className="rounded-2xl bg-neutral-50 px-3 py-3 text-sm text-neutral-700 shadow-sm">
+                              <div className="text-xs uppercase tracking-wide text-neutral-500">Залишок гостя</div>
+                              <div className="mt-1 font-semibold text-neutral-900">{formatMoney(roomBalance)}</div>
+                            </div>
+                          ) : null}
                           <label className="block md:col-span-2">
                             <span className="text-sm font-medium">Коментар по номеру</span>
                             <textarea value={draftRoom.bookingNote} onChange={(e) => updateDraftRoom(draftRoom.key, { bookingNote: e.target.value })} rows={3} className={textAreaClass} />
@@ -1222,15 +1210,10 @@ export function NewBookingForm() {
             <section className={sectionClass}>
               <div className="text-base font-semibold sm:text-lg">Підсумок</div>
               <div className="mt-4 space-y-2 text-sm text-neutral-700">
-                <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Гостей у пошуку</span><span className="font-medium">{guestsCount}</span></div>
-                <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Орієнтовно платних доп. місць</span><span className="font-medium">{paidSearchExtraBedsCount}</span></div>
                 <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Номерів</span><span className="font-medium">{draftRooms.length}</span></div>
+                <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Гостей</span><span className="font-medium">{totalGuestsInBooking}</span></div>
+                <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Доп. місця</span><span className="font-medium">{totalExtraBedsInBooking}</span></div>
                 <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Вартість</span><span className="font-medium">{formatMoney(totalPrice)}</span></div>
-                <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Сертифікати</span><span className="font-medium">{formatMoney(totalCertificate)}</span></div>
-                <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Оплачено</span><span className="font-medium">{formatMoney(totalPaid)}</span></div>
-                <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Статус оплати</span><span className="font-medium">{getPaymentStatusLabel(paymentStatus)}</span></div>
-                <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Оплата очікується</span><span className="font-medium">{getPaymentDueStageLabel(paymentDueStage)}</span></div>
-                <div className="rounded-2xl bg-neutral-50 px-3 py-3 sm:flex sm:justify-between"><span>Залишок</span><span className="font-medium">{formatMoney(balance)}</span></div>
               </div>
 
               <button type="submit" form="booking-form" disabled={saving} className={`mt-4 ${primaryButtonClass}`}>
