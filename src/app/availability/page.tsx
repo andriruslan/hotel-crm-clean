@@ -69,8 +69,6 @@ const primaryButtonClass =
   'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 text-[13px] font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)] disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm'
 const secondaryButtonClass =
   'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] px-4 text-[13px] font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(143,45,86,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)] disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm'
-const stickyFilterActionWrapClass =
-  'sticky bottom-2 z-20 -mx-1 rounded-2xl bg-[color:rgba(248,242,234,0.96)] p-1.5 backdrop-blur supports-[backdrop-filter]:bg-[color:rgba(248,242,234,0.82)] xl:static xl:z-auto xl:-mx-0 xl:bg-transparent xl:p-0 xl:backdrop-blur-none'
 const counterButtonClass =
   'flex h-12 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] text-xl font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(143,45,86,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)]'
 const counterPrimaryButtonClass =
@@ -735,41 +733,43 @@ export default function AvailabilityPage() {
         <div className="grid gap-3 xl:grid-cols-[minmax(320px,380px)_minmax(0,1fr)] xl:items-start">
           <section className={`${sectionClass} xl:sticky xl:top-24`}>
             <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Доступність номерів</h1>
-            <form onSubmit={handleSearch} className="mt-5 space-y-3 pb-1">
-              <div className="grid min-w-0 grid-cols-2 gap-3 xl:grid-cols-2">
-                <label className="block min-w-0">
-                  <span className="block text-center text-[13px] font-medium text-neutral-800 sm:text-sm">Дата заїзду</span>
-                  <DatePickerField
-                    value={checkIn}
-                    onChange={(value) => {
-                      setCheckIn(value)
-                      setCheckOut(getNextDateInputValue(value))
-                    }}
-                    className={fieldClass}
-                    required
-                  />
-                </label>
+            <form onSubmit={handleSearch} className="mt-5 grid gap-3 md:max-xl:grid-cols-2 xl:grid-cols-1">
+              <div className="space-y-3">
+                <div className="grid min-w-0 grid-cols-2 gap-3">
+                  <label className="block min-w-0">
+                    <span className="block text-center text-[13px] font-medium text-neutral-800 sm:text-sm">Дата заїзду</span>
+                    <DatePickerField
+                      value={checkIn}
+                      onChange={(value) => {
+                        setCheckIn(value)
+                        setCheckOut(getNextDateInputValue(value))
+                      }}
+                      className={fieldClass}
+                      required
+                    />
+                  </label>
 
-                <label className="block min-w-0">
-                  <span className="block text-center text-[13px] font-medium text-neutral-800 sm:text-sm">Дата виїзду</span>
-                  <DatePickerField
-                    value={checkOut}
-                    onChange={(value) => {
-                      setCheckOut(value)
-                    }}
-                    className={fieldClass}
-                    required
-                  />
-                </label>
-              </div>
+                  <label className="block min-w-0">
+                    <span className="block text-center text-[13px] font-medium text-neutral-800 sm:text-sm">Дата виїзду</span>
+                    <DatePickerField
+                      value={checkOut}
+                      onChange={(value) => {
+                        setCheckOut(value)
+                      }}
+                      className={fieldClass}
+                      required
+                    />
+                  </label>
+                </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <button type="button" onClick={() => void handleQuickPeriod(7)} disabled={loading} className={secondaryButtonClass}>
-                  Тиждень
-                </button>
-                <button type="button" onClick={() => void handleQuickPeriod(30)} disabled={loading} className={secondaryButtonClass}>
-                  Місяць
-                </button>
+                <div className="grid grid-cols-2 gap-3">
+                  <button type="button" onClick={() => void handleQuickPeriod(7)} disabled={loading} className={secondaryButtonClass}>
+                    Тиждень
+                  </button>
+                  <button type="button" onClick={() => void handleQuickPeriod(30)} disabled={loading} className={secondaryButtonClass}>
+                    Місяць
+                  </button>
+                </div>
               </div>
 
               <div className="rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-4">
@@ -784,7 +784,7 @@ export default function AvailabilityPage() {
                 </div>
               </div>
 
-              <div className={stickyFilterActionWrapClass}>
+              <div className="md:max-xl:col-span-2 xl:col-span-1">
                 <button type="submit" disabled={loading} className={primaryButtonClass}>
                   {loading ? 'Перевірка...' : 'Перевірити доступність'}
                 </button>
