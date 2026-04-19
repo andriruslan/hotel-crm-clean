@@ -18,7 +18,7 @@ async function parseApiResponse(response: Response) {
 
   if (!rawText) {
     if (!response.ok) {
-      throw new Error(`Ð¡ÐµÑ€Ð²ÐµÑ€ Ð¿Ð¾Ð²ÐµÑ€Ð½ÑƒÐ² Ð¿Ð¾Ð¼Ð¸Ð»ÐºÑƒ ${response.status}.`)
+      throw new Error(`Сервер повернув помилку ${response.status}.`)
     }
 
     return { ok: true } as ApiResponse
@@ -33,10 +33,10 @@ async function parseApiResponse(response: Response) {
       .trim()
 
     if (!response.ok) {
-      throw new Error(compactText || `Ð¡ÐµÑ€Ð²ÐµÑ€ Ð¿Ð¾Ð²ÐµÑ€Ð½ÑƒÐ² Ð¿Ð¾Ð¼Ð¸Ð»ÐºÑƒ ${response.status}.`)
+      throw new Error(compactText || `Сервер повернув помилку ${response.status}.`)
     }
 
-    throw new Error('Ð¡ÐµÑ€Ð²ÐµÑ€ Ð¿Ð¾Ð²ÐµÑ€Ð½ÑƒÐ² Ð½ÐµÐ¾Ñ‡Ñ–ÐºÑƒÐ²Ð°Ð½Ñƒ Ð²Ñ–Ð´Ð¿Ð¾Ð²Ñ–Ð´ÑŒ.')
+    throw new Error('Сервер повернув неочікувану відповідь.')
   }
 }
 
@@ -334,14 +334,14 @@ function MultiDayAvailabilityMatrix({
     <div className="min-w-0 space-y-3">
       <div className="flex flex-wrap items-center gap-2 text-sm">
         <span className="rounded-full bg-[var(--crm-vine-soft)] px-3 py-1.5 font-semibold text-[var(--crm-vine-dark)]">
-          ÐšÐ»Ñ–Ñ‚Ð¸Ð½ÐºÐ° Ð·ÐµÐ»ÐµÐ½Ð° = Ð²Ñ–Ð»ÑŒÐ½Ð¾
+          Клітинка зелена = вільно
         </span>
         <span className="rounded-full bg-neutral-100 px-3 py-1.5 font-semibold text-neutral-600">
-          Ð¡Ñ–Ñ€Ð° = Ð·Ð°Ð¹Ð½ÑÑ‚Ð¾
+          Сіра = зайнято
         </span>
       </div>
 
-      <div className="text-xs font-medium text-neutral-500 sm:text-sm">ÐÐ° Ñ‚ÐµÐ»ÐµÑ„Ð¾Ð½Ñ– Ñ‚Ð°Ð±Ð»Ð¸Ñ†ÑŽ Ð¼Ð¾Ð¶Ð½Ð° Ð³Ð¾Ñ€Ñ‚Ð°Ñ‚Ð¸ Ð²Ð»Ñ–Ð²Ð¾ Ñ‚Ð° Ð²Ð¿Ñ€Ð°Ð²Ð¾.</div>
+      <div className="text-xs font-medium text-neutral-500 sm:text-sm">На телефоні таблицю можна гортати вліво та вправо.</div>
 
       <div className="-mx-2 w-auto max-w-none overflow-hidden rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] shadow-sm sm:mx-0 sm:w-full sm:max-w-full">
         <div className="crm-horizontal-scroll w-full max-w-full px-1 pb-2 sm:px-0 sm:pb-0">
@@ -349,8 +349,8 @@ function MultiDayAvailabilityMatrix({
             <div className="grid border-b border-[var(--crm-wine-border)] bg-[var(--crm-panel)]" style={{ gridTemplateColumns: columnTemplate }}>
               <div className="sticky left-0 z-20 flex min-h-[64px] items-center border-r border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-2.5 py-2.5 sm:px-3 sm:py-3">
                 <div>
-                  <div className="text-sm font-semibold text-neutral-900">ÐÐ¾Ð¼ÐµÑ€</div>
-                  <div className="text-xs text-neutral-500">Ð¢Ð¸Ñ†Ð½Ð¸ Ð¿Ð¾ Ð´Ð°Ñ‚Ñ–</div>
+                  <div className="text-sm font-semibold text-neutral-900">Номер</div>
+                  <div className="text-xs text-neutral-500">Тицни по даті</div>
                 </div>
               </div>
               {selectedDates.map((dateValue) => (
@@ -381,10 +381,10 @@ function MultiDayAvailabilityMatrix({
                     className={`${leftCellClassName} ${isSelected ? 'ring-2 ring-[var(--crm-wine)] ring-inset' : ''}`}
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <div className="text-base font-bold leading-tight text-neutral-900 sm:text-lg">ÐÐ¾Ð¼ÐµÑ€ {item.room_number}</div>
+                      <div className="text-base font-bold leading-tight text-neutral-900 sm:text-lg">Номер {item.room_number}</div>
                       {isMultiSelectEnabled && isSelected ? (
                         <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full border border-[var(--crm-wine)] bg-[var(--crm-wine)] px-2 text-[11px] font-semibold text-white">
-                          ÐžÐ±Ñ€Ð°Ð½Ð¾
+                          Обрано
                         </span>
                       ) : null}
                     </div>
@@ -409,7 +409,7 @@ function MultiDayAvailabilityMatrix({
                     if (!isFree) {
                       return (
                         <div key={`${item.room_id}-${dateValue}`} className={`flex items-center justify-center ${cellClassName}`}>
-                          <div className={contentClassName}>â€”</div>
+                          <div className={contentClassName}>—</div>
                         </div>
                       )
                     }
@@ -423,7 +423,7 @@ function MultiDayAvailabilityMatrix({
                           className={`flex w-full items-center justify-center rounded-none transition hover:brightness-[0.98] ${cellClassName}`}
                           style={{ touchAction: 'pan-x' }}
                         >
-                          <div className={contentClassName}>â€¢</div>
+                          <div className={contentClassName}>•</div>
                         </button>
                       )
                     }
@@ -436,7 +436,7 @@ function MultiDayAvailabilityMatrix({
                         style={{ touchAction: 'pan-x' }}
                         scroll={false}
                       >
-                        <div className={contentClassName}>â€¢</div>
+                        <div className={contentClassName}>•</div>
                       </Link>
                     )
                   })}
@@ -483,7 +483,7 @@ function SingleDayAvailabilityGrid({
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <div className="truncate text-sm font-bold leading-tight sm:text-base">Номер {item.room_number}</div>
-                  <div className="mt-1 text-xs leading-5 text-neutral-500">{item.building_name} · {item.room_type_name}</div>
+                  <div className="mt-1 text-xs leading-5 text-neutral-500">{item.building_name} � {item.room_type_name}</div>
                 </div>
                 <span
                   className={`inline-flex self-start rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-sm ${
@@ -511,7 +511,7 @@ function SingleDayAvailabilityGrid({
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
                 <div className="truncate text-sm font-bold leading-tight sm:text-base">Номер {item.room_number}</div>
-                <div className="mt-1 text-xs leading-5 text-neutral-500">{item.building_name} · {item.room_type_name}</div>
+                <div className="mt-1 text-xs leading-5 text-neutral-500">{item.building_name} � {item.room_type_name}</div>
               </div>
             </div>
 
@@ -565,18 +565,18 @@ export default function AvailabilityPage() {
 
     try {
       if (!isCompleteDateInput(nextCheckIn) || !isCompleteDateInput(nextCheckOut)) {
-        throw new Error('Ð”Ð°Ñ‚Ð¸ Ð¼Ð°ÑŽÑ‚ÑŒ Ð±ÑƒÑ‚Ð¸ Ñƒ Ñ„Ð¾Ñ€Ð¼Ð°Ñ‚Ñ– Ð”Ð”-ÐœÐœ-Ð Ð Ð Ð ')
+        throw new Error('Дати мають бути у форматі ДД-ММ-РРРР')
       }
 
       const checkInIso = dateInputToIso(nextCheckIn)
       const checkOutIso = dateInputToIso(nextCheckOut)
 
       if (!checkInIso || !checkOutIso) {
-        throw new Error('Ð”Ð°Ñ‚Ð¸ Ð¼Ð°ÑŽÑ‚ÑŒ Ð±ÑƒÑ‚Ð¸ Ñƒ Ñ„Ð¾Ñ€Ð¼Ð°Ñ‚Ñ– Ð”Ð”-ÐœÐœ-Ð Ð Ð Ð ')
+        throw new Error('Дати мають бути у форматі ДД-ММ-РРРР')
       }
 
       if (checkOutIso <= checkInIso) {
-        throw new Error('Ð”Ð°Ñ‚Ð° Ð²Ð¸Ñ—Ð·Ð´Ñƒ Ð¼Ð°Ñ” Ð±ÑƒÑ‚Ð¸ Ð¿Ñ–Ð·Ð½Ñ–ÑˆÐµ Ð·Ð° Ð´Ð°Ñ‚Ñƒ Ð·Ð°Ñ—Ð·Ð´Ñƒ')
+        throw new Error('Дата виїзду має бути пізніше за дату заїзду')
       }
 
       const nextGuestsCount = getTotalGuestsCount(composition)
@@ -594,7 +594,7 @@ export default function AvailabilityPage() {
       const data = await parseApiResponse(response)
 
       if (!response.ok || !data.ok) {
-        throw new Error(data.error || 'ÐÐµ Ð²Ð´Ð°Ð»Ð¾ÑÑ Ð¾Ñ‚Ñ€Ð¸Ð¼Ð°Ñ‚Ð¸ Ð´Ð¾ÑÑ‚ÑƒÐ¿Ð½Ñ– Ð½Ð¾Ð¼ÐµÑ€Ð¸')
+        throw new Error(data.error || 'Не вдалося отримати доступні номери')
       }
 
       const nextItems = [...(data.items || [])].sort((left, right) => {
@@ -621,7 +621,7 @@ export default function AvailabilityPage() {
       setSelectedCellKeys([])
       setShouldScrollToResults(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ð¡Ñ‚Ð°Ð»Ð°ÑÑ Ð¿Ð¾Ð¼Ð¸Ð»ÐºÐ°')
+      setError(err instanceof Error ? err.message : 'Сталася помилка')
     } finally {
       setLoading(false)
     }
@@ -732,11 +732,11 @@ export default function AvailabilityPage() {
       <div className="mx-auto w-full max-w-6xl">
         <div className="grid gap-3 xl:grid-cols-[minmax(320px,380px)_minmax(0,1fr)] xl:items-start">
           <section className={`${sectionClass} xl:sticky xl:top-24`}>
-            <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Ð”Ð¾ÑÑ‚ÑƒÐ¿Ð½Ñ–ÑÑ‚ÑŒ Ð½Ð¾Ð¼ÐµÑ€Ñ–Ð²</h1>
+            <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Доступність номерів</h1>
             <form onSubmit={handleSearch} className="mt-5 space-y-3">
               <div className="grid min-w-0 grid-cols-2 gap-3 xl:grid-cols-2">
                 <label className="block min-w-0">
-                  <span className="block text-center text-sm font-medium text-neutral-800">Ð”Ð°Ñ‚Ð° Ð·Ð°Ñ—Ð·Ð´Ñƒ</span>
+                  <span className="block text-center text-sm font-medium text-neutral-800">Дата заїзду</span>
                   <DatePickerField
                     value={checkIn}
                     onChange={(value) => {
@@ -749,7 +749,7 @@ export default function AvailabilityPage() {
                 </label>
 
                 <label className="block min-w-0">
-                  <span className="block text-center text-sm font-medium text-neutral-800">Ð”Ð°Ñ‚Ð° Ð²Ð¸Ñ—Ð·Ð´Ñƒ</span>
+                  <span className="block text-center text-sm font-medium text-neutral-800">Дата виїзду</span>
                   <DatePickerField
                     value={checkOut}
                     onChange={(value) => {
@@ -763,27 +763,27 @@ export default function AvailabilityPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <button type="button" onClick={() => void handleQuickPeriod(7)} disabled={loading} className={secondaryButtonClass}>
-                  Ð¢Ð¸Ð¶Ð´ÐµÐ½ÑŒ
+                  Тиждень
                 </button>
                 <button type="button" onClick={() => void handleQuickPeriod(30)} disabled={loading} className={secondaryButtonClass}>
-                  ÐœÑ–ÑÑÑ†ÑŒ
+                  Місяць
                 </button>
               </div>
 
               <div className="rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-4">
-                <div className="text-sm font-semibold text-[var(--crm-wine)]">Ð¡ÐºÐ»Ð°Ð´ Ð³Ð¾ÑÑ‚ÐµÐ¹</div>
+                <div className="text-sm font-semibold text-[var(--crm-wine)]">Склад гостей</div>
                 <div className="mt-3 grid gap-3">
-                  <CompositionField label="Ð“Ð¾ÑÑ‚Ñ–" value={adultsCount} onChange={setAdultsCount} />
-                  <CompositionField label="Ð”Ð¾Ð´Ð°Ñ‚ÐºÐ¾Ð²Ñ– Ð³Ð¾ÑÑ‚Ñ–" value={children6PlusCount} onChange={setChildren6PlusCount} />
-                  <CompositionField label="Ð”Ð¾ 6 Ñ€Ð¾ÐºÑ–Ð²" value={childrenUnder6Count} onChange={setChildrenUnder6Count} />
+                  <CompositionField label="Гості" value={adultsCount} onChange={setAdultsCount} />
+                  <CompositionField label="Додаткові гості" value={children6PlusCount} onChange={setChildren6PlusCount} />
+                  <CompositionField label="До 6 років" value={childrenUnder6Count} onChange={setChildrenUnder6Count} />
                 </div>
                 <div className="mt-4 rounded-2xl bg-white px-3 py-3 text-sm leading-6 text-neutral-700 shadow-sm">
-                  <div className="mt-1">Ð’ÑÑŒÐ¾Ð³Ð¾: {guestsCount}</div>
+                  <div className="mt-1">Всього: {guestsCount}</div>
                 </div>
               </div>
 
               <button type="submit" disabled={loading} className={primaryButtonClass}>
-                {loading ? 'ÐŸÐµÑ€ÐµÐ²Ñ–Ñ€ÐºÐ°...' : 'ÐŸÐµÑ€ÐµÐ²Ñ–Ñ€Ð¸Ñ‚Ð¸ Ð´Ð¾ÑÑ‚ÑƒÐ¿Ð½Ñ–ÑÑ‚ÑŒ'}
+                {loading ? 'Перевірка...' : 'Перевірити доступність'}
               </button>
             </form>
           </section>
@@ -797,13 +797,13 @@ export default function AvailabilityPage() {
 
             {!searched && !loading && !error ? (
               <div className={`${sectionClass} text-sm leading-6 text-neutral-600`}>
-                Ð’Ð¸Ð±ÐµÑ€Ð¸ Ð´Ð°Ñ‚Ð¸, Ð²ÐºÐ°Ð¶Ð¸ ÐºÑ–Ð»ÑŒÐºÑ–ÑÑ‚ÑŒ Ð³Ð¾ÑÑ‚ÐµÐ¹ Ñ– Ð½Ð°Ñ‚Ð¸ÑÐ½Ð¸ â€œÐŸÐµÑ€ÐµÐ²Ñ–Ñ€Ð¸Ñ‚Ð¸ Ð´Ð¾ÑÑ‚ÑƒÐ¿Ð½Ñ–ÑÑ‚ÑŒâ€.
+                Вибери дати, вкажи кількість гостей і натисни “Перевірити доступність”.
               </div>
             ) : null}
 
             {searched && !loading && !error && items.length === 0 ? (
               <div className={`${sectionClass} text-sm leading-6 text-neutral-600`}>
-                ÐÐ° Ð²Ð¸Ð±Ñ€Ð°Ð½Ñ– Ð´Ð°Ñ‚Ð¸ Ð²Ñ–Ð»ÑŒÐ½Ð¸Ñ… Ð½Ð¾Ð¼ÐµÑ€Ñ–Ð² Ð½Ðµ Ð·Ð½Ð°Ð¹Ð´ÐµÐ½Ð¾.
+                На вибрані дати вільних номерів не знайдено.
               </div>
             ) : null}
 
@@ -812,11 +812,11 @@ export default function AvailabilityPage() {
                 <div className="flex flex-col gap-1 border-b border-neutral-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <div className="text-lg font-semibold text-neutral-900">
-                      {showDailyBreakdown ? 'Ð’Ñ–Ð»ÑŒÐ½Ñ– Ð½Ð¾Ð¼ÐµÑ€Ð¸ Ð¿Ð¾ Ð´Ð½ÑÑ…' : 'Ð’Ñ–Ð»ÑŒÐ½Ñ– Ð½Ð¾Ð¼ÐµÑ€Ð¸'}
+                      {showDailyBreakdown ? 'Вільні номери по днях' : 'Вільні номери'}
                     </div>
                   </div>
                   <div className="text-sm font-medium text-neutral-500">
-                    {showDailyBreakdown ? `${selectedDates.length} Ð´Ð½.` : `${items.length} Ð½Ð¾Ð¼ÐµÑ€(Ð¸)`}
+                    {showDailyBreakdown ? `${selectedDates.length} дн.` : `${items.length} номер(и)`}
                   </div>
                 </div>
 
@@ -829,7 +829,7 @@ export default function AvailabilityPage() {
                         onChange={(e) => handleToggleMultiSelect(e.target.checked)}
                         className="h-5 w-5 rounded border-[var(--crm-wine-border)] text-[var(--crm-wine)] accent-[var(--crm-wine)]"
                       />
-                      ÐžÐ±Ñ€Ð°Ñ‚Ð¸ ÐºÑ–Ð»ÑŒÐºÐ° Ð½Ð¾Ð¼ÐµÑ€Ñ–Ð²
+                      Обрати кілька номерів
                     </label>
 
                     {showDailyBreakdown ? (
@@ -840,7 +840,7 @@ export default function AvailabilityPage() {
                           onChange={(e) => handleToggleMultiDateSelect(e.target.checked)}
                           className="h-5 w-5 rounded border-[var(--crm-wine-border)] text-[var(--crm-wine)] accent-[var(--crm-wine)]"
                         />
-                        ÐžÐ±Ñ€Ð°Ñ‚Ð¸ ÐºÑ–Ð»ÑŒÐºÐ° Ð´Ð°Ñ‚
+                        Обрати кілька дат
                       </label>
                     ) : null}
                   </div>
@@ -851,15 +851,15 @@ export default function AvailabilityPage() {
                         href={createMatrixBookingHref(selectedRoomSelections, searchComposition)}
                         className="inline-flex min-h-11 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)]"
                       >
-                        {`ÐŸÐµÑ€ÐµÐ¹Ñ‚Ð¸ Ð· ${selectedRoomSelections.length} Ð²Ð¸Ð±Ð¾Ñ€Ð¾Ð¼(Ð¸)`}
+                        {`Перейти з ${selectedRoomSelections.length} вибором(и)`}
                       </Link>
                     ) : (
                       <div className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-100 px-4 py-2 text-sm font-semibold text-neutral-500">
                         {isMultiSelectEnabled && isMultiDateSelectEnabled
-                          ? 'ÐžÐ±ÐµÑ€Ð¸ Ð·ÐµÐ»ÐµÐ½Ñ– ÐºÐ»Ñ–Ñ‚Ð¸Ð½ÐºÐ¸ Ð½Ð¾Ð¼ÐµÑ€Ñ–Ð² Ñ– Ð´Ð°Ñ‚'
+                          ? 'Обери зелені клітинки номерів і дат'
                           : isMultiSelectEnabled
-                            ? 'ÐžÐ±ÐµÑ€Ð¸ Ð½Ð¾Ð¼ÐµÑ€Ð¸ Ð½Ð° Ð¾Ð´Ð½Ñƒ Ð´Ð°Ñ‚Ñƒ'
-                            : 'ÐžÐ±ÐµÑ€Ð¸ Ð´Ð°Ñ‚Ð¸ Ð´Ð»Ñ Ð¾Ð´Ð½Ð¾Ð³Ð¾ Ð½Ð¾Ð¼ÐµÑ€Ð°'}
+                            ? 'Обери номери на одну дату'
+                            : 'Обери дати для одного номера'}
                       </div>
                     )
                   ) : isMultiSelectEnabled ? (
@@ -873,11 +873,11 @@ export default function AvailabilityPage() {
                         )}
                         className="inline-flex min-h-11 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)]"
                       >
-                        {`ÐŸÐµÑ€ÐµÐ¹Ñ‚Ð¸ Ð· ${selectedItems.length} Ð½Ð¾Ð¼ÐµÑ€(Ð¸)`}
+                        {`Перейти з ${selectedItems.length} номер(и)`}
                       </Link>
                     ) : (
                       <div className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-100 px-4 py-2 text-sm font-semibold text-neutral-500">
-                        ÐžÐ±ÐµÑ€Ð¸ Ð½Ð¾Ð¼ÐµÑ€Ð¸
+                        Обери номери
                       </div>
                     )
                   ) : null}
