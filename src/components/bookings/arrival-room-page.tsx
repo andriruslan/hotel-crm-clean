@@ -210,21 +210,30 @@ export function ArrivalRoomPage({
     }
   }
 
-  async function handleCheckIn(nextBookingId: string) {
-    return runItemAction(nextBookingId, 'check-in', async () => {
-      await updateBookingStatus(nextBookingId)
+  async function handleCheckIn(nextItem: ArrivalRoomDetailItem) {
+    const totalPaid = Number(nextItem.payment_total_received || 0)
+    const totalPrice = Number(nextItem.price_total || 0)
+    const balance = Math.max(0, totalPrice - totalPaid)
+
+    return runItemAction(nextItem.id, 'check-in', async () => {
+      await updateBookingStatus(nextItem.id, balance > 0 ? 'at_check_out' : undefined)
     })
   }
 
   async function handleCheckInWithPayment(nextItem: ArrivalRoomDetailItem, totalAmount: number) {
-    if (totalAmount <= 0) {
-      setError('Вкажи суму оплати.')
-      return false
+    const totalPaid = Number(nextItem.payment_total_received || 0)
+    const totalPrice = Number(nextItem.price_total || 0)
+    const balance = Math.max(0, totalPrice - totalPaid)
+    const amountToPay = totalAmount > 0 ? Math.min(totalAmount, balance) : balance
+
+    if (amountToPay <= 0) {
+      return handleCheckIn(nextItem)
     }
 
     return runItemAction(nextItem.id, 'check-in-pay', async () => {
-      await savePayment(nextItem.id, totalAmount, 'Оплата при заселенні', 'at_check_in')
-      await updateBookingStatus(nextItem.id, 'at_check_in')
+      const paymentDueStage = amountToPay >= balance ? 'at_check_in' : 'at_check_out'
+      await savePayment(nextItem.id, amountToPay, 'Оплата при заселенні', paymentDueStage)
+      await updateBookingStatus(nextItem.id, paymentDueStage)
     })
   }
 

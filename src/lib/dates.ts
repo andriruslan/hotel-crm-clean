@@ -22,6 +22,14 @@ export function addOneDay(dateStr: string): string {
   return `${year}-${month}-${day}`
 }
 
+export function getNextDateInputValue(value: string): string {
+  if (!isCompleteDateInput(value)) {
+    return value
+  }
+
+  return isoDateToInputValue(addOneDay(dateInputToIso(value)))
+}
+
 export function addDays(dateStr: string, days: number): string {
   const date = new Date(dateStr)
   date.setDate(date.getDate() + days)

@@ -82,7 +82,7 @@ export function ArrivalRoomDetailCard({
   commentValue: string
   showCommentEditor: boolean
   isCommentDirty: boolean
-  onCheckIn: (bookingId: string) => Promise<boolean>
+  onCheckIn: (item: ArrivalRoomDetailItem) => Promise<boolean>
   onCheckInWithPayment: (item: ArrivalRoomDetailItem, totalAmount: number) => Promise<boolean>
   onDeferPaymentToCheckOut: (bookingId: string) => Promise<boolean>
   onAddPayment: (bookingId: string, totalAmount: number) => Promise<boolean>
@@ -231,19 +231,19 @@ export function ArrivalRoomDetailCard({
             </button>
           ) : null
         ) : isFullyPaid ? (
-          <button type="button" onClick={() => void onCheckIn(item.id)} disabled={isBusy} className={secondaryButtonClass}>
+          <button type="button" onClick={() => void onCheckIn(item)} disabled={isBusy} className={secondaryButtonClass}>
             {isBusy ? 'Оновлення...' : 'Заселити номер'}
           </button>
         ) : (
           <>
-            <button type="button" onClick={() => void onCheckIn(item.id)} disabled={isBusy} className={secondaryButtonClass}>
+            <button type="button" onClick={() => void onCheckIn(item)} disabled={isBusy} className={secondaryButtonClass}>
               {isBusy ? 'Оновлення...' : 'Заселити номер'}
             </button>
             <button
               type="button"
               onClick={handlePayAndCheckIn}
-              disabled={isBusy || parseIntegerValue(paymentValue) <= 0}
-              className="hidden"
+              disabled={isBusy}
+              className={primaryButtonClass}
             >
               {isBusy ? 'Збереження...' : 'Заселити + оплата'}
             </button>

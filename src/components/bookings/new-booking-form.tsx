@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { DatePickerField } from '@/components/ui/date-picker-field'
 import { getDefaultPaymentDueStage, getPaymentDueStageLabel, type PaymentDueStage } from '@/lib/booking-note-meta'
-import { addOneDay, dateInputToIso, formatDateForDisplay, formatDateInput, getTodayDate, isoDateToInputValue, isCompleteDateInput } from '@/lib/dates'
+import { addOneDay, dateInputToIso, formatDateForDisplay, formatDateInput, getNextDateInputValue, getTodayDate, isoDateToInputValue, isCompleteDateInput } from '@/lib/dates'
 import {
   buildGuestCompositionSummary,
   getPaidExtraBedsCount,
@@ -224,7 +224,8 @@ function recalculateDraftRoomDates(
   patch: Partial<Pick<DraftRoom, 'checkIn' | 'checkOut'>>
 ): DraftRoom {
   const nextCheckIn = patch.checkIn ?? room.checkIn
-  const nextCheckOut = patch.checkOut ?? room.checkOut
+  const nextCheckOut =
+    patch.checkOut ?? (patch.checkIn && patch.checkIn !== room.checkIn ? getNextDateInputValue(patch.checkIn) : room.checkOut)
 
   if (!isCompleteDateInput(nextCheckIn) || !isCompleteDateInput(nextCheckOut)) {
     return {
@@ -985,7 +986,14 @@ export function NewBookingForm() {
                   <div className="mt-4 grid min-w-0 grid-cols-2 gap-3 2xl:grid-cols-3">
                     <label className="block min-w-0">
                       <span className="block text-center text-sm font-medium">Дата заїзду</span>
-                      <DatePickerField value={checkIn} onChange={setCheckIn} className={fieldClass} />
+                      <DatePickerField
+                        value={checkIn}
+                        onChange={(value) => {
+                          setCheckIn(value)
+                          setCheckOut(getNextDateInputValue(value))
+                        }}
+                        className={fieldClass}
+                      />
                     </label>
                     <label className="block min-w-0">
                       <span className="block text-center text-sm font-medium">Дата виїзду</span>

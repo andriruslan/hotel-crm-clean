@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { DatePickerField } from '@/components/ui/date-picker-field'
 import type { AvailabilityItem } from '@/types/availability'
-import { addDays, addOneDay, dateInputToIso, getDatesInRange, getNights, getTodayDate, isoDateToInputValue, isCompleteDateInput } from '@/lib/dates'
+import { addDays, addOneDay, dateInputToIso, getDatesInRange, getNextDateInputValue, getNights, getTodayDate, isoDateToInputValue, isCompleteDateInput } from '@/lib/dates'
 import { getTotalGuestsCount, type GuestComposition } from '@/lib/guest-composition'
 
 type ApiResponse = {
@@ -744,6 +744,7 @@ export default function AvailabilityPage() {
                     value={checkIn}
                     onChange={(value) => {
                       setCheckIn(value)
+                      setCheckOut(getNextDateInputValue(value))
                     }}
                     className={fieldClass}
                     required
