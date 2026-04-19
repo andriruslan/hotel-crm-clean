@@ -150,7 +150,7 @@ function ArrivalBookingCard({
     return (
       <Link
         href={`/bookings/arrivals/${item.id}?date=${encodeURIComponent(appliedDate)}`}
-        className={`block rounded-3xl border-2 px-3.5 py-3.5 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:shadow-lg sm:px-5 sm:py-5 ${item.occupancy_status === 'checked_in' ? 'border-[var(--crm-vine-border)] bg-[var(--crm-vine-soft)] hover:border-[var(--crm-vine-dark)]' : 'border-[var(--crm-wine-border)] bg-white/95 hover:border-[var(--crm-wine)]'}`}
+        className={`block h-full rounded-3xl border-2 px-3 py-3 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:shadow-lg sm:px-3.5 sm:py-3.5 ${item.occupancy_status === 'checked_in' ? 'border-[var(--crm-vine-border)] bg-[var(--crm-vine-soft)] hover:border-[var(--crm-vine-dark)]' : 'border-[var(--crm-wine-border)] bg-white/95 hover:border-[var(--crm-wine)]'}`}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
@@ -163,14 +163,14 @@ function ArrivalBookingCard({
           </span>
         </div>
 
-        <div className={`mt-3 rounded-3xl border px-3 py-3 shadow-sm sm:px-3.5 sm:py-3.5 ${item.occupancy_status === 'checked_in' ? 'border-[var(--crm-vine-border)] bg-white/90' : 'border-[var(--crm-wine-border)] bg-[var(--crm-panel)]'}`}>
+        <div className={`mt-2.5 rounded-2xl border px-3 py-2.5 shadow-sm ${item.occupancy_status === 'checked_in' ? 'border-[var(--crm-vine-border)] bg-white/90' : 'border-[var(--crm-wine-border)] bg-[var(--crm-panel)]'}`}>
           <div className="min-w-0 w-full">
-            <div className="text-xl font-bold leading-tight text-neutral-900 sm:text-2xl">
+            <div className="text-lg font-bold leading-tight text-neutral-900 sm:text-xl">
               {`Номер ${item.room_number}${item.building_name ? ` (${item.building_name.toLowerCase()})` : ''}`}
             </div>
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px] text-neutral-700">
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-[12px] text-neutral-700">
             <span className="rounded-full bg-white/95 px-2.5 py-1 shadow-sm">{item.guests_count} гост.</span>
           </div>
         </div>

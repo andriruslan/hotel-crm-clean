@@ -77,6 +77,14 @@ function getRoomCardsGridClass(itemsCount: number) {
   return 'mt-4 grid gap-3 lg:grid-cols-2'
 }
 
+function getBookingCardsGridClass(groupsCount: number) {
+  if (groupsCount <= 2) {
+    return 'mt-4 grid items-start gap-3 min-[560px]:grid-cols-2'
+  }
+
+  return 'mt-4 grid items-start gap-3 min-[560px]:grid-cols-2 min-[1180px]:grid-cols-3'
+}
+
 function createDepartureDisplayGroup(
   group: DepartureGroup,
   filter: (item: DepartureGroupItem) => boolean
@@ -136,7 +144,7 @@ function DepartureBookingCard({
     return (
       <Link
         href={`/bookings/departures/${item.id}?date=${encodeURIComponent(appliedDate)}`}
-        className="block rounded-3xl border-2 border-[var(--crm-wine-border)] bg-white/95 px-3.5 py-3.5 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:shadow-lg sm:px-5 sm:py-5"
+        className="block h-full rounded-3xl border-2 border-[var(--crm-wine-border)] bg-white/95 px-3 py-3 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:shadow-lg sm:px-3.5 sm:py-3.5"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
@@ -149,13 +157,13 @@ function DepartureBookingCard({
           </span>
         </div>
 
-        <div className="mt-4 rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3.5 shadow-sm sm:px-4 sm:py-4">
+        <div className="mt-2.5 rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3 py-2.5 shadow-sm">
           <div className="min-w-0">
-            <div className="text-xl font-bold leading-tight text-neutral-900 sm:text-2xl">Номер {item.room_number}</div>
+            <div className="text-lg font-bold leading-tight text-neutral-900 sm:text-xl">Номер {item.room_number}</div>
             <div className="mt-1 text-sm leading-5 text-neutral-500">{item.building_name || 'Без корпусу'}</div>
           </div>
 
-          <div className="mt-3 flex flex-wrap gap-2 text-[12px] text-neutral-700">
+          <div className="mt-2 flex flex-wrap gap-2 text-[12px] text-neutral-700">
             <span className="rounded-full bg-white/95 px-2.5 py-1 shadow-sm">{item.guests_count} гост.</span>
           </div>
 
@@ -398,7 +406,7 @@ export function DeparturesGroups({ initialDate = '' }: { initialDate?: string })
               ) : pendingGroups.length === 0 ? (
                 <div className="mt-4 rounded-2xl bg-neutral-50 px-4 py-4 text-sm text-neutral-600">Немає номерів, які очікують виїзду.</div>
               ) : (
-                <div className="mt-4 grid items-start gap-3 2xl:grid-cols-2">
+                <div className={getBookingCardsGridClass(pendingGroups.length)}>
                   {pendingGroups.map(({ fullGroup, displayGroup }) => (
                     <DepartureBookingCard
                       key={`${displayGroup.id}-pending`}
@@ -422,7 +430,7 @@ export function DeparturesGroups({ initialDate = '' }: { initialDate?: string })
               {loading ? null : checkedOutGroups.length === 0 ? (
                 <div className="mt-4 rounded-2xl bg-[var(--crm-vine-soft)] px-4 py-4 text-sm text-[var(--crm-vine-dark)]">Поки немає номерів, які вже виселили на цю дату.</div>
               ) : (
-                <div className="mt-4 grid items-start gap-3 2xl:grid-cols-2">
+                <div className={getBookingCardsGridClass(checkedOutGroups.length)}>
                   {checkedOutGroups.map(({ fullGroup, displayGroup }) => (
                     <DepartureBookingCard
                       key={`${displayGroup.id}-checked-out`}
