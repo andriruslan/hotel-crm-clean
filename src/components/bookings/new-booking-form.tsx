@@ -955,7 +955,6 @@ export function NewBookingForm() {
                   <input
                     type="text"
                     inputMode="numeric"
-                    pattern="[0-9]*"
                     value={birthDate}
                     onChange={(e) => setBirthDate(formatDateInput(e.target.value))}
                     placeholder="ДД-ММ-РРРР"
