@@ -1,6 +1,6 @@
 import type { PaymentStatus } from '@/constants/payment-status'
 import type { PaymentDueStage } from '@/lib/booking-note-meta'
-import { getPaymentStatus } from '@/lib/payment-status'
+import { getEffectivePaidAmount, getPaymentStatus } from '@/lib/payment-status'
 
 export type ArrivalGroupItem = {
   id: string
@@ -18,6 +18,7 @@ export type ArrivalGroupItem = {
   payment_cash_amount: number
   payment_card_amount: number
   payment_total_received: number
+  certificate_amount: number
   payment_status: PaymentStatus
   status: 'new' | 'confirmed' | 'canceled' | 'completed'
   occupancy_status: 'not_checked_in' | 'checked_in' | 'checked_out'
@@ -52,7 +53,12 @@ export function groupArrivalItems(items: ArrivalGroupItem[]) {
     const currentGroup = groups.get(groupId)
 
     if (!currentGroup) {
-      const totalPaid = Number(item.payment_total_received || 0)
+      const totalPaid = getEffectivePaidAmount({
+        paymentTotalReceived: item.payment_total_received,
+        paymentCashAmount: item.payment_cash_amount,
+        paymentCardAmount: item.payment_card_amount,
+        certificateAmount: item.certificate_amount,
+      })
       const totalPrice = Number(item.price_total || 0)
 
       groups.set(groupId, {
@@ -88,7 +94,12 @@ export function groupArrivalItems(items: ArrivalGroupItem[]) {
     currentGroup.total_price += Number(item.price_total || 0)
     currentGroup.total_cash_amount += Number(item.payment_cash_amount || 0)
     currentGroup.total_card_amount += Number(item.payment_card_amount || 0)
-    currentGroup.total_paid += Number(item.payment_total_received || 0)
+    currentGroup.total_paid += getEffectivePaidAmount({
+      paymentTotalReceived: item.payment_total_received,
+      paymentCashAmount: item.payment_cash_amount,
+      paymentCardAmount: item.payment_card_amount,
+      certificateAmount: item.certificate_amount,
+    })
     currentGroup.total_balance = Math.max(0, currentGroup.total_price - currentGroup.total_paid)
     currentGroup.payment_status = getPaymentStatus(currentGroup.total_price, currentGroup.total_paid)
     currentGroup.occupancy_status = currentGroup.items.every((groupItem) => groupItem.occupancy_status === 'checked_in')
@@ -114,7 +125,16 @@ export function allocateGroupPayment(
   return items
     .map((item) => ({
       item,
-      balance: Math.max(0, Number(item.price_total || 0) - Number(item.payment_total_received || 0)),
+      balance: Math.max(
+        0,
+        Number(item.price_total || 0) -
+          getEffectivePaidAmount({
+            paymentTotalReceived: item.payment_total_received,
+            paymentCashAmount: item.payment_cash_amount,
+            paymentCardAmount: item.payment_card_amount,
+            certificateAmount: item.certificate_amount,
+          })
+      ),
     }))
     .filter((entry) => entry.balance > 0)
     .map((entry) => {

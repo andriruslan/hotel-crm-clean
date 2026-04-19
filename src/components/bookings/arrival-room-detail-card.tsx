@@ -5,7 +5,7 @@ import { getEditableBookingComment } from '@/components/bookings/booking-comment
 import type { PaymentStatus } from '@/constants/payment-status'
 import { getPaymentDueStageLabel, type PaymentDueStage } from '@/lib/booking-note-meta'
 import { formatDateForDisplay } from '@/lib/dates'
-import { getPaymentStatusLabel } from '@/lib/payment-status'
+import { getEffectivePaidAmount, getPaymentStatusLabel } from '@/lib/payment-status'
 
 export type ArrivalRoomDetailItem = {
   id: string
@@ -19,6 +19,9 @@ export type ArrivalRoomDetailItem = {
   booking_note: string
   payment_due_stage: PaymentDueStage
   price_total: number
+  payment_cash_amount: number
+  payment_card_amount: number
+  certificate_amount: number
   payment_total_received: number
   payment_status: PaymentStatus
   occupancy_status: 'not_checked_in' | 'checked_in' | 'checked_out'
@@ -93,7 +96,12 @@ export function ArrivalRoomDetailCard({
   const isBusy = savingKey.startsWith(`${item.id}:`)
   const isCommentSaving = savingKey === `${item.id}:comment`
   const isCheckedIn = item.occupancy_status === 'checked_in'
-  const totalPaid = Number(item.payment_total_received || 0)
+  const totalPaid = getEffectivePaidAmount({
+    paymentTotalReceived: item.payment_total_received,
+    paymentCashAmount: item.payment_cash_amount,
+    paymentCardAmount: item.payment_card_amount,
+    certificateAmount: item.certificate_amount,
+  })
   const totalPrice = Number(item.price_total || 0)
   const balance = Math.max(0, totalPrice - totalPaid)
   const isFullyPaid = item.payment_status === 'paid' || balance <= 0

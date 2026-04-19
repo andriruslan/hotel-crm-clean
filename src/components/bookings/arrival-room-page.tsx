@@ -9,6 +9,7 @@ import { getVisibleGuestName } from '@/components/bookings/arrival-shared'
 import type { PaymentDueStage } from '@/lib/booking-note-meta'
 import { dateInputToIso, getTodayDate, isoDateToInputValue, isCompleteDateInput } from '@/lib/dates'
 import { normalizePhone } from '@/lib/phone'
+import { getEffectivePaidAmount } from '@/lib/payment-status'
 
 type ArrivalsResponse = {
   ok: boolean
@@ -211,7 +212,12 @@ export function ArrivalRoomPage({
   }
 
   async function handleCheckIn(nextItem: ArrivalRoomDetailItem) {
-    const totalPaid = Number(nextItem.payment_total_received || 0)
+    const totalPaid = getEffectivePaidAmount({
+      paymentTotalReceived: nextItem.payment_total_received,
+      paymentCashAmount: nextItem.payment_cash_amount,
+      paymentCardAmount: nextItem.payment_card_amount,
+      certificateAmount: nextItem.certificate_amount,
+    })
     const totalPrice = Number(nextItem.price_total || 0)
     const balance = Math.max(0, totalPrice - totalPaid)
 
@@ -221,7 +227,12 @@ export function ArrivalRoomPage({
   }
 
   async function handleCheckInWithPayment(nextItem: ArrivalRoomDetailItem, totalAmount: number) {
-    const totalPaid = Number(nextItem.payment_total_received || 0)
+    const totalPaid = getEffectivePaidAmount({
+      paymentTotalReceived: nextItem.payment_total_received,
+      paymentCashAmount: nextItem.payment_cash_amount,
+      paymentCardAmount: nextItem.payment_card_amount,
+      certificateAmount: nextItem.certificate_amount,
+    })
     const totalPrice = Number(nextItem.price_total || 0)
     const balance = Math.max(0, totalPrice - totalPaid)
     const amountToPay = totalAmount > 0 ? Math.min(totalAmount, balance) : balance

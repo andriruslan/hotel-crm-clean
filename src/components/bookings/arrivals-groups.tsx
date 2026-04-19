@@ -5,10 +5,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { getVisibleGuestName } from '@/components/bookings/arrival-shared'
 import { DatePickerField } from '@/components/ui/date-picker-field'
 import type { PaymentStatus } from '@/constants/payment-status'
-import { dateInputToIso, formatDateForDisplay, getTodayDate, isoDateToInputValue, isCompleteDateInput } from '@/lib/dates'
+import { dateInputToIso, getTodayDate, isoDateToInputValue, isCompleteDateInput } from '@/lib/dates'
 import { groupArrivalItems, type ArrivalGroup, type ArrivalGroupItem } from '@/lib/arrival-groups'
 import { normalizePhone } from '@/lib/phone'
-import { getPaymentStatus, getPaymentStatusLabel } from '@/lib/payment-status'
+import { getEffectivePaidAmount, getPaymentStatus, getPaymentStatusLabel } from '@/lib/payment-status'
 
 type ArrivalsResponse = {
   ok: boolean
@@ -78,7 +78,17 @@ function createArrivalDisplayGroup(
   const totalPrice = nextItems.reduce((sum, item) => sum + Number(item.price_total || 0), 0)
   const totalCashAmount = nextItems.reduce((sum, item) => sum + Number(item.payment_cash_amount || 0), 0)
   const totalCardAmount = nextItems.reduce((sum, item) => sum + Number(item.payment_card_amount || 0), 0)
-  const totalPaid = nextItems.reduce((sum, item) => sum + Number(item.payment_total_received || 0), 0)
+  const totalPaid = nextItems.reduce(
+    (sum, item) =>
+      sum +
+      getEffectivePaidAmount({
+        paymentTotalReceived: item.payment_total_received,
+        paymentCashAmount: item.payment_cash_amount,
+        paymentCardAmount: item.payment_card_amount,
+        certificateAmount: item.certificate_amount,
+      }),
+    0
+  )
 
   return {
     ...group,
@@ -129,8 +139,6 @@ function ArrivalBookingCard({
       return null
     }
 
-    const itemBalance = Math.max(0, Number(item.price_total || 0) - Number(item.payment_total_received || 0))
-
     return (
       <Link
         href={`/bookings/arrivals/${item.id}?date=${encodeURIComponent(appliedDate)}`}
@@ -147,21 +155,15 @@ function ArrivalBookingCard({
           </span>
         </div>
 
-        <div className={`mt-4 rounded-3xl border px-3.5 py-3.5 shadow-sm sm:px-4 sm:py-4 ${item.occupancy_status === 'checked_in' ? 'border-[var(--crm-vine-border)] bg-white/90' : 'border-[var(--crm-wine-border)] bg-[var(--crm-panel)]'}`}>
+        <div className={`mt-3 rounded-3xl border px-3 py-3 shadow-sm sm:px-3.5 sm:py-3.5 ${item.occupancy_status === 'checked_in' ? 'border-[var(--crm-vine-border)] bg-white/90' : 'border-[var(--crm-wine-border)] bg-[var(--crm-panel)]'}`}>
           <div className="min-w-0">
             <div className="text-xl font-bold leading-tight text-neutral-900 sm:text-2xl">
               {`Номер ${item.room_number}${item.building_name ? ` (${item.building_name.toLowerCase()})` : ''}`}
             </div>
           </div>
 
-          <div className="mt-3 flex flex-wrap gap-2 text-[12px] text-neutral-700">
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px] text-neutral-700">
             <span className="rounded-full bg-white/95 px-2.5 py-1 shadow-sm">{item.guests_count} гост.</span>
-          </div>
-
-          <div className="mt-4 rounded-2xl bg-white/90 px-3 py-3 text-sm leading-6 text-neutral-500 shadow-sm">
-            <div>Заїзд: {formatDateForDisplay(item.check_in_date)}</div>
-            <div>Виїзд: {formatDateForDisplay(item.check_out_date)}</div>
-            <div>Залишок: {formatMoney(itemBalance)}</div>
           </div>
         </div>
       </Link>
@@ -234,13 +236,11 @@ function ArrivalBookingCard({
 
       <div className={getRoomCardsGridClass(group.items.length)}>
         {group.items.map((item) => {
-          const itemBalance = Math.max(0, Number(item.price_total || 0) - Number(item.payment_total_received || 0))
-
           return (
             <Link
               key={item.id}
               href={`/bookings/arrivals/${item.id}?date=${encodeURIComponent(appliedDate)}`}
-              className={`block w-full rounded-3xl border-2 px-3.5 py-3.5 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:shadow-lg sm:px-4 sm:py-4 ${item.occupancy_status === 'checked_in' ? 'border-[var(--crm-vine-border)] bg-white/90 hover:border-[var(--crm-vine-dark)]' : 'border-[var(--crm-wine-border)] bg-[var(--crm-panel)] hover:border-[var(--crm-wine)]'}`}
+              className={`block w-full rounded-3xl border-2 px-3 py-3 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:shadow-lg sm:px-3.5 sm:py-3.5 ${item.occupancy_status === 'checked_in' ? 'border-[var(--crm-vine-border)] bg-white/90 hover:border-[var(--crm-vine-dark)]' : 'border-[var(--crm-wine-border)] bg-[var(--crm-panel)] hover:border-[var(--crm-wine)]'}`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -250,17 +250,11 @@ function ArrivalBookingCard({
                 </div>
               </div>
 
-              <div className="mt-3 flex flex-wrap gap-2 text-[12px] text-neutral-700">
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px] text-neutral-700">
                 <span className={`rounded-full px-2.5 py-1 shadow-sm ${getPaymentBadgeClass(item.payment_status)}`}>
                   {getPaymentStatusLabel(item.payment_status)}
                 </span>
                 <span className="rounded-full bg-white/95 px-2.5 py-1 shadow-sm">{item.guests_count} гост.</span>
-              </div>
-
-              <div className="mt-4 rounded-2xl bg-white/90 px-3 py-3 text-sm leading-6 text-neutral-500 shadow-sm">
-                <div>Заїзд: {formatDateForDisplay(item.check_in_date)}</div>
-                <div>Виїзд: {formatDateForDisplay(item.check_out_date)}</div>
-                <div>Залишок: {formatMoney(itemBalance)}</div>
               </div>
             </Link>
           )

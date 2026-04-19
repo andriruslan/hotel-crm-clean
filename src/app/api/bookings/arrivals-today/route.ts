@@ -1,7 +1,7 @@
 ﻿import { NextRequest, NextResponse } from 'next/server'
 import { getTodayDate } from '@/lib/dates'
 import { parseBookingNoteMeta } from '@/lib/booking-note-meta'
-import { getPaymentStatus } from '@/lib/payment-status'
+import { getEffectivePaidAmount, getPaymentStatus } from '@/lib/payment-status'
 import { supabaseAdmin } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
@@ -93,9 +93,12 @@ export async function GET(request: NextRequest) {
       const priceTotal = Number(item.price_total || 0)
       const paymentCashAmount = Number(item.payment_cash_amount || 0)
       const paymentCardAmount = Number(item.payment_card_amount || 0)
-      const paymentTotalReceived = Number(
-        item.payment_total_received ?? paymentCashAmount + paymentCardAmount + Number(bookingMeta.certificateAmount || 0)
-      )
+      const paymentTotalReceived = getEffectivePaidAmount({
+        paymentTotalReceived: item.payment_total_received,
+        paymentCashAmount,
+        paymentCardAmount,
+        certificateAmount: bookingMeta.certificateAmount,
+      })
       const paymentStatus = item.payment_status || getPaymentStatus(priceTotal, paymentTotalReceived)
 
       return {
