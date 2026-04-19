@@ -69,6 +69,8 @@ const primaryButtonClass =
   'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 text-[13px] font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)] disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm'
 const secondaryButtonClass =
   'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] px-4 text-[13px] font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(143,45,86,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)] disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm'
+const stickyFilterActionWrapClass =
+  'sticky bottom-2 z-20 -mx-1 rounded-2xl bg-[color:rgba(248,242,234,0.96)] p-1.5 backdrop-blur supports-[backdrop-filter]:bg-[color:rgba(248,242,234,0.82)] xl:static xl:z-auto xl:-mx-0 xl:bg-transparent xl:p-0 xl:backdrop-blur-none'
 const counterButtonClass =
   'flex h-12 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] text-xl font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(143,45,86,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)]'
 const counterPrimaryButtonClass =
@@ -733,7 +735,7 @@ export default function AvailabilityPage() {
         <div className="grid gap-3 xl:grid-cols-[minmax(320px,380px)_minmax(0,1fr)] xl:items-start">
           <section className={`${sectionClass} xl:sticky xl:top-24`}>
             <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Доступність номерів</h1>
-            <form onSubmit={handleSearch} className="mt-5 space-y-3">
+            <form onSubmit={handleSearch} className="mt-5 space-y-3 pb-1">
               <div className="grid min-w-0 grid-cols-2 gap-3 xl:grid-cols-2">
                 <label className="block min-w-0">
                   <span className="block text-center text-[13px] font-medium text-neutral-800 sm:text-sm">Дата заїзду</span>
@@ -772,7 +774,7 @@ export default function AvailabilityPage() {
 
               <div className="rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-4">
                 <div className="text-[13px] font-semibold text-[var(--crm-wine)] sm:text-sm">Склад гостей</div>
-                <div className="mt-3 grid gap-3">
+                <div className="mt-3 grid gap-3 md:grid-cols-3 xl:grid-cols-1">
                   <CompositionField label="Гості" value={adultsCount} onChange={setAdultsCount} />
                   <CompositionField label="Додаткові гості" value={children6PlusCount} onChange={setChildren6PlusCount} />
                   <CompositionField label="До 6 років" value={childrenUnder6Count} onChange={setChildrenUnder6Count} />
@@ -782,9 +784,11 @@ export default function AvailabilityPage() {
                 </div>
               </div>
 
-              <button type="submit" disabled={loading} className={primaryButtonClass}>
-                {loading ? 'Перевірка...' : 'Перевірити доступність'}
-              </button>
+              <div className={stickyFilterActionWrapClass}>
+                <button type="submit" disabled={loading} className={primaryButtonClass}>
+                  {loading ? 'Перевірка...' : 'Перевірити доступність'}
+                </button>
+              </div>
             </form>
           </section>
 
