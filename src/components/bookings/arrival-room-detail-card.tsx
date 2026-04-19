@@ -29,8 +29,6 @@ const secondaryButtonClass =
   'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] px-4 text-sm font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(143,45,86,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)] disabled:opacity-60'
 const primaryButtonClass =
   'inline-flex min-h-12 w-full items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)] disabled:opacity-60'
-const successButtonClass =
-  'inline-flex min-h-12 w-full items-center justify-center rounded-2xl border-2 border-[var(--crm-vine-dark)] bg-[var(--crm-vine)] px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(95,112,54,0.2)] transition hover:bg-[var(--crm-vine-dark)] disabled:opacity-60'
 
 function formatMoney(value: number) {
   return new Intl.NumberFormat('uk-UA', {
@@ -143,19 +141,19 @@ export function ArrivalRoomDetailCard({
 
       <div className="mt-3 grid grid-cols-2 gap-2">
         <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
-          <div className="text-xs uppercase tracking-wide text-neutral-500">Оплата</div>
-          <div className="mt-1 font-semibold text-neutral-900">{getPaymentDueStageLabel(item.payment_due_stage)}</div>
+          <div className="text-xs uppercase tracking-wide text-neutral-500">Вартість</div>
+          <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPrice)}</div>
         </div>
         <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
-          <div className="text-xs uppercase tracking-wide text-neutral-500">Оплачено</div>
-          <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPaid)}</div>
+          <div className="text-xs uppercase tracking-wide text-neutral-500">Оплата</div>
+          <div className="mt-1 font-semibold text-neutral-900">{getPaymentDueStageLabel(item.payment_due_stage)}</div>
         </div>
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
         <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
-          <div className="text-xs uppercase tracking-wide text-neutral-500">Вартість</div>
-          <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPrice)}</div>
+          <div className="text-xs uppercase tracking-wide text-neutral-500">Оплачено</div>
+          <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPaid)}</div>
         </div>
         <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
           <div className="text-xs uppercase tracking-wide text-neutral-500">Залишок</div>
@@ -205,7 +203,7 @@ export function ArrivalRoomDetailCard({
               type="button"
               onClick={handlePayAndCheckIn}
               disabled={isBusy || parseIntegerValue(paymentValue) <= 0}
-              className={primaryButtonClass}
+              className="hidden"
             >
               {isBusy ? 'Збереження...' : 'Заселити + оплата'}
             </button>
@@ -213,7 +211,7 @@ export function ArrivalRoomDetailCard({
               type="button"
               onClick={() => void onDeferPaymentToCheckOut(item.id)}
               disabled={isBusy}
-              className={successButtonClass}
+              className="hidden"
             >
               {isBusy ? 'Оновлення...' : 'Оплата при виїзді'}
             </button>
