@@ -615,9 +615,17 @@ export function NewBookingForm() {
     }
 
     const frameId = window.requestAnimationFrame(() => {
-      availableRoomsRef.current?.scrollIntoView({
+      const rect = availableRoomsRef.current?.getBoundingClientRect()
+
+      if (!rect) {
+        return
+      }
+
+      const targetTop = Math.max(0, window.scrollY + rect.top - 112)
+
+      window.scrollTo({
+        top: targetTop,
         behavior: 'smooth',
-        block: 'start',
       })
     })
 
@@ -1007,7 +1015,9 @@ export function NewBookingForm() {
                   </div>
 
                   {availableRooms.length > 0 ? (
-                    <div ref={availableRoomsRef} className="mt-4 grid gap-3 xl:grid-cols-2">
+                    <div ref={availableRoomsRef} className="mt-4 space-y-3">
+                      <div className="text-sm font-semibold text-[var(--crm-wine-dark)]">Доступні номери</div>
+                      <div className="grid gap-3 xl:grid-cols-2">
                       {availableRooms.map((room) => (
                         <button
                           key={`${room.room_id}-${room.room_number}`}
@@ -1033,6 +1043,7 @@ export function NewBookingForm() {
                           </div>
                         </button>
                       ))}
+                      </div>
                     </div>
                   ) : null}
                 </>

@@ -114,7 +114,7 @@ export function DepartureRoomDetailCard({
         </div>
       </div>
 
-      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+      <div className="mt-4 grid grid-cols-2 gap-2">
         <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
           <div className="text-xs uppercase tracking-wide text-neutral-500">Заїзд</div>
           <div className="mt-1 font-semibold text-neutral-900">{formatDateForDisplay(item.check_in_date)}</div>
@@ -125,7 +125,7 @@ export function DepartureRoomDetailCard({
         </div>
       </div>
 
-      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+      <div className="mt-3 grid grid-cols-2 gap-2">
         <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
           <div className="text-xs uppercase tracking-wide text-neutral-500">Оплата</div>
           <div className="mt-1 font-semibold text-neutral-900">{getPaymentDueStageLabel(item.payment_due_stage)}</div>
@@ -136,7 +136,7 @@ export function DepartureRoomDetailCard({
         </div>
       </div>
 
-      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+      <div className="mt-3 grid grid-cols-2 gap-2">
         <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
           <div className="text-xs uppercase tracking-wide text-neutral-500">Вартість</div>
           <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPrice)}</div>
