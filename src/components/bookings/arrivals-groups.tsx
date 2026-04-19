@@ -119,6 +119,14 @@ function getRoomCardsGridClass(itemsCount: number) {
   return 'mt-4 grid gap-3 lg:grid-cols-2'
 }
 
+function getBookingCardsGridClass(groupsCount: number) {
+  if (groupsCount <= 2) {
+    return 'mt-4 grid items-start gap-3 min-[560px]:grid-cols-2'
+  }
+
+  return 'mt-4 grid items-start gap-3 min-[560px]:grid-cols-2 min-[1180px]:grid-cols-3'
+}
+
 function ArrivalBookingCard({
   group,
   fullGroup,
@@ -156,7 +164,7 @@ function ArrivalBookingCard({
         </div>
 
         <div className={`mt-3 rounded-3xl border px-3 py-3 shadow-sm sm:px-3.5 sm:py-3.5 ${item.occupancy_status === 'checked_in' ? 'border-[var(--crm-vine-border)] bg-white/90' : 'border-[var(--crm-wine-border)] bg-[var(--crm-panel)]'}`}>
-          <div className="min-w-0">
+          <div className="min-w-0 w-full">
             <div className="text-xl font-bold leading-tight text-neutral-900 sm:text-2xl">
               {`Номер ${item.room_number}${item.building_name ? ` (${item.building_name.toLowerCase()})` : ''}`}
             </div>
@@ -388,7 +396,7 @@ export function ArrivalsGroups({ initialDate = '' }: { initialDate?: string }) {
               ) : pendingGroups.length === 0 ? (
                 <div className="mt-4 rounded-2xl bg-neutral-50 px-4 py-4 text-sm text-neutral-600">Немає номерів, які очікують заселення.</div>
               ) : (
-                <div className="mt-4 grid items-start gap-3 2xl:grid-cols-2">
+                <div className={getBookingCardsGridClass(pendingGroups.length)}>
                   {pendingGroups.map(({ fullGroup, displayGroup }) => (
                     <ArrivalBookingCard
                       key={`${displayGroup.id}-pending`}
@@ -412,7 +420,7 @@ export function ArrivalsGroups({ initialDate = '' }: { initialDate?: string }) {
               {loading ? null : checkedInGroups.length === 0 ? (
                 <div className="mt-4 rounded-2xl bg-[var(--crm-vine-soft)] px-4 py-4 text-sm text-[var(--crm-vine-dark)]">Поки немає номерів, які вже заселили на цю дату.</div>
               ) : (
-                <div className="mt-4 grid items-start gap-3 2xl:grid-cols-2">
+                <div className={getBookingCardsGridClass(checkedInGroups.length)}>
                   {checkedInGroups.map(({ fullGroup, displayGroup }) => (
                     <ArrivalBookingCard
                       key={`${displayGroup.id}-checked-in`}
