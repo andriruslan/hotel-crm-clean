@@ -728,12 +728,12 @@ export default function AvailabilityPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--background)] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-8">
+    <main className="min-h-screen bg-[var(--background)] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-6 xl:py-8">
       <div className="mx-auto w-full max-w-6xl">
-        <div className="grid gap-3 2xl:grid-cols-[minmax(360px,420px)_minmax(0,1fr)] 2xl:items-start">
-          <section className={`${sectionClass} 2xl:sticky 2xl:top-24`}>
+        <div className="grid gap-3 xl:grid-cols-[minmax(320px,380px)_minmax(0,1fr)] xl:items-start">
+          <section className={`${sectionClass} xl:sticky xl:top-24`}>
             <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Доступність номерів</h1>
-            <form onSubmit={handleSearch} className="mt-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(320px,360px)] 2xl:grid-cols-1">
+            <form onSubmit={handleSearch} className="mt-5 grid gap-3 md:max-xl:grid-cols-2 xl:grid-cols-1">
               <div className="space-y-3">
                 <div className="grid min-w-0 grid-cols-2 gap-3">
                   <label className="block min-w-0">
@@ -774,7 +774,7 @@ export default function AvailabilityPage() {
 
               <div className="rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-4">
                 <div className="text-[13px] font-semibold text-[var(--crm-wine)] sm:text-sm">Склад гостей</div>
-                <div className="mt-3 grid gap-3 md:grid-cols-3 lg:grid-cols-1 2xl:grid-cols-1">
+                <div className="mt-3 grid gap-3 md:grid-cols-3 xl:grid-cols-1">
                   <CompositionField label="Гості" value={adultsCount} onChange={setAdultsCount} />
                   <CompositionField label="Додаткові гості" value={children6PlusCount} onChange={setChildren6PlusCount} />
                   <CompositionField label="До 6 років" value={childrenUnder6Count} onChange={setChildrenUnder6Count} />
@@ -784,7 +784,7 @@ export default function AvailabilityPage() {
                 </div>
               </div>
 
-              <div className="lg:col-span-2 2xl:col-span-1">
+              <div className="md:max-xl:col-span-2 xl:col-span-1">
                 <button type="submit" disabled={loading} className={primaryButtonClass}>
                   {loading ? 'Перевірка...' : 'Перевірити доступність'}
                 </button>
