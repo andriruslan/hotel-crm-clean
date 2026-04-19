@@ -59,6 +59,14 @@ function getPaymentBadgeClass(status: PaymentStatus) {
   }
 }
 
+function getVisibleBookingNote(note: string) {
+  return note
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith('Склад гостей:') && !line.startsWith('Додаткові місця:'))
+    .join('\n')
+}
+
 export function DepartureRoomDetailCard({
   item,
   savingKey,
@@ -68,23 +76,22 @@ export function DepartureRoomDetailCard({
   item: DepartureRoomDetailItem
   savingKey: string
   onCheckout: (bookingId: string) => Promise<boolean>
-  onPayAndCheckout: (item: DepartureRoomDetailItem, cashAmount: number, cardAmount: number) => Promise<boolean>
+  onPayAndCheckout: (item: DepartureRoomDetailItem, totalAmount: number) => Promise<boolean>
 }) {
-  const [cashValue, setCashValue] = useState('')
-  const [cardValue, setCardValue] = useState('')
+  const [paymentValue, setPaymentValue] = useState('')
   const isBusy = savingKey.startsWith(`${item.id}:`)
   const isCheckedOut = item.occupancy_status === 'checked_out'
   const totalPaid = Number(item.payment_total_received || 0)
   const totalPrice = Number(item.price_total || 0)
   const balance = Math.max(0, totalPrice - totalPaid)
   const hasDebt = balance > 0
+  const visibleBookingNote = getVisibleBookingNote(item.booking_note)
 
   async function handlePayAndCheckoutClick() {
-    const ok = await onPayAndCheckout(item, parseIntegerValue(cashValue), parseIntegerValue(cardValue))
+    const ok = await onPayAndCheckout(item, parseIntegerValue(paymentValue))
 
     if (ok) {
-      setCashValue('')
-      setCardValue('')
+      setPaymentValue('')
     }
   }
 
@@ -107,7 +114,7 @@ export function DepartureRoomDetailCard({
         </div>
       </div>
 
-      <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
         <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
           <div className="text-xs uppercase tracking-wide text-neutral-500">Заїзд</div>
           <div className="mt-1 font-semibold text-neutral-900">{formatDateForDisplay(item.check_in_date)}</div>
@@ -116,24 +123,23 @@ export function DepartureRoomDetailCard({
           <div className="text-xs uppercase tracking-wide text-neutral-500">Виїзд</div>
           <div className="mt-1 font-semibold text-neutral-900">{formatDateForDisplay(item.check_out_date)}</div>
         </div>
-        <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
-          <div className="text-xs uppercase tracking-wide text-neutral-500">Гостей</div>
-          <div className="mt-1 font-semibold text-neutral-900">{item.guests_count}</div>
-        </div>
+      </div>
+
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
         <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
           <div className="text-xs uppercase tracking-wide text-neutral-500">Оплата</div>
           <div className="mt-1 font-semibold text-neutral-900">{getPaymentDueStageLabel(item.payment_due_stage)}</div>
         </div>
-      </div>
-
-      <div className="mt-3 grid gap-2 sm:grid-cols-3">
-        <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
-          <div className="text-xs uppercase tracking-wide text-neutral-500">Вартість</div>
-          <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPrice)}</div>
-        </div>
         <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
           <div className="text-xs uppercase tracking-wide text-neutral-500">Оплачено</div>
           <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPaid)}</div>
+        </div>
+      </div>
+
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+        <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
+          <div className="text-xs uppercase tracking-wide text-neutral-500">Вартість</div>
+          <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPrice)}</div>
         </div>
         <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
           <div className="text-xs uppercase tracking-wide text-neutral-500">Залишок</div>
@@ -147,19 +153,19 @@ export function DepartureRoomDetailCard({
         </div>
       ) : null}
 
-      {item.booking_note ? <div className="mt-3 rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">{item.booking_note}</div> : null}
+      {visibleBookingNote ? <div className="mt-3 rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">{visibleBookingNote}</div> : null}
 
       {!isCheckedOut && hasDebt ? (
-        <div className="mt-4 grid gap-2 sm:grid-cols-2">
-          <label className="block">
-            <span className="text-sm font-medium text-neutral-800">Готівка, грн</span>
-            <input type="text" inputMode="numeric" value={cashValue} onChange={(e) => setCashValue(sanitizeIntegerInput(e.target.value))} className={fieldClass} />
-          </label>
-          <label className="block">
-            <span className="text-sm font-medium text-neutral-800">Картка, грн</span>
-            <input type="text" inputMode="numeric" value={cardValue} onChange={(e) => setCardValue(sanitizeIntegerInput(e.target.value))} className={fieldClass} />
-          </label>
-        </div>
+        <label className="mt-4 block">
+          <span className="text-sm font-medium text-neutral-800">Оплата, грн</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={paymentValue}
+            onChange={(e) => setPaymentValue(sanitizeIntegerInput(e.target.value))}
+            className={fieldClass}
+          />
+        </label>
       ) : null}
 
       <div className="mt-4 grid gap-2">
@@ -171,7 +177,7 @@ export function DepartureRoomDetailCard({
           <button
             type="button"
             onClick={handlePayAndCheckoutClick}
-            disabled={isBusy || parseIntegerValue(cashValue) + parseIntegerValue(cardValue) <= 0}
+            disabled={isBusy || parseIntegerValue(paymentValue) <= 0}
             className={primaryButtonClass}
           >
             {isBusy ? 'Збереження...' : 'Оплата + виселити'}

@@ -21,6 +21,8 @@ const fieldClass =
   'mt-1.5 h-12 w-full rounded-2xl border border-neutral-300 bg-white px-3.5 text-[16px] text-neutral-900 outline-none transition focus:border-neutral-700 focus:ring-4 focus:ring-neutral-200'
 const secondaryButtonClass =
   'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] px-4 text-sm font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(143,45,86,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)] disabled:opacity-60'
+const compactActionButtonClass =
+  'inline-flex h-12 shrink-0 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] px-4 text-sm font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(143,45,86,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)] disabled:opacity-60'
 
 type ArrivalDisplayGroup = ArrivalGroup
 
@@ -134,8 +136,8 @@ function ArrivalBookingCard({
         href={`/bookings/arrivals/${item.id}?date=${encodeURIComponent(appliedDate)}`}
         className={`block rounded-3xl border-2 px-3.5 py-3.5 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:shadow-lg sm:px-5 sm:py-5 ${item.occupancy_status === 'checked_in' ? 'border-[var(--crm-vine-border)] bg-[var(--crm-vine-soft)] hover:border-[var(--crm-vine-dark)]' : 'border-[var(--crm-wine-border)] bg-white/95 hover:border-[var(--crm-wine)]'}`}
       >
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
             <div className="text-base font-bold text-neutral-900 sm:text-lg">{normalizePhone(group.guest_phone || '') || 'Телефон не вказано'}</div>
             {visibleGuestName ? <div className="mt-1 text-sm text-neutral-700">{visibleGuestName}</div> : null}
           </div>
@@ -344,18 +346,20 @@ export function ArrivalsGroups({ initialDate = '' }: { initialDate?: string }) {
           <section className={`${sectionClass} xl:sticky xl:top-24`}>
             <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Заїзди</h1>
             <div className="mt-4 space-y-3">
-              <label className="block min-w-0">
-                <span className="text-sm font-medium text-neutral-800">Дата</span>
-                <DatePickerField value={selectedDate} onChange={setSelectedDate} className={fieldClass} />
-              </label>
-              <button
-                type="button"
-                onClick={() => setAppliedDate(selectedDate)}
-                disabled={!isCompleteDateInput(selectedDate)}
-                className={secondaryButtonClass}
-              >
-                Сформувати
-              </button>
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+                <label className="block min-w-0">
+                  <span className="text-sm font-medium text-neutral-800">Дата заселення</span>
+                  <DatePickerField value={selectedDate} onChange={setSelectedDate} className={fieldClass} />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setAppliedDate(selectedDate)}
+                  disabled={!isCompleteDateInput(selectedDate)}
+                  className={compactActionButtonClass}
+                >
+                  Сформувати
+                </button>
+              </div>
               <label className="block">
                 <span className="text-sm font-medium text-neutral-800">Пошук гостя або номера</span>
                 <input type="text" inputMode="search" placeholder="Телефон, ПІБ або номер" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} className={fieldClass} />

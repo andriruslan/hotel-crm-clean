@@ -109,15 +109,14 @@ export function DepartureRoomPage({
 
   async function savePayment(
     nextBookingId: string,
-    cashAmount: number,
-    cardAmount: number,
+    totalAmount: number,
     comment: string,
     paymentDueStage?: PaymentDueStage
   ) {
     const response = await fetch('/api/payments/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ bookingId: nextBookingId, cashAmount, cardAmount, comment, paymentDueStage }),
+      body: JSON.stringify({ bookingId: nextBookingId, cashAmount: totalAmount, cardAmount: 0, comment, paymentDueStage }),
     })
 
     const data: PaymentResponse = await response.json()
@@ -149,14 +148,14 @@ export function DepartureRoomPage({
     })
   }
 
-  async function handlePayAndCheckout(nextItem: DepartureRoomDetailItem, cashAmount: number, cardAmount: number) {
-    if (cashAmount <= 0 && cardAmount <= 0) {
-      setError('Вкажи суму оплати готівкою або карткою.')
+  async function handlePayAndCheckout(nextItem: DepartureRoomDetailItem, totalAmount: number) {
+    if (totalAmount <= 0) {
+      setError('Вкажи суму оплати.')
       return false
     }
 
     return runItemAction(nextItem.id, 'pay-checkout', async () => {
-      await savePayment(nextItem.id, cashAmount, cardAmount, 'Оплата при виїзді', 'at_check_out')
+      await savePayment(nextItem.id, totalAmount, 'Оплата при виїзді', 'at_check_out')
       await updateBookingStatus(nextItem.id)
     })
   }

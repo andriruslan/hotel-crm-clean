@@ -107,11 +107,11 @@ export function ArrivalRoomPage({
     }
   }
 
-  async function savePayment(nextBookingId: string, cashAmount: number, cardAmount: number, comment: string, paymentDueStage?: PaymentDueStage) {
+  async function savePayment(nextBookingId: string, totalAmount: number, comment: string, paymentDueStage?: PaymentDueStage) {
     const response = await fetch('/api/payments/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ bookingId: nextBookingId, cashAmount, cardAmount, comment, paymentDueStage }),
+      body: JSON.stringify({ bookingId: nextBookingId, cashAmount: totalAmount, cardAmount: 0, comment, paymentDueStage }),
     })
 
     const data: PaymentResponse = await response.json()
@@ -143,14 +143,14 @@ export function ArrivalRoomPage({
     })
   }
 
-  async function handleCheckInWithPayment(nextItem: ArrivalRoomDetailItem, cashAmount: number, cardAmount: number) {
-    if (cashAmount <= 0 && cardAmount <= 0) {
-      setError('Вкажи суму оплати готівкою або карткою.')
+  async function handleCheckInWithPayment(nextItem: ArrivalRoomDetailItem, totalAmount: number) {
+    if (totalAmount <= 0) {
+      setError('Вкажи суму оплати.')
       return false
     }
 
     return runItemAction(nextItem.id, 'check-in-pay', async () => {
-      await savePayment(nextItem.id, cashAmount, cardAmount, 'Оплата при заселенні', 'at_check_in')
+      await savePayment(nextItem.id, totalAmount, 'Оплата при заселенні', 'at_check_in')
       await updateBookingStatus(nextItem.id, 'at_check_in')
     })
   }
@@ -161,14 +161,14 @@ export function ArrivalRoomPage({
     })
   }
 
-  async function handleAddPayment(nextBookingId: string, cashAmount: number, cardAmount: number) {
-    if (cashAmount <= 0 && cardAmount <= 0) {
-      setError('Вкажи суму оплати готівкою або карткою.')
+  async function handleAddPayment(nextBookingId: string, totalAmount: number) {
+    if (totalAmount <= 0) {
+      setError('Вкажи суму оплати.')
       return false
     }
 
     return runItemAction(nextBookingId, 'pay', async () => {
-      await savePayment(nextBookingId, cashAmount, cardAmount, 'Дооплата по бронюванню')
+      await savePayment(nextBookingId, totalAmount, 'Дооплата по бронюванню')
     })
   }
 

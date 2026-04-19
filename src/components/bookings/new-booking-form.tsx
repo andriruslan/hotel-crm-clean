@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { DatePickerField } from '@/components/ui/date-picker-field'
 import { getDefaultPaymentDueStage, getPaymentDueStageLabel, type PaymentDueStage } from '@/lib/booking-note-meta'
 import { addOneDay, dateInputToIso, formatDateForDisplay, formatDateInput, getTodayDate, isoDateToInputValue, isCompleteDateInput } from '@/lib/dates'
@@ -538,6 +538,7 @@ export function NewBookingForm() {
   const router = useRouter()
   const today = useMemo(() => isoDateToInputValue(getTodayDate()), [])
   const tomorrow = useMemo(() => isoDateToInputValue(addOneDay(getTodayDate())), [])
+  const availableRoomsRef = useRef<HTMLDivElement | null>(null)
 
   const [phone, setPhone] = useState(formatPhoneInput(''))
   const [guestId, setGuestId] = useState('')
@@ -607,6 +608,21 @@ export function NewBookingForm() {
       setRoomsMessage(nextDraftRooms.length > 1 ? 'Номери додано з екрана доступності.' : 'Номер додано з екрана доступності.')
     }
   }, [])
+
+  useEffect(() => {
+    if (loadingRooms || availableRooms.length === 0 || !availableRoomsRef.current) {
+      return
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      availableRoomsRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    })
+
+    return () => window.cancelAnimationFrame(frameId)
+  }, [availableRooms, loadingRooms])
 
   const totalPrice = draftRooms.reduce((sum, room) => sum + getDraftRoomTotalPrice(room), 0)
   const totalGuestsInBooking = draftRooms.reduce((sum, room) => sum + room.guestsCount, 0)
@@ -717,6 +733,10 @@ export function NewBookingForm() {
 
     setDraftRooms((current) => [...current, createDraftRoom(room, checkIn, checkOut, searchComposition)])
     setSuccess('Номер додано в бронювання.')
+  }
+
+  function removeDraftRoom(key: string) {
+    setDraftRooms((current) => current.filter((room) => room.key !== key))
   }
 
   function updateDraftRoom(key: string, patch: Partial<DraftRoom>) {
@@ -987,7 +1007,7 @@ export function NewBookingForm() {
                   </div>
 
                   {availableRooms.length > 0 ? (
-                    <div className="mt-4 grid gap-3 xl:grid-cols-2">
+                    <div ref={availableRoomsRef} className="mt-4 grid gap-3 xl:grid-cols-2">
                       {availableRooms.map((room) => (
                         <button
                           key={`${room.room_id}-${room.room_number}`}
@@ -1050,8 +1070,12 @@ export function NewBookingForm() {
                             </div>
                             <div className="mt-1 text-xs text-neutral-500">{draftRoom.checkIn} - {draftRoom.checkOut} · {draftRoom.guestsCount} гост.</div>
                           </div>
-                          <button type="button" onClick={() => setDraftRooms((current) => current.filter((room) => room.key !== draftRoom.key))} className="inline-flex rounded-2xl bg-white px-3 py-2 text-sm font-semibold text-[var(--crm-wine)] shadow-sm">
-                            Прибрати
+                          <button
+                            type="button"
+                            onClick={() => removeDraftRoom(draftRoom.key)}
+                            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-2xl border border-[var(--crm-wine)] bg-[var(--crm-wine-soft)] px-3.5 py-2 text-sm font-semibold text-[var(--crm-wine)] shadow-sm transition hover:bg-[var(--crm-wine-soft-hover)]"
+                          >
+                            Прибрати номер
                           </button>
                         </div>
 

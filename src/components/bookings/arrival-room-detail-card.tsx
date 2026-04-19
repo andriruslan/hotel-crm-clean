@@ -61,6 +61,14 @@ function getPaymentBadgeClass(status: PaymentStatus) {
   }
 }
 
+function getVisibleBookingNote(note: string) {
+  return note
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith('Склад гостей:') && !line.startsWith('Додаткові місця:'))
+    .join('\n')
+}
+
 export function ArrivalRoomDetailCard({
   item,
   savingKey,
@@ -72,12 +80,11 @@ export function ArrivalRoomDetailCard({
   item: ArrivalRoomDetailItem
   savingKey: string
   onCheckIn: (bookingId: string) => Promise<boolean>
-  onCheckInWithPayment: (item: ArrivalRoomDetailItem, cashAmount: number, cardAmount: number) => Promise<boolean>
+  onCheckInWithPayment: (item: ArrivalRoomDetailItem, totalAmount: number) => Promise<boolean>
   onDeferPaymentToCheckOut: (bookingId: string) => Promise<boolean>
-  onAddPayment: (bookingId: string, cashAmount: number, cardAmount: number) => Promise<boolean>
+  onAddPayment: (bookingId: string, totalAmount: number) => Promise<boolean>
 }) {
-  const [cashValue, setCashValue] = useState('')
-  const [cardValue, setCardValue] = useState('')
+  const [paymentValue, setPaymentValue] = useState('')
   const isBusy = savingKey.startsWith(`${item.id}:`)
   const isCheckedIn = item.occupancy_status === 'checked_in'
   const totalPaid = Number(item.payment_total_received || 0)
@@ -85,23 +92,22 @@ export function ArrivalRoomDetailCard({
   const balance = Math.max(0, totalPrice - totalPaid)
   const isFullyPaid = item.payment_status === 'paid' || balance <= 0
   const shouldShowAddPayment = isCheckedIn && balance > 0
-  const shouldShowPaymentInputs = (!isCheckedIn && !isFullyPaid) || shouldShowAddPayment
+  const shouldShowPaymentInput = (!isCheckedIn && !isFullyPaid) || shouldShowAddPayment
+  const visibleBookingNote = getVisibleBookingNote(item.booking_note)
 
   async function handlePayAndCheckIn() {
-    const ok = await onCheckInWithPayment(item, parseIntegerValue(cashValue), parseIntegerValue(cardValue))
+    const ok = await onCheckInWithPayment(item, parseIntegerValue(paymentValue))
 
     if (ok) {
-      setCashValue('')
-      setCardValue('')
+      setPaymentValue('')
     }
   }
 
   async function handleAddPaymentClick() {
-    const ok = await onAddPayment(item.id, parseIntegerValue(cashValue), parseIntegerValue(cardValue))
+    const ok = await onAddPayment(item.id, parseIntegerValue(paymentValue))
 
     if (ok) {
-      setCashValue('')
-      setCardValue('')
+      setPaymentValue('')
     }
   }
 
@@ -124,7 +130,7 @@ export function ArrivalRoomDetailCard({
         </div>
       </div>
 
-      <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
         <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
           <div className="text-xs uppercase tracking-wide text-neutral-500">Заїзд</div>
           <div className="mt-1 font-semibold text-neutral-900">{formatDateForDisplay(item.check_in_date)}</div>
@@ -133,24 +139,23 @@ export function ArrivalRoomDetailCard({
           <div className="text-xs uppercase tracking-wide text-neutral-500">Виїзд</div>
           <div className="mt-1 font-semibold text-neutral-900">{formatDateForDisplay(item.check_out_date)}</div>
         </div>
-        <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
-          <div className="text-xs uppercase tracking-wide text-neutral-500">Гостей</div>
-          <div className="mt-1 font-semibold text-neutral-900">{item.guests_count}</div>
-        </div>
+      </div>
+
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
         <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
           <div className="text-xs uppercase tracking-wide text-neutral-500">Оплата</div>
           <div className="mt-1 font-semibold text-neutral-900">{getPaymentDueStageLabel(item.payment_due_stage)}</div>
         </div>
-      </div>
-
-      <div className="mt-3 grid gap-2 sm:grid-cols-3">
-        <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
-          <div className="text-xs uppercase tracking-wide text-neutral-500">Вартість</div>
-          <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPrice)}</div>
-        </div>
         <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
           <div className="text-xs uppercase tracking-wide text-neutral-500">Оплачено</div>
           <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPaid)}</div>
+        </div>
+      </div>
+
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+        <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
+          <div className="text-xs uppercase tracking-wide text-neutral-500">Вартість</div>
+          <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPrice)}</div>
         </div>
         <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
           <div className="text-xs uppercase tracking-wide text-neutral-500">Залишок</div>
@@ -158,19 +163,19 @@ export function ArrivalRoomDetailCard({
         </div>
       </div>
 
-      {item.booking_note ? <div className="mt-3 rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">{item.booking_note}</div> : null}
+      {visibleBookingNote ? <div className="mt-3 rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">{visibleBookingNote}</div> : null}
 
-      {shouldShowPaymentInputs ? (
-        <div className="mt-4 grid gap-2 sm:grid-cols-2">
-          <label className="block">
-            <span className="text-sm font-medium text-neutral-800">Готівка, грн</span>
-            <input type="text" inputMode="numeric" value={cashValue} onChange={(e) => setCashValue(sanitizeIntegerInput(e.target.value))} className={fieldClass} />
-          </label>
-          <label className="block">
-            <span className="text-sm font-medium text-neutral-800">Картка, грн</span>
-            <input type="text" inputMode="numeric" value={cardValue} onChange={(e) => setCardValue(sanitizeIntegerInput(e.target.value))} className={fieldClass} />
-          </label>
-        </div>
+      {shouldShowPaymentInput ? (
+        <label className="mt-4 block">
+          <span className="text-sm font-medium text-neutral-800">Оплата, грн</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={paymentValue}
+            onChange={(e) => setPaymentValue(sanitizeIntegerInput(e.target.value))}
+            className={fieldClass}
+          />
+        </label>
       ) : null}
 
       <div className="mt-4 grid gap-2">
@@ -180,7 +185,7 @@ export function ArrivalRoomDetailCard({
               <button
                 type="button"
                 onClick={handleAddPaymentClick}
-                disabled={isBusy || (parseIntegerValue(cashValue) <= 0 && parseIntegerValue(cardValue) <= 0)}
+                disabled={isBusy || parseIntegerValue(paymentValue) <= 0}
                 className={primaryButtonClass}
               >
                 {isBusy ? 'Збереження...' : 'Додати оплату'}
@@ -199,7 +204,7 @@ export function ArrivalRoomDetailCard({
             <button
               type="button"
               onClick={handlePayAndCheckIn}
-              disabled={isBusy || (parseIntegerValue(cashValue) <= 0 && parseIntegerValue(cardValue) <= 0)}
+              disabled={isBusy || parseIntegerValue(paymentValue) <= 0}
               className={primaryButtonClass}
             >
               {isBusy ? 'Збереження...' : 'Заселити + оплата'}
