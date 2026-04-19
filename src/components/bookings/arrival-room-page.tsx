@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { getEditableBookingComment, normalizeBookingCommentInput } from '@/components/bookings/booking-comment'
 import { ArrivalRoomDetailCard, type ArrivalRoomDetailItem } from '@/components/bookings/arrival-room-detail-card'
 import { getVisibleGuestName } from '@/components/bookings/arrival-shared'
 import type { PaymentDueStage } from '@/lib/booking-note-meta'
@@ -18,6 +19,7 @@ type ArrivalsResponse = {
 type UpdateResponse = {
   ok: boolean
   error?: string
+  bookingNote?: string
 }
 
 type PaymentResponse = {
@@ -44,6 +46,8 @@ export function ArrivalRoomPage({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [savingKey, setSavingKey] = useState('')
+  const [commentValue, setCommentValue] = useState('')
+  const [savedCommentValue, setSavedCommentValue] = useState('')
 
   useEffect(() => {
     if (!isCompleteDateInput(safeInitialDate)) {
@@ -93,6 +97,55 @@ export function ArrivalRoomPage({
     }
   }, [bookingId, safeInitialDate])
 
+  useEffect(() => {
+    const nextComment = getEditableBookingComment(item?.booking_note)
+    setCommentValue(nextComment)
+    setSavedCommentValue(nextComment)
+  }, [item?.id, item?.booking_note])
+
+  const normalizedCommentValue = normalizeBookingCommentInput(commentValue)
+  const normalizedSavedCommentValue = normalizeBookingCommentInput(savedCommentValue)
+  const isCommentDirty = normalizedCommentValue !== normalizedSavedCommentValue
+  const showCommentEditor = Boolean(normalizedCommentValue || normalizedSavedCommentValue)
+
+  async function saveBookingComment(nextBookingId: string, nextComment: string) {
+    const response = await fetch('/api/bookings/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bookingId: nextBookingId, bookingNote: nextComment }),
+    })
+
+    const data: UpdateResponse = await response.json()
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || 'Не вдалося зберегти коментар')
+    }
+
+    return data
+  }
+
+  async function persistCommentIfNeeded(nextBookingId: string) {
+    if (!isCommentDirty) {
+      return true
+    }
+
+    const data = await saveBookingComment(nextBookingId, normalizedCommentValue)
+    const nextVisibleComment = getEditableBookingComment(data.bookingNote ?? normalizedCommentValue)
+
+    setSavedCommentValue(nextVisibleComment)
+    setCommentValue(nextVisibleComment)
+    setItem((currentItem) =>
+      currentItem && currentItem.id === nextBookingId
+        ? {
+            ...currentItem,
+            booking_note: data.bookingNote ?? nextVisibleComment,
+          }
+        : currentItem
+    )
+
+    return true
+  }
+
   async function updateBookingStatus(nextBookingId: string, paymentDueStage?: PaymentDueStage) {
     const response = await fetch('/api/bookings/update', {
       method: 'POST',
@@ -126,8 +179,28 @@ export function ArrivalRoomPage({
     setError('')
 
     try {
+      await persistCommentIfNeeded(nextBookingId)
       await callback()
       router.push(`/bookings/arrivals?date=${encodeURIComponent(dateInputToIso(safeInitialDate))}`)
+      return true
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Сталася помилка')
+      return false
+    } finally {
+      setSavingKey('')
+    }
+  }
+
+  async function handleSaveComment() {
+    if (!item) {
+      return false
+    }
+
+    setSavingKey(`${item.id}:comment`)
+    setError('')
+
+    try {
+      await persistCommentIfNeeded(item.id)
       return true
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Сталася помилка')
@@ -197,7 +270,10 @@ export function ArrivalRoomPage({
             </div>
 
             <div>
-              <Link href={`/bookings/arrivals?date=${encodeURIComponent(dateInputToIso(safeInitialDate))}`} className={`inline-flex min-h-11 items-center justify-center rounded-2xl px-4 ${secondaryButtonClass}`}>
+              <Link
+                href={`/bookings/arrivals?date=${encodeURIComponent(dateInputToIso(safeInitialDate))}`}
+                className={`inline-flex min-h-11 items-center justify-center rounded-2xl px-4 ${secondaryButtonClass}`}
+              >
                 Повернутися до заїздів
               </Link>
             </div>
@@ -214,16 +290,24 @@ export function ArrivalRoomPage({
           <ArrivalRoomDetailCard
             item={item}
             savingKey={savingKey}
+            commentValue={commentValue}
+            showCommentEditor={showCommentEditor}
+            isCommentDirty={isCommentDirty}
             onCheckIn={handleCheckIn}
             onCheckInWithPayment={handleCheckInWithPayment}
             onDeferPaymentToCheckOut={handleDeferPaymentToCheckOut}
             onAddPayment={handleAddPayment}
+            onCommentChange={setCommentValue}
+            onSaveComment={handleSaveComment}
           />
         ) : (
           <section className={sectionClass}>
             <div className="text-sm text-neutral-600">На вибрану дату картка заселення не знайдена.</div>
             <div className="mt-4">
-              <Link href={`/bookings/arrivals?date=${encodeURIComponent(dateInputToIso(safeInitialDate))}`} className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-[var(--crm-wine)] bg-[var(--crm-wine-soft)] px-4 text-sm font-semibold text-[var(--crm-wine)] shadow-sm transition hover:bg-[var(--crm-wine-soft-hover)]">
+              <Link
+                href={`/bookings/arrivals?date=${encodeURIComponent(dateInputToIso(safeInitialDate))}`}
+                className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-[var(--crm-wine)] bg-[var(--crm-wine-soft)] px-4 text-sm font-semibold text-[var(--crm-wine)] shadow-sm transition hover:bg-[var(--crm-wine-soft-hover)]"
+              >
                 Повернутися до заїздів
               </Link>
             </div>

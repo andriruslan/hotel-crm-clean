@@ -12,6 +12,7 @@ type RequestBody = {
   bookingStatus?: BookingStatus
   markReminder?: boolean
   reserveUntilDate?: string | null
+  bookingNote?: string
 }
 
 export async function POST(request: NextRequest) {
@@ -23,12 +24,15 @@ export async function POST(request: NextRequest) {
     const bookingStatus = body.bookingStatus
     const markReminder = Boolean(body.markReminder)
     const reserveUntilDate = body.reserveUntilDate
+    const bookingNote = typeof body.bookingNote === 'string' ? body.bookingNote : undefined
 
     if (!bookingId) {
       return NextResponse.json({ ok: false, error: 'Не передано bookingId' }, { status: 400 })
     }
 
-    const shouldLoadBookingMeta = Boolean(paymentDueStage || markReminder || reserveUntilDate !== undefined)
+    const shouldLoadBookingMeta = Boolean(
+      paymentDueStage || markReminder || reserveUntilDate !== undefined || bookingNote !== undefined
+    )
     let bookingMeta = null as ReturnType<typeof parseBookingNoteMeta> | null
 
     if (shouldLoadBookingMeta) {
@@ -62,11 +66,12 @@ export async function POST(request: NextRequest) {
     }
 
     if (bookingMeta) {
-      updatePayload.booking_note = buildBookingNoteWithMeta(bookingMeta.visibleNote, {
+      updatePayload.booking_note = buildBookingNoteWithMeta(bookingNote ?? bookingMeta.visibleNote, {
         paymentDueStage: paymentDueStage || bookingMeta.paymentDueStage,
         bookingGroupId: bookingMeta.bookingGroupId,
         reserveUntilDate: reserveUntilDate === undefined ? bookingMeta.reserveUntilDate : reserveUntilDate || '',
         lastReminderAt: markReminder ? new Date().toISOString() : bookingMeta.lastReminderAt,
+        certificateAmount: bookingMeta.certificateAmount,
       })
     }
 
@@ -92,6 +97,8 @@ export async function POST(request: NextRequest) {
       bookingId: data.id,
       occupancyStatus: data.occupancy_status,
       bookingStatus: data.status,
+      bookingNote: nextMeta.visibleNote,
+      rawBookingNote: data.booking_note,
       paymentDueStage: nextMeta.paymentDueStage,
       reserveUntilDate: nextMeta.reserveUntilDate,
       lastReminderAt: nextMeta.lastReminderAt,

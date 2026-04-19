@@ -1,6 +1,7 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
+import { getEditableBookingComment } from '@/components/bookings/booking-comment'
 import type { PaymentStatus } from '@/constants/payment-status'
 import { getPaymentDueStageLabel, type PaymentDueStage } from '@/lib/booking-note-meta'
 import { formatDateForDisplay } from '@/lib/dates'
@@ -25,10 +26,14 @@ export type DepartureRoomDetailItem = {
 
 const fieldClass =
   'mt-1.5 h-12 w-full rounded-2xl border border-neutral-300 bg-white px-3.5 text-[16px] text-neutral-900 outline-none transition focus:border-neutral-700 focus:ring-4 focus:ring-neutral-200'
+const textareaClass =
+  'mt-2 min-h-28 w-full rounded-2xl border border-neutral-300 bg-white px-3.5 py-3 text-[16px] text-neutral-900 outline-none transition focus:border-neutral-700 focus:ring-4 focus:ring-neutral-200'
 const secondaryButtonClass =
   'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] px-4 text-sm font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(143,45,86,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)] disabled:opacity-60'
 const primaryButtonClass =
   'inline-flex min-h-12 w-full items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)] disabled:opacity-60'
+const subtleButtonClass =
+  'inline-flex min-h-11 w-full items-center justify-center rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-wine-soft)] px-4 py-3 text-sm font-semibold text-[var(--crm-wine-dark)] shadow-sm transition hover:bg-[var(--crm-wine-soft-hover)] disabled:opacity-60'
 
 function formatMoney(value: number) {
   return new Intl.NumberFormat('uk-UA', {
@@ -55,37 +60,40 @@ function getPaymentBadgeClass(status: PaymentStatus) {
       return 'bg-amber-100 text-amber-900'
     case 'unpaid':
     default:
-      return 'bg-[var(--crm-danger-soft)] text-[var(--crm-danger)]'
+      return 'bg-[var(--crm-wine-soft)] text-[var(--crm-wine)]'
   }
-}
-
-function getVisibleBookingNote(note: string) {
-  return note
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line && !line.startsWith('Склад гостей:') && !line.startsWith('Додаткові місця:'))
-    .join('\n')
 }
 
 export function DepartureRoomDetailCard({
   item,
   savingKey,
+  commentValue,
+  showCommentEditor,
+  isCommentDirty,
   onCheckout,
   onPayAndCheckout,
+  onCommentChange,
+  onSaveComment,
 }: {
   item: DepartureRoomDetailItem
   savingKey: string
+  commentValue: string
+  showCommentEditor: boolean
+  isCommentDirty: boolean
   onCheckout: (bookingId: string) => Promise<boolean>
   onPayAndCheckout: (item: DepartureRoomDetailItem, totalAmount: number) => Promise<boolean>
+  onCommentChange: (value: string) => void
+  onSaveComment: () => Promise<boolean>
 }) {
   const [paymentValue, setPaymentValue] = useState('')
   const isBusy = savingKey.startsWith(`${item.id}:`)
+  const isCommentSaving = savingKey === `${item.id}:comment`
   const isCheckedOut = item.occupancy_status === 'checked_out'
   const totalPaid = Number(item.payment_total_received || 0)
   const totalPrice = Number(item.price_total || 0)
   const balance = Math.max(0, totalPrice - totalPaid)
   const hasDebt = balance > 0
-  const visibleBookingNote = getVisibleBookingNote(item.booking_note)
+  const visibleBookingNote = getEditableBookingComment(item.booking_note)
 
   async function handlePayAndCheckoutClick() {
     const ok = await onPayAndCheckout(item, parseIntegerValue(paymentValue))
@@ -96,7 +104,15 @@ export function DepartureRoomDetailCard({
   }
 
   return (
-    <article className={`rounded-3xl border px-4 py-4 shadow-sm ${isCheckedOut ? 'border-[var(--crm-vine-border)] bg-[var(--crm-vine-soft)]' : hasDebt ? 'border-[var(--crm-danger)] bg-[var(--crm-danger-soft)]' : 'border-[var(--crm-wine-border)] bg-[var(--crm-panel)]'}`}>
+    <article
+      className={`rounded-3xl border px-4 py-4 shadow-sm ${
+        isCheckedOut
+          ? 'border-[var(--crm-vine-border)] bg-[var(--crm-vine-soft)]'
+          : hasDebt
+            ? 'border-[var(--crm-danger)] bg-[var(--crm-danger-soft)]'
+            : 'border-[var(--crm-wine-border)] bg-[var(--crm-panel)]'
+      }`}
+    >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="text-lg font-bold text-neutral-900">
@@ -105,7 +121,11 @@ export function DepartureRoomDetailCard({
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <span className={`rounded-full px-3 py-1.5 text-xs font-semibold ${isCheckedOut ? 'bg-[var(--crm-vine)] text-white' : hasDebt ? 'bg-[var(--crm-danger)] text-white' : 'bg-[var(--crm-wine)] text-white'}`}>
+          <span
+            className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+              isCheckedOut ? 'bg-[var(--crm-vine)] text-white' : hasDebt ? 'bg-[var(--crm-danger)] text-white' : 'bg-[var(--crm-wine)] text-white'
+            }`}
+          >
             {isCheckedOut ? 'Виселено' : hasDebt ? 'Є доплата' : 'Готово до виїзду'}
           </span>
           <span className={`rounded-full px-3 py-1.5 text-xs font-semibold ${getPaymentBadgeClass(item.payment_status)}`}>
@@ -127,23 +147,25 @@ export function DepartureRoomDetailCard({
 
       <div className="mt-3 grid grid-cols-2 gap-2">
         <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
-          <div className="text-xs uppercase tracking-wide text-neutral-500">Оплата</div>
-          <div className="mt-1 font-semibold text-neutral-900">{getPaymentDueStageLabel(item.payment_due_stage)}</div>
+          <div className="text-xs uppercase tracking-wide text-neutral-500">Вартість</div>
+          <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPrice)}</div>
         </div>
         <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
-          <div className="text-xs uppercase tracking-wide text-neutral-500">Оплачено</div>
-          <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPaid)}</div>
+          <div className="text-xs uppercase tracking-wide text-neutral-500">Оплата</div>
+          <div className="mt-1 font-semibold text-neutral-900">{getPaymentDueStageLabel(item.payment_due_stage)}</div>
         </div>
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
         <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
-          <div className="text-xs uppercase tracking-wide text-neutral-500">Вартість</div>
-          <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPrice)}</div>
+          <div className="text-xs uppercase tracking-wide text-neutral-500">Оплачено</div>
+          <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPaid)}</div>
         </div>
         <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
           <div className="text-xs uppercase tracking-wide text-neutral-500">Залишок</div>
-          <div className={`mt-1 font-semibold ${hasDebt && !isCheckedOut ? 'text-[var(--crm-danger)]' : 'text-[var(--crm-vine-dark)]'}`}>{formatMoney(balance)}</div>
+          <div className={`mt-1 font-semibold ${hasDebt && !isCheckedOut ? 'text-[var(--crm-danger)]' : 'text-[var(--crm-vine-dark)]'}`}>
+            {formatMoney(balance)}
+          </div>
         </div>
       </div>
 
@@ -153,7 +175,29 @@ export function DepartureRoomDetailCard({
         </div>
       ) : null}
 
-      {visibleBookingNote ? <div className="mt-3 rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">{visibleBookingNote}</div> : null}
+      {showCommentEditor ? (
+        <div className="mt-3 rounded-2xl bg-white px-3 py-3 shadow-sm">
+          <div className="text-sm font-semibold text-neutral-900">Коментар менеджера</div>
+          <textarea
+            value={commentValue}
+            onChange={(event) => onCommentChange(event.target.value)}
+            className={textareaClass}
+            rows={3}
+          />
+          {isCommentDirty ? (
+            <button
+              type="button"
+              onClick={() => void onSaveComment()}
+              disabled={isBusy}
+              className={`${subtleButtonClass} mt-3`}
+            >
+              {isCommentSaving ? 'Збереження...' : 'Зберегти коментар'}
+            </button>
+          ) : null}
+        </div>
+      ) : visibleBookingNote ? (
+        <div className="mt-3 rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">{visibleBookingNote}</div>
+      ) : null}
 
       {!isCheckedOut && hasDebt ? (
         <label className="mt-4 block">
@@ -162,7 +206,7 @@ export function DepartureRoomDetailCard({
             type="text"
             inputMode="numeric"
             value={paymentValue}
-            onChange={(e) => setPaymentValue(sanitizeIntegerInput(e.target.value))}
+            onChange={(event) => setPaymentValue(sanitizeIntegerInput(event.target.value))}
             className={fieldClass}
           />
         </label>
