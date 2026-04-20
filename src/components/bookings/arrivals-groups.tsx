@@ -6,9 +6,9 @@ import { getVisibleGuestName } from '@/components/bookings/arrival-shared'
 import { DatePickerField } from '@/components/ui/date-picker-field'
 import type { PaymentStatus } from '@/constants/payment-status'
 import { dateInputToIso, getTodayDate, isoDateToInputValue, isCompleteDateInput } from '@/lib/dates'
-import { groupArrivalItems, type ArrivalGroup, type ArrivalGroupItem } from '@/lib/arrival-groups'
+import type { ArrivalGroupItem } from '@/lib/arrival-groups'
 import { normalizePhone } from '@/lib/phone'
-import { getEffectivePaidAmount, getPaymentStatus, getPaymentStatusLabel } from '@/lib/payment-status'
+import { getPaymentStatusLabel } from '@/lib/payment-status'
 
 type ArrivalsResponse = {
   ok: boolean
@@ -24,17 +24,7 @@ const secondaryButtonClass =
 const compactActionButtonClass =
   'inline-flex h-12 shrink-0 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] px-4 text-sm font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(143,45,86,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)] disabled:opacity-60'
 
-type ArrivalDisplayGroup = ArrivalGroup
-
-function formatMoney(value: number) {
-  return new Intl.NumberFormat('uk-UA', {
-    style: 'currency',
-    currency: 'UAH',
-    maximumFractionDigits: 0,
-  }).format(value)
-}
-
-function matchesSearch(group: ArrivalDisplayGroup, search: string) {
+function matchesSearch(item: ArrivalGroupItem, search: string) {
   const normalizedSearch = search.trim().toLowerCase()
 
   if (!normalizedSearch) {
@@ -42,13 +32,15 @@ function matchesSearch(group: ArrivalDisplayGroup, search: string) {
   }
 
   const digitsSearch = normalizedSearch.replace(/\D/g, '')
-  const phoneValue = normalizePhone(group.guest_phone || '')
+  const phoneValue = normalizePhone(item.guest_phone || '')
   const phoneDigits = phoneValue.replace(/\D/g, '')
+  const guestName = (item.guest_name || '').trim().toLowerCase()
+  const roomNumber = (item.room_number || '').trim().toLowerCase()
 
   return (
-    group.guest_name.toLowerCase().includes(normalizedSearch) ||
+    guestName.includes(normalizedSearch) ||
     phoneValue.toLowerCase().includes(normalizedSearch) ||
-    group.room_numbers.some((roomNumber) => roomNumber.toLowerCase().includes(normalizedSearch)) ||
+    roomNumber.includes(normalizedSearch) ||
     (digitsSearch.length > 0 && phoneDigits.includes(digitsSearch))
   )
 }
@@ -65,210 +57,72 @@ function getPaymentBadgeClass(status: PaymentStatus) {
   }
 }
 
-function createArrivalDisplayGroup(
-  group: ArrivalGroup,
-  filter: (item: ArrivalGroupItem) => boolean
-): ArrivalDisplayGroup | null {
-  const nextItems = group.items.filter(filter)
-
-  if (nextItems.length === 0) {
-    return null
-  }
-
-  const totalPrice = nextItems.reduce((sum, item) => sum + Number(item.price_total || 0), 0)
-  const totalCashAmount = nextItems.reduce((sum, item) => sum + Number(item.payment_cash_amount || 0), 0)
-  const totalCardAmount = nextItems.reduce((sum, item) => sum + Number(item.payment_card_amount || 0), 0)
-  const totalPaid = nextItems.reduce(
-    (sum, item) =>
-      sum +
-      getEffectivePaidAmount({
-        paymentTotalReceived: item.payment_total_received,
-        paymentCashAmount: item.payment_cash_amount,
-        paymentCardAmount: item.payment_card_amount,
-        certificateAmount: item.certificate_amount,
-      }),
-    0
-  )
-
-  return {
-    ...group,
-    items: nextItems,
-    room_numbers: Array.from(new Set(nextItems.map((item) => item.room_number))),
-    total_guests_count: nextItems.reduce((sum, item) => sum + Number(item.guests_count || 0), 0),
-    total_price: totalPrice,
-    total_cash_amount: totalCashAmount,
-    total_card_amount: totalCardAmount,
-    total_paid: totalPaid,
-    total_balance: Math.max(0, totalPrice - totalPaid),
-    payment_status: getPaymentStatus(totalPrice, totalPaid),
-    occupancy_status: nextItems.every((item) => item.occupancy_status === 'checked_in') ? 'checked_in' : 'not_checked_in',
-    booking_note: group.booking_note || nextItems.find((item) => item.booking_note)?.booking_note || '',
-    payment_due_stage: nextItems[0]?.payment_due_stage || group.payment_due_stage,
-  }
-}
-
-function getRoomCardsGridClass(itemsCount: number) {
+function getPreviewCardsGridClass(itemsCount: number) {
   if (itemsCount <= 1) {
     return 'mt-4 grid gap-3'
   }
 
-  if (itemsCount === 2) {
-    return 'mt-4 grid gap-3 xl:grid-cols-2'
+  if (itemsCount <= 4) {
+    return 'mt-4 grid gap-3 min-[700px]:grid-cols-2'
   }
 
-  return 'mt-4 grid gap-3 lg:grid-cols-2'
+  return 'mt-4 grid gap-3 min-[700px]:grid-cols-2 min-[1280px]:grid-cols-3'
 }
 
-function getBookingCardsGridClass(groupsCount: number) {
-  if (groupsCount <= 2) {
-    return 'mt-4 grid items-start gap-3 min-[560px]:grid-cols-2'
+function buildDuplicateGuestMap(items: ArrivalGroupItem[]) {
+  const counts = new Map<string, number>()
+
+  for (const item of items) {
+    const phoneKey = normalizePhone(item.guest_phone || '')
+    const nameKey = (item.guest_name || '').trim().toLowerCase()
+
+    if (!phoneKey && !nameKey) {
+      continue
+    }
+
+    const combinedKey = `${phoneKey}::${nameKey}`
+    counts.set(combinedKey, (counts.get(combinedKey) || 0) + 1)
   }
 
-  return 'mt-4 grid items-start gap-3 min-[560px]:grid-cols-2 min-[1180px]:grid-cols-3'
+  return counts
+}
+
+function getDuplicateGuestKey(item: ArrivalGroupItem) {
+  return `${normalizePhone(item.guest_phone || '')}::${(item.guest_name || '').trim().toLowerCase()}`
 }
 
 function ArrivalBookingCard({
-  group,
-  fullGroup,
+  item,
   appliedDate,
+  showRoomHint,
 }: {
-  group: ArrivalDisplayGroup
-  fullGroup: ArrivalGroup
+  item: ArrivalGroupItem
   appliedDate: string
+  showRoomHint: boolean
 }) {
-  const hasOtherRoomsOutsideSection = fullGroup.items.length !== group.items.length
-  const hasMultipleRoomsInBooking = fullGroup.room_numbers.length > 1
-  const visibleGuestName = getVisibleGuestName(group.guest_name)
-
-  if (!hasMultipleRoomsInBooking) {
-    const item = group.items[0]
-
-    if (!item) {
-      return null
-    }
-
-    return (
-      <Link
-        href={`/bookings/arrivals/${item.id}?date=${encodeURIComponent(appliedDate)}`}
-        className={`block h-full rounded-3xl border-2 px-3 py-3 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:shadow-lg sm:px-3.5 sm:py-3.5 ${item.occupancy_status === 'checked_in' ? 'border-[var(--crm-vine-border)] bg-[var(--crm-vine-soft)] hover:border-[var(--crm-vine-dark)]' : 'border-[var(--crm-wine-border)] bg-white/95 hover:border-[var(--crm-wine)]'}`}
-      >
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="text-base font-bold text-neutral-900 sm:text-lg">{normalizePhone(group.guest_phone || '') || 'Телефон не вказано'}</div>
-            {visibleGuestName ? <div className="mt-1 text-sm text-neutral-700">{visibleGuestName}</div> : null}
-          </div>
-
-          <span className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${getPaymentBadgeClass(group.payment_status)}`}>
-            {getPaymentStatusLabel(group.payment_status)}
-          </span>
-        </div>
-
-        <div className={`mt-2.5 rounded-2xl border px-3 py-2.5 shadow-sm ${item.occupancy_status === 'checked_in' ? 'border-[var(--crm-vine-border)] bg-white/90' : 'border-[var(--crm-wine-border)] bg-[var(--crm-panel)]'}`}>
-          <div className="min-w-0 w-full">
-            <div className="text-lg font-bold leading-tight text-neutral-900 sm:text-xl">
-              {`Номер ${item.room_number}${item.building_name ? ` (${item.building_name.toLowerCase()})` : ''}`}
-            </div>
-          </div>
-
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-[12px] text-neutral-700">
-            <span className="rounded-full bg-white/95 px-2.5 py-1 shadow-sm">{item.guests_count} гост.</span>
-          </div>
-        </div>
-      </Link>
-    )
-  }
+  const visibleGuestName = getVisibleGuestName(item.guest_name)
 
   return (
-    <section
-      className={`rounded-3xl border-2 px-3.5 py-3.5 shadow-[0_10px_24px_rgba(143,45,86,0.08)] sm:px-5 sm:py-5 ${group.occupancy_status === 'checked_in' ? 'border-[var(--crm-vine-border)] bg-[var(--crm-vine-soft)]' : 'border-neutral-200 bg-white'}`}
+    <Link
+      href={`/bookings/arrivals/${item.id}?date=${encodeURIComponent(appliedDate)}`}
+      className={`block rounded-3xl border-2 px-3.5 py-3.5 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:shadow-lg sm:px-4 sm:py-4 ${
+        item.occupancy_status === 'checked_in'
+          ? 'border-[var(--crm-vine-border)] bg-[var(--crm-vine-soft)] hover:border-[var(--crm-vine-dark)]'
+          : 'border-[var(--crm-wine-border)] bg-white/95 hover:border-[var(--crm-wine)]'
+      }`}
     >
-      <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-        <div>
-          <div className="text-base font-bold text-neutral-900 sm:text-lg">{normalizePhone(group.guest_phone || '') || 'Телефон не вказано'}</div>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="text-base font-bold text-neutral-900 sm:text-lg">{normalizePhone(item.guest_phone || '') || 'Телефон не вказано'}</div>
           {visibleGuestName ? <div className="mt-1 text-sm text-neutral-700">{visibleGuestName}</div> : null}
+          {showRoomHint ? <div className="mt-2 text-xs font-medium text-neutral-500">{`Номер ${item.room_number}`}</div> : null}
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          {fullGroup.booking_group_id ? (
-            <span className="rounded-full bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white">{fullGroup.booking_group_id}</span>
-          ) : null}
-          <span className={`rounded-full px-3 py-1.5 text-xs font-semibold ${getPaymentBadgeClass(group.payment_status)}`}>
-            {getPaymentStatusLabel(group.payment_status)}
-          </span>
-        </div>
+        <span className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ${getPaymentBadgeClass(item.payment_status)}`}>
+          {getPaymentStatusLabel(item.payment_status)}
+        </span>
       </div>
-
-      {hasMultipleRoomsInBooking ? (
-        <div className="mt-4 grid grid-cols-2 gap-2 xl:grid-cols-4">
-          <div className="rounded-2xl bg-neutral-50 px-3 py-3">
-            <div className="text-xs uppercase tracking-wide text-neutral-500">У замовленні</div>
-            <div className="mt-1 font-semibold text-neutral-900">{fullGroup.room_numbers.length} номерів</div>
-          </div>
-          <div className="rounded-2xl bg-neutral-50 px-3 py-3">
-            <div className="text-xs uppercase tracking-wide text-neutral-500">У цьому блоці</div>
-            <div className="mt-1 font-semibold text-neutral-900">{group.room_numbers.length} номерів</div>
-          </div>
-          <div className="rounded-2xl bg-neutral-50 px-3 py-3">
-            <div className="text-xs uppercase tracking-wide text-neutral-500">Загальний залишок</div>
-            <div className="mt-1 font-semibold text-neutral-900">{formatMoney(fullGroup.total_balance)}</div>
-          </div>
-          <div className="rounded-2xl bg-neutral-50 px-3 py-3">
-            <div className="text-xs uppercase tracking-wide text-neutral-500">У цьому блоці</div>
-            <div className="mt-1 font-semibold text-neutral-900">{formatMoney(group.total_balance)}</div>
-          </div>
-        </div>
-      ) : null}
-
-      {hasMultipleRoomsInBooking ? (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {fullGroup.items.map((item) => (
-            <span
-              key={item.id}
-              className={`rounded-full px-3 py-1.5 text-xs font-semibold ${item.occupancy_status === 'checked_in' ? 'bg-[var(--crm-vine)] text-white' : 'bg-[var(--crm-wine-soft)] text-[var(--crm-wine)]'}`}
-            >
-              {item.room_number}
-            </span>
-          ))}
-        </div>
-      ) : null}
-
-      {hasMultipleRoomsInBooking && hasOtherRoomsOutsideSection ? (
-        <div className="mt-3 rounded-2xl bg-neutral-100 px-3 py-3 text-sm text-neutral-700">
-          У цьому замовленні є ще номери в іншому блоці цього екрана.
-        </div>
-      ) : null}
-
-      {hasMultipleRoomsInBooking && group.booking_note ? (
-        <div className="mt-3 rounded-2xl bg-neutral-50 px-3 py-3 text-sm text-neutral-700">{group.booking_note}</div>
-      ) : null}
-
-      <div className={getRoomCardsGridClass(group.items.length)}>
-        {group.items.map((item) => {
-          return (
-            <Link
-              key={item.id}
-              href={`/bookings/arrivals/${item.id}?date=${encodeURIComponent(appliedDate)}`}
-              className={`block w-full rounded-3xl border-2 px-3 py-3 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:shadow-lg sm:px-3.5 sm:py-3.5 ${item.occupancy_status === 'checked_in' ? 'border-[var(--crm-vine-border)] bg-white/90 hover:border-[var(--crm-vine-dark)]' : 'border-[var(--crm-wine-border)] bg-[var(--crm-panel)] hover:border-[var(--crm-wine)]'}`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-lg font-bold leading-tight text-neutral-900 sm:text-xl">
-                    {`Номер ${item.room_number}${item.building_name ? ` (${item.building_name.toLowerCase()})` : ''}`}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px] text-neutral-700">
-                <span className={`rounded-full px-2.5 py-1 shadow-sm ${getPaymentBadgeClass(item.payment_status)}`}>
-                  {getPaymentStatusLabel(item.payment_status)}
-                </span>
-                <span className="rounded-full bg-white/95 px-2.5 py-1 shadow-sm">{item.guests_count} гост.</span>
-              </div>
-            </Link>
-          )
-        })}
-      </div>
-    </section>
+    </Link>
   )
 }
 
@@ -323,23 +177,15 @@ export function ArrivalsGroups({ initialDate = '' }: { initialDate?: string }) {
     }
   }, [appliedDate])
 
-  const groups = useMemo(() => groupArrivalItems(items), [items])
-  const pendingGroups = useMemo(
-    () =>
-      groups
-        .map((group) => ({ fullGroup: group, displayGroup: createArrivalDisplayGroup(group, (item) => item.occupancy_status !== 'checked_in') }))
-        .filter((entry): entry is { fullGroup: ArrivalGroup; displayGroup: ArrivalDisplayGroup } => Boolean(entry.displayGroup))
-        .filter((entry) => matchesSearch(entry.displayGroup, searchValue)),
-    [groups, searchValue]
+  const pendingItems = useMemo(
+    () => items.filter((item) => item.occupancy_status !== 'checked_in').filter((item) => matchesSearch(item, searchValue)),
+    [items, searchValue]
   )
-  const checkedInGroups = useMemo(
-    () =>
-      groups
-        .map((group) => ({ fullGroup: group, displayGroup: createArrivalDisplayGroup(group, (item) => item.occupancy_status === 'checked_in') }))
-        .filter((entry): entry is { fullGroup: ArrivalGroup; displayGroup: ArrivalDisplayGroup } => Boolean(entry.displayGroup))
-        .filter((entry) => matchesSearch(entry.displayGroup, searchValue)),
-    [groups, searchValue]
+  const checkedInItems = useMemo(
+    () => items.filter((item) => item.occupancy_status === 'checked_in').filter((item) => matchesSearch(item, searchValue)),
+    [items, searchValue]
   )
+  const duplicateGuestMap = useMemo(() => buildDuplicateGuestMap(items), [items])
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-8">
@@ -364,7 +210,14 @@ export function ArrivalsGroups({ initialDate = '' }: { initialDate?: string }) {
               </div>
               <label className="block">
                 <span className="text-sm font-medium text-neutral-800">Пошук гостя або номера</span>
-                <input type="text" inputMode="search" placeholder="Телефон, ПІБ або номер" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} className={fieldClass} />
+                <input
+                  type="text"
+                  inputMode="search"
+                  placeholder="Телефон, ПІБ або номер"
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  className={fieldClass}
+                />
               </label>
               <button
                 type="button"
@@ -388,21 +241,21 @@ export function ArrivalsGroups({ initialDate = '' }: { initialDate?: string }) {
                 <div>
                   <div className="text-lg font-semibold text-neutral-900">Очікують заселення</div>
                 </div>
-                <div className="rounded-full bg-[var(--crm-wine-soft)] px-3 py-1.5 text-sm font-semibold text-[var(--crm-wine)]">{pendingGroups.length}</div>
+                <div className="rounded-full bg-[var(--crm-wine-soft)] px-3 py-1.5 text-sm font-semibold text-[var(--crm-wine)]">{pendingItems.length}</div>
               </div>
 
               {loading ? (
                 <div className="mt-4 rounded-2xl bg-neutral-50 px-4 py-4 text-sm text-neutral-600">Завантаження заїздів...</div>
-              ) : pendingGroups.length === 0 ? (
+              ) : pendingItems.length === 0 ? (
                 <div className="mt-4 rounded-2xl bg-neutral-50 px-4 py-4 text-sm text-neutral-600">Немає номерів, які очікують заселення.</div>
               ) : (
-                <div className={getBookingCardsGridClass(pendingGroups.length)}>
-                  {pendingGroups.map(({ fullGroup, displayGroup }) => (
+                <div className={getPreviewCardsGridClass(pendingItems.length)}>
+                  {pendingItems.map((item) => (
                     <ArrivalBookingCard
-                      key={`${displayGroup.id}-pending`}
-                      group={displayGroup}
-                      fullGroup={fullGroup}
+                      key={`${item.id}-pending`}
+                      item={item}
                       appliedDate={appliedDate}
+                      showRoomHint={(duplicateGuestMap.get(getDuplicateGuestKey(item)) || 0) > 1}
                     />
                   ))}
                 </div>
@@ -414,19 +267,19 @@ export function ArrivalsGroups({ initialDate = '' }: { initialDate?: string }) {
                 <div>
                   <div className="text-lg font-semibold text-[var(--crm-vine-dark)]">Заселені</div>
                 </div>
-                <div className="rounded-full bg-[var(--crm-vine)] px-3 py-1.5 text-sm font-semibold text-white">{checkedInGroups.length}</div>
+                <div className="rounded-full bg-[var(--crm-vine)] px-3 py-1.5 text-sm font-semibold text-white">{checkedInItems.length}</div>
               </div>
 
-              {loading ? null : checkedInGroups.length === 0 ? (
+              {loading ? null : checkedInItems.length === 0 ? (
                 <div className="mt-4 rounded-2xl bg-[var(--crm-vine-soft)] px-4 py-4 text-sm text-[var(--crm-vine-dark)]">Поки немає номерів, які вже заселили на цю дату.</div>
               ) : (
-                <div className={getBookingCardsGridClass(checkedInGroups.length)}>
-                  {checkedInGroups.map(({ fullGroup, displayGroup }) => (
+                <div className={getPreviewCardsGridClass(checkedInItems.length)}>
+                  {checkedInItems.map((item) => (
                     <ArrivalBookingCard
-                      key={`${displayGroup.id}-checked-in`}
-                      group={displayGroup}
-                      fullGroup={fullGroup}
+                      key={`${item.id}-checked-in`}
+                      item={item}
                       appliedDate={appliedDate}
+                      showRoomHint={(duplicateGuestMap.get(getDuplicateGuestKey(item)) || 0) > 1}
                     />
                   ))}
                 </div>

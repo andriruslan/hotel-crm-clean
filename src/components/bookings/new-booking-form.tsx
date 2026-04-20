@@ -84,6 +84,8 @@ const primaryButtonClass =
   'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)] disabled:opacity-60'
 const secondaryButtonClass =
   'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] px-4 text-sm font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(143,45,86,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)] disabled:opacity-60'
+const dialogButtonClass =
+  'inline-flex min-h-11 min-w-32 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-6 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)] disabled:opacity-60'
 const counterButtonClass =
   'flex h-12 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] text-xl font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(143,45,86,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)]'
 const counterPrimaryButtonClass =
@@ -1297,15 +1299,17 @@ export function NewBookingForm() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="booking-created-title"
-            className="w-full max-w-md rounded-[28px] border border-[var(--crm-vine-border)] bg-white px-5 py-5 shadow-2xl sm:px-6 sm:py-6"
+            className="w-full max-w-[32rem] rounded-[28px] border border-[var(--crm-vine-border)] bg-white px-5 py-5 shadow-2xl sm:px-6 sm:py-6"
           >
             <div id="booking-created-title" className="text-xl font-bold text-neutral-900">
               Бронювання записано
             </div>
             <div className="mt-3 text-sm leading-6 text-neutral-700">{bookingCreatedMessage}</div>
-            <button type="button" onClick={handleCloseBookingCreatedMessage} className={`mt-5 ${primaryButtonClass}`}>
-              Ок
-            </button>
+            <div className="mt-5 flex justify-center">
+              <button type="button" onClick={handleCloseBookingCreatedMessage} className={dialogButtonClass}>
+                Ок
+              </button>
+            </div>
           </div>
         </div>
       ) : null}

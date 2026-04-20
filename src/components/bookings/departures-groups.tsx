@@ -144,7 +144,7 @@ function DepartureBookingCard({
     return (
       <Link
         href={`/bookings/departures/${item.id}?date=${encodeURIComponent(appliedDate)}`}
-        className="block h-full rounded-3xl border-2 border-[var(--crm-wine-border)] bg-white/95 px-3 py-3 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:shadow-lg sm:px-3.5 sm:py-3.5"
+        className="block rounded-3xl border-2 border-[var(--crm-wine-border)] bg-white/95 px-3 py-3 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:shadow-lg sm:px-3.5 sm:py-3.5"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
