@@ -29,8 +29,8 @@ type PaymentResponse = {
 }
 
 const sectionClass = 'rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-4 py-4 shadow-sm sm:px-5 sm:py-5'
-const secondaryButtonClass =
-  'h-12 w-full rounded-2xl border border-[var(--crm-wine)] bg-[var(--crm-wine-soft)] px-4 text-sm font-semibold text-[var(--crm-wine)] shadow-sm transition hover:bg-[var(--crm-wine-soft-hover)] disabled:opacity-60'
+const inlineButtonClass =
+  'inline-flex min-h-11 items-center justify-center rounded-2xl border border-[var(--crm-wine)] bg-[var(--crm-wine-soft)] px-4 text-sm font-semibold text-[var(--crm-wine)] shadow-sm transition hover:bg-[var(--crm-wine-soft-hover)] disabled:opacity-60'
 
 export function ArrivalRoomPage({
   bookingId,
@@ -269,9 +269,9 @@ export function ArrivalRoomPage({
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-8">
-      <div className="mx-auto max-w-5xl space-y-3">
+      <div className="mx-auto max-w-3xl space-y-3">
         <section className={sectionClass}>
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Картка заселення</h1>
@@ -292,7 +292,7 @@ export function ArrivalRoomPage({
             <div>
               <Link
                 href={`/bookings/arrivals?date=${encodeURIComponent(dateInputToIso(safeInitialDate))}`}
-                className={`inline-flex min-h-11 items-center justify-center rounded-2xl px-4 ${secondaryButtonClass}`}
+                className={inlineButtonClass}
               >
                 Повернутися до заїздів
               </Link>
@@ -326,7 +326,7 @@ export function ArrivalRoomPage({
             <div className="mt-4">
               <Link
                 href={`/bookings/arrivals?date=${encodeURIComponent(dateInputToIso(safeInitialDate))}`}
-                className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-[var(--crm-wine)] bg-[var(--crm-wine-soft)] px-4 text-sm font-semibold text-[var(--crm-wine)] shadow-sm transition hover:bg-[var(--crm-wine-soft-hover)]"
+                className={inlineButtonClass}
               >
                 Повернутися до заїздів
               </Link>

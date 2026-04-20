@@ -58,15 +58,11 @@ function getPaymentBadgeClass(status: PaymentStatus) {
 }
 
 function getPreviewCardsGridClass(itemsCount: number) {
-  if (itemsCount <= 1) {
-    return 'mt-4 grid gap-3'
+  if (itemsCount <= 0) {
+    return 'mt-4'
   }
 
-  if (itemsCount <= 4) {
-    return 'mt-4 grid gap-3 min-[700px]:grid-cols-2'
-  }
-
-  return 'mt-4 grid gap-3 min-[700px]:grid-cols-2 min-[1280px]:grid-cols-3'
+  return 'mt-4 flex flex-wrap items-start gap-3'
 }
 
 function buildDuplicateGuestMap(items: ArrivalGroupItem[]) {
@@ -105,7 +101,7 @@ function ArrivalBookingCard({
   return (
     <Link
       href={`/bookings/arrivals/${item.id}?date=${encodeURIComponent(appliedDate)}`}
-      className={`block rounded-3xl border-2 px-3.5 py-3.5 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:shadow-lg sm:px-4 sm:py-4 ${
+      className={`block w-full self-start min-[700px]:w-[calc(50%-0.375rem)] min-[1180px]:w-[calc(33.333%-0.5rem)] min-[1480px]:w-[calc(25%-0.5625rem)] rounded-3xl border-2 px-3 py-3 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:shadow-lg sm:px-3.5 sm:py-3.5 ${
         item.occupancy_status === 'checked_in'
           ? 'border-[var(--crm-vine-border)] bg-[var(--crm-vine-soft)] hover:border-[var(--crm-vine-dark)]'
           : 'border-[var(--crm-wine-border)] bg-white/95 hover:border-[var(--crm-wine)]'
@@ -113,8 +109,8 @@ function ArrivalBookingCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <div className="text-base font-bold text-neutral-900 sm:text-lg">{normalizePhone(item.guest_phone || '') || 'Телефон не вказано'}</div>
-          {visibleGuestName ? <div className="mt-1 text-sm text-neutral-700">{visibleGuestName}</div> : null}
+          <div className="whitespace-nowrap text-base font-bold text-neutral-900 sm:text-lg">{normalizePhone(item.guest_phone || '') || 'Телефон не вказано'}</div>
+          {visibleGuestName ? <div className="mt-1 break-words text-sm leading-5 text-neutral-700">{visibleGuestName}</div> : null}
           {showRoomHint ? <div className="mt-2 text-xs font-medium text-neutral-500">{`Номер ${item.room_number}`}</div> : null}
         </div>
 

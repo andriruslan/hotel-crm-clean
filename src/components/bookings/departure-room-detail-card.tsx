@@ -27,7 +27,7 @@ export type DepartureRoomDetailItem = {
 const fieldClass =
   'mt-1.5 h-12 w-full rounded-2xl border border-neutral-300 bg-white px-3.5 text-[16px] text-neutral-900 outline-none transition focus:border-neutral-700 focus:ring-4 focus:ring-neutral-200'
 const textareaClass =
-  'mt-2 min-h-28 w-full rounded-2xl border border-neutral-300 bg-white px-3.5 py-3 text-[16px] text-neutral-900 outline-none transition focus:border-neutral-700 focus:ring-4 focus:ring-neutral-200'
+  'mt-2 min-h-24 w-full rounded-2xl border border-neutral-300 bg-white px-3.5 py-3 text-[16px] text-neutral-900 outline-none transition focus:border-neutral-700 focus:ring-4 focus:ring-neutral-200'
 const secondaryButtonClass =
   'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] px-4 text-sm font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(143,45,86,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)] disabled:opacity-60'
 const primaryButtonClass =
@@ -105,7 +105,7 @@ export function DepartureRoomDetailCard({
 
   return (
     <article
-      className={`rounded-3xl border px-4 py-4 shadow-sm ${
+      className={`mx-auto max-w-[920px] rounded-3xl border px-4 py-4 shadow-sm ${
         isCheckedOut
           ? 'border-[var(--crm-vine-border)] bg-[var(--crm-vine-soft)]'
           : hasDebt
@@ -113,7 +113,7 @@ export function DepartureRoomDetailCard({
             : 'border-[var(--crm-wine-border)] bg-[var(--crm-panel)]'
       }`}
     >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
         <div>
           <div className="text-lg font-bold text-neutral-900">
             {`Номер ${item.room_number}${item.building_name ? ` (${item.building_name.toLowerCase()})` : ''}`}
@@ -134,34 +134,34 @@ export function DepartureRoomDetailCard({
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
+      <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-3">
+        <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
           <div className="text-xs uppercase tracking-wide text-neutral-500">Заїзд</div>
           <div className="mt-1 font-semibold text-neutral-900">{formatDateForDisplay(item.check_in_date)}</div>
         </div>
-        <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
+        <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
           <div className="text-xs uppercase tracking-wide text-neutral-500">Виїзд</div>
           <div className="mt-1 font-semibold text-neutral-900">{formatDateForDisplay(item.check_out_date)}</div>
         </div>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
+      <div className="mt-2 grid grid-cols-2 gap-2 lg:grid-cols-3">
+        <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
           <div className="text-xs uppercase tracking-wide text-neutral-500">Вартість</div>
           <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPrice)}</div>
         </div>
-        <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
+        <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
           <div className="text-xs uppercase tracking-wide text-neutral-500">Оплата</div>
           <div className="mt-1 font-semibold text-neutral-900">{getPaymentDueStageLabel(item.payment_due_stage)}</div>
         </div>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
+      <div className="mt-2 grid grid-cols-2 gap-2 lg:grid-cols-3">
+        <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
           <div className="text-xs uppercase tracking-wide text-neutral-500">Оплачено</div>
           <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPaid)}</div>
         </div>
-        <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
+        <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
           <div className="text-xs uppercase tracking-wide text-neutral-500">Залишок</div>
           <div className={`mt-1 font-semibold ${hasDebt && !isCheckedOut ? 'text-[var(--crm-danger)]' : 'text-[var(--crm-vine-dark)]'}`}>
             {formatMoney(balance)}
