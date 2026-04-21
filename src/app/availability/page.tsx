@@ -62,17 +62,17 @@ type MatrixSelection = {
 }
 
 const fieldClass =
-  'mt-1.5 h-12 w-full rounded-2xl border border-neutral-300 bg-white px-3.5 text-[15px] text-neutral-900 outline-none transition focus:border-neutral-700 focus:ring-4 focus:ring-neutral-200 sm:text-[16px]'
+  'mt-1.5 h-12 w-full rounded-2xl border border-neutral-300 bg-white px-3.5 text-[15px] text-neutral-900 outline-none transition focus:border-neutral-700 focus:ring-4 focus:ring-neutral-200 sm:text-[16px] lg:h-10 lg:px-3 lg:text-[14px]'
 
 const sectionClass = 'rounded-3xl border border-[var(--crm-wine-border)] bg-white/95 px-3.5 py-3.5 shadow-sm sm:px-5 sm:py-5'
 const primaryButtonClass =
-  'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 text-[13px] font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)] disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm'
+  'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 text-[13px] font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)] disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm lg:h-10 lg:text-[12px]'
 const secondaryButtonClass =
-  'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] px-4 text-[13px] font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(143,45,86,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)] disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm'
+  'h-12 w-full rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] px-4 text-[13px] font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(143,45,86,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)] disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm lg:h-10 lg:text-[12px]'
 const counterButtonClass =
-  'flex h-12 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] text-xl font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(143,45,86,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)]'
+  'flex h-12 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] text-xl font-semibold text-[var(--crm-wine-dark)] shadow-[0_8px_20px_rgba(143,45,86,0.1)] transition hover:bg-[var(--crm-wine-soft-hover)] lg:h-10 lg:text-lg'
 const counterPrimaryButtonClass =
-  'flex h-12 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] text-xl font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)]'
+  'flex h-12 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] text-xl font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)] lg:h-10 lg:text-lg'
 
 function parseIntegerValue(value: string) {
   const digits = value.replace(/\D/g, '')
@@ -98,8 +98,8 @@ function CompositionField({
 }) {
   return (
     <label className="block">
-      <span className="text-[13px] font-medium text-neutral-800 sm:text-sm">{label}</span>
-      <div className="mt-1.5 grid grid-cols-[3rem_minmax(0,1fr)_3rem] gap-2">
+      <span className="text-[13px] font-medium text-neutral-800 sm:text-sm lg:text-[12px]">{label}</span>
+      <div className="mt-1.5 grid grid-cols-[3rem_minmax(0,1fr)_3rem] gap-2 lg:mt-1 lg:grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] lg:gap-1.5">
         <button type="button" onClick={() => onChange(Math.max(0, value - 1))} className={counterButtonClass}>
           -
         </button>
@@ -730,11 +730,11 @@ export default function AvailabilityPage() {
   return (
     <main className="min-h-screen bg-[var(--background)] px-3 pt-3 pb-4 sm:px-4 sm:pt-4 sm:pb-5 lg:px-5 lg:pt-5 lg:pb-6 xl:pb-8">
       <div className="mx-auto w-full max-w-[1280px] space-y-4 lg:grid lg:grid-cols-[300px_minmax(0,1fr)] lg:items-start lg:gap-4 lg:space-y-0">
-        <section className={`${sectionClass} lg:mx-0 lg:max-w-none`}>
+        <section className={`${sectionClass} lg:mx-0 lg:max-w-none lg:px-3 lg:py-3`}>
             <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Доступність номерів</h1>
-            <form onSubmit={handleSearch} className="mt-4 grid gap-3">
-              <div className="space-y-3">
-                <div className="grid min-w-0 grid-cols-2 gap-3">
+            <form onSubmit={handleSearch} className="mt-4 grid gap-3 lg:mt-3 lg:gap-2.5">
+              <div className="space-y-3 lg:space-y-2.5">
+                <div className="grid min-w-0 grid-cols-2 gap-3 lg:gap-2">
                   <label className="block min-w-0">
                     <span className="block text-center text-[13px] font-medium text-neutral-800 sm:text-sm">Дата заїзду</span>
                     <DatePickerField
@@ -761,7 +761,7 @@ export default function AvailabilityPage() {
                   </label>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3 lg:gap-2">
                   <button type="button" onClick={() => void handleQuickPeriod(7)} disabled={loading} className={secondaryButtonClass}>
                     Тиждень
                   </button>
@@ -771,14 +771,14 @@ export default function AvailabilityPage() {
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-4">
+              <div className="rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-4 lg:px-3 lg:py-3">
                 <div className="text-[13px] font-semibold text-[var(--crm-wine)] sm:text-sm">Склад гостей</div>
-                <div className="mt-3 grid gap-3 min-[820px]:grid-cols-3 lg:grid-cols-1">
+                <div className="mt-3 grid gap-3 min-[820px]:grid-cols-3 lg:mt-2 lg:grid-cols-1 lg:gap-2">
                   <CompositionField label="Гості" value={adultsCount} onChange={setAdultsCount} />
                   <CompositionField label="Додаткові гості" value={children6PlusCount} onChange={setChildren6PlusCount} />
                   <CompositionField label="До 6 років" value={childrenUnder6Count} onChange={setChildrenUnder6Count} />
                 </div>
-                <div className="mt-4 rounded-2xl bg-white px-3 py-3 text-[13px] leading-6 text-neutral-700 shadow-sm sm:text-sm">
+                <div className="mt-4 rounded-2xl bg-white px-3 py-3 text-[13px] leading-6 text-neutral-700 shadow-sm sm:text-sm lg:mt-3 lg:px-3 lg:py-2">
                   <div className="mt-1">Всього: {guestsCount}</div>
                 </div>
               </div>
