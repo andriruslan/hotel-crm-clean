@@ -464,7 +464,7 @@ function SingleDayAvailabilityGrid({
   onToggleRoom: (roomId: string) => void
 }) {
   return (
-    <div className="flex flex-wrap gap-2.5">
+    <div className="grid grid-cols-1 gap-2.5 min-[620px]:justify-center min-[620px]:[grid-template-columns:repeat(auto-fit,minmax(260px,320px))]">
       {items.map((item) => {
         const isSelected = selectedRoomIds.includes(item.room_id)
 
@@ -474,7 +474,7 @@ function SingleDayAvailabilityGrid({
               key={item.room_id}
               type="button"
               onClick={() => onToggleRoom(item.room_id)}
-              className={`w-full min-[620px]:w-[calc(50%-0.3125rem)] min-[980px]:w-[calc(33.333%-0.4375rem)] min-[1480px]:w-[calc(25%-0.5rem)] rounded-3xl border-2 bg-white/90 px-3 py-3 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3.5 sm:py-3.5 ${
+              className={`w-full rounded-3xl border-2 bg-white/90 px-3 py-3 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3.5 sm:py-3.5 ${
                 isSelected
                   ? 'border-[var(--crm-wine)] ring-2 ring-[var(--crm-wine)] ring-inset'
                   : 'border-[var(--crm-wine-border)] hover:border-[var(--crm-wine)]'
@@ -506,7 +506,7 @@ function SingleDayAvailabilityGrid({
           <Link
             key={item.room_id}
             href={createHref(item)}
-            className="block w-full min-[620px]:w-[calc(50%-0.3125rem)] min-[980px]:w-[calc(33.333%-0.4375rem)] min-[1480px]:w-[calc(25%-0.5rem)] rounded-3xl border-2 border-[var(--crm-wine-border)] bg-white/90 px-3 py-3 shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3.5 sm:py-3.5"
+            className="block w-full rounded-3xl border-2 border-[var(--crm-wine-border)] bg-white/90 px-3 py-3 shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3.5 sm:py-3.5"
           >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
@@ -728,7 +728,7 @@ export default function AvailabilityPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--background)] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-6 xl:py-8">
+    <main className="min-h-screen bg-[var(--background)] px-3 pt-5 pb-4 sm:px-4 sm:pt-6 sm:pb-5 lg:px-6 lg:pt-7 lg:pb-6 xl:pt-8 xl:pb-8">
       <div className="mx-auto w-full max-w-[1320px] space-y-3">
         <section className={sectionClass}>
             <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Доступність номерів</h1>
@@ -811,7 +811,7 @@ export default function AvailabilityPage() {
             ) : null}
 
             {items.length > 0 ? (
-              <div className={sectionClass}>
+              <div className={showDailyBreakdown ? sectionClass : `${sectionClass} mx-auto max-w-[1080px]`}>
                 <div className="flex flex-col gap-1 border-b border-neutral-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <div className="text-lg font-semibold text-neutral-900">
