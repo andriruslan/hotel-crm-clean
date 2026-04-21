@@ -24,6 +24,7 @@ type RoomTypeRow = {
 }
 
 type BookingRangeRow = {
+  id: string
   room_id: string
   check_in_date: string
   check_out_date: string
@@ -83,7 +84,7 @@ export async function GET(request: NextRequest) {
 
     const { data: conflictingBookings, error: bookingsError } = await supabaseAdmin
       .from('bookings')
-      .select('room_id, check_in_date, check_out_date')
+      .select('id, room_id, check_in_date, check_out_date')
       .neq('status', 'canceled')
       .lt('check_in_date', checkOut)
       .gt('check_out_date', checkIn)
@@ -117,6 +118,17 @@ export async function GET(request: NextRequest) {
         const freeDates = requestedDates.filter((requestedDate) =>
           roomBookings.every((booking) => !(booking.check_in_date <= requestedDate && booking.check_out_date > requestedDate))
         )
+        const occupiedBookingIdsByDate = requestedDates.reduce<Record<string, string>>((accumulator, requestedDate) => {
+          const matchingBooking = roomBookings.find(
+            (booking) => booking.check_in_date <= requestedDate && booking.check_out_date > requestedDate
+          )
+
+          if (matchingBooking) {
+            accumulator[requestedDate] = matchingBooking.id
+          }
+
+          return accumulator
+        }, {})
         const isFullyAvailable = freeDates.length === requestedDates.length
         const paidExtraBedsCount =
           Number.isFinite(adultsCount) && Number.isFinite(childrenUnder6Count) && Number.isFinite(children6PlusCount)
@@ -156,6 +168,7 @@ export async function GET(request: NextRequest) {
           price_extra_total: pricing.priceExtraTotal,
           price_total: pricing.priceTotal,
           free_dates: freeDates,
+          occupied_booking_ids_by_date: occupiedBookingIdsByDate,
           free_dates_count: freeDates.length,
           is_fully_available: isFullyAvailable,
         }

@@ -61,6 +61,23 @@ type MatrixSelection = {
   dateValue: string
 }
 
+type BuildingFilterValue = 'all' | '1' | '2' | '3'
+type RoomTypeFilterValue = 'all' | 'lux' | 'semi_lux' | 'standard'
+
+const buildingFilterOptions: Array<{ value: BuildingFilterValue; label: string }> = [
+  { value: 'all', label: 'Усі корпуси' },
+  { value: '1', label: '1 Корпус' },
+  { value: '2', label: '2 Корпус' },
+  { value: '3', label: '3 Корпус' },
+]
+
+const roomTypeFilterOptions: Array<{ value: RoomTypeFilterValue; label: string }> = [
+  { value: 'all', label: 'Усі типи' },
+  { value: 'lux', label: 'Люкс' },
+  { value: 'semi_lux', label: 'НапівЛ.' },
+  { value: 'standard', label: 'Стан.' },
+]
+
 const fieldClass =
   'mt-1.5 h-12 w-full rounded-2xl border border-neutral-300 bg-white px-3.5 text-[15px] text-neutral-900 outline-none transition focus:border-neutral-700 focus:ring-4 focus:ring-neutral-200 sm:text-[16px] lg:h-10 lg:px-3 lg:text-[14px]'
 
@@ -289,6 +306,16 @@ function createDailyBookingHref(item: AvailabilityItem, dateValue: string, compo
   return createBookingHref(item, checkIn, checkOut, composition)
 }
 
+function createOccupiedArrivalHref(item: AvailabilityItem, dateValue: string) {
+  const bookingId = item.occupied_booking_ids_by_date[dateValue]
+
+  if (!bookingId) {
+    return ''
+  }
+
+  return `/bookings/arrivals/${bookingId}?date=${encodeURIComponent(dateValue)}`
+}
+
 function getWeekdayShortLabel(value: string) {
   const parsed = new Date(`${value}T00:00:00`)
 
@@ -307,6 +334,83 @@ function getCompactDateLabel(value: string) {
   }
 
   return new Intl.DateTimeFormat('uk-UA', { day: '2-digit', month: '2-digit' }).format(parsed)
+}
+
+function normalizeFilterValue(value: string) {
+  return value.toLocaleLowerCase('uk-UA').trim()
+}
+
+function matchesBuildingFilter(item: AvailabilityItem, selectedBuildingFilter: BuildingFilterValue) {
+  if (selectedBuildingFilter === 'all') {
+    return true
+  }
+
+  const normalizedBuildingName = normalizeFilterValue(item.building_name)
+  return normalizedBuildingName.includes(`корпус ${selectedBuildingFilter}`) || normalizedBuildingName.includes(selectedBuildingFilter)
+}
+
+function matchesRoomTypeFilter(item: AvailabilityItem, selectedRoomTypeFilter: RoomTypeFilterValue) {
+  if (selectedRoomTypeFilter === 'all') {
+    return true
+  }
+
+  const normalizedRoomTypeName = normalizeFilterValue(item.room_type_name)
+
+  if (selectedRoomTypeFilter === 'semi_lux') {
+    return normalizedRoomTypeName.includes('напів')
+  }
+
+  if (selectedRoomTypeFilter === 'lux') {
+    return normalizedRoomTypeName.includes('люкс') && !normalizedRoomTypeName.includes('напів')
+  }
+
+  return normalizedRoomTypeName.includes('станд')
+}
+
+function FilterRadioGroup<TValue extends string>({
+  legend,
+  name,
+  value,
+  options,
+  onChange,
+}: {
+  legend: string
+  name: string
+  value: TValue
+  options: Array<{ value: TValue; label: string }>
+  onChange: (nextValue: TValue) => void
+}) {
+  return (
+    <fieldset className="space-y-2">
+      <legend className="text-[13px] font-semibold text-[var(--crm-wine)] sm:text-sm">{legend}</legend>
+      <div className="flex flex-wrap gap-2">
+        {options.map((option) => {
+          const isActive = option.value === value
+
+          return (
+            <label
+              key={option.value}
+              className={`inline-flex min-h-10 cursor-pointer items-center justify-center rounded-2xl border px-3 py-2 text-sm font-semibold shadow-sm transition ${
+                isActive
+                  ? 'border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] text-white'
+                  : 'border-[var(--crm-wine-border)] bg-[var(--crm-panel)] text-neutral-900 hover:bg-[var(--crm-wine-soft-hover)]'
+              }`}
+            >
+              <input
+                type="radio"
+                name={name}
+                value={option.value}
+                checked={isActive}
+                onChange={() => onChange(option.value)}
+                className="sr-only"
+              />
+              {option.label}
+            </label>
+          )
+        })}
+      </div>
+    </fieldset>
+  )
 }
 
 function MultiDayAvailabilityMatrix({
@@ -405,8 +509,23 @@ function MultiDayAvailabilityMatrix({
                         ? 'bg-white text-[var(--crm-vine-dark)]'
                         : 'bg-neutral-200 text-neutral-400'
                     }`
-
                     if (!isFree) {
+                      const occupiedArrivalHref = createOccupiedArrivalHref(item, dateValue)
+
+                      if (occupiedArrivalHref) {
+                        return (
+                          <Link
+                            key={`${item.room_id}-${dateValue}`}
+                            href={occupiedArrivalHref}
+                            className={`flex items-center justify-center rounded-none transition hover:brightness-[0.98] ${cellClassName}`}
+                            style={{ touchAction: 'pan-x' }}
+                            scroll={false}
+                          >
+                            <div className={contentClassName}>—</div>
+                          </Link>
+                        )
+                      }
+
                       return (
                         <div key={`${item.room_id}-${dateValue}`} className={`flex items-center justify-center ${cellClassName}`}>
                           <div className={contentClassName}>—</div>
@@ -538,6 +657,8 @@ export default function AvailabilityPage() {
   const [children6PlusCount, setChildren6PlusCount] = useState(0)
   const [loading, setLoading] = useState(false)
   const [items, setItems] = useState<AvailabilityItem[]>([])
+  const [selectedBuildingFilter, setSelectedBuildingFilter] = useState<BuildingFilterValue>('all')
+  const [selectedRoomTypeFilter, setSelectedRoomTypeFilter] = useState<RoomTypeFilterValue>('all')
   const [isMultiSelectEnabled, setIsMultiSelectEnabled] = useState(false)
   const [isMultiDateSelectEnabled, setIsMultiDateSelectEnabled] = useState(false)
   const [selectedRoomIds, setSelectedRoomIds] = useState<string[]>([])
@@ -661,16 +782,36 @@ export default function AvailabilityPage() {
     () => (selectedCheckInIso && selectedCheckOutIso ? getDatesInRange(selectedCheckInIso, selectedCheckOutIso) : []),
     [selectedCheckInIso, selectedCheckOutIso]
   )
+  const filteredItems = useMemo(
+    () =>
+      items.filter(
+        (item) =>
+          matchesBuildingFilter(item, selectedBuildingFilter) &&
+          matchesRoomTypeFilter(item, selectedRoomTypeFilter)
+      ),
+    [items, selectedBuildingFilter, selectedRoomTypeFilter]
+  )
+  const filteredRoomIdsSet = useMemo(() => new Set(filteredItems.map((item) => item.room_id)), [filteredItems])
   const selectedItems = useMemo(
-    () => items.filter((item) => selectedRoomIds.includes(item.room_id)),
-    [items, selectedRoomIds]
+    () => filteredItems.filter((item) => selectedRoomIds.includes(item.room_id)),
+    [filteredItems, selectedRoomIds]
   )
   const selectedRoomSelections = useMemo(
-    () => buildRoomSelectionsFromMatrix(items, selectedCellKeys),
-    [items, selectedCellKeys]
+    () => buildRoomSelectionsFromMatrix(filteredItems, selectedCellKeys),
+    [filteredItems, selectedCellKeys]
   )
   const showDailyBreakdown =
     Boolean(selectedCheckInIso) && Boolean(selectedCheckOutIso) && getNights(selectedCheckInIso, selectedCheckOutIso) > 1
+
+  useEffect(() => {
+    setSelectedRoomIds((current) => current.filter((roomId) => filteredRoomIdsSet.has(roomId)))
+    setSelectedCellKeys((current) =>
+      current.filter((key) => {
+        const selection = parseMatrixSelectionKey(key)
+        return selection ? filteredRoomIdsSet.has(selection.roomId) : false
+      })
+    )
+  }, [filteredRoomIdsSet])
 
   function handleToggleMultiSelect(enabled: boolean) {
     setIsMultiSelectEnabled(enabled)
@@ -815,81 +956,104 @@ export default function AvailabilityPage() {
                 <div className="flex flex-col gap-1 border-b border-neutral-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <div className="text-lg font-semibold text-neutral-900">
-                      {showDailyBreakdown ? 'Вільні номери по днях' : 'Вільні номери'}
+                      {showDailyBreakdown ? '?????? ?????? ?? ????' : '?????? ??????'}
                     </div>
                   </div>
                   <div className="text-sm font-medium text-neutral-500">
-                    {showDailyBreakdown ? `${selectedDates.length} дн.` : `${items.length} номер(и)`}
+                    {showDailyBreakdown ? `${selectedDates.length} ??.` : `${filteredItems.length} ?????(?)`}
                   </div>
                 </div>
 
-                <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                    <label className="inline-flex min-h-11 items-center gap-3 rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-2 text-sm font-semibold text-neutral-900 shadow-sm">
-                      <input
-                        type="checkbox"
-                        checked={isMultiSelectEnabled}
-                        onChange={(e) => handleToggleMultiSelect(e.target.checked)}
-                        className="h-5 w-5 rounded border-[var(--crm-wine-border)] text-[var(--crm-wine)] accent-[var(--crm-wine)]"
-                      />
-                      Обрати кілька номерів
-                    </label>
+                <div className="mt-4 space-y-4">
+                  <div className="grid gap-3 xl:grid-cols-2">
+                    <FilterRadioGroup
+                      legend="??????"
+                      name="availability-building-filter"
+                      value={selectedBuildingFilter}
+                      options={buildingFilterOptions}
+                      onChange={setSelectedBuildingFilter}
+                    />
+                    <FilterRadioGroup
+                      legend="??? ??????"
+                      name="availability-room-type-filter"
+                      value={selectedRoomTypeFilter}
+                      options={roomTypeFilterOptions}
+                      onChange={setSelectedRoomTypeFilter}
+                    />
+                  </div>
 
-                    {showDailyBreakdown ? (
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                       <label className="inline-flex min-h-11 items-center gap-3 rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-2 text-sm font-semibold text-neutral-900 shadow-sm">
                         <input
                           type="checkbox"
-                          checked={isMultiDateSelectEnabled}
-                          onChange={(e) => handleToggleMultiDateSelect(e.target.checked)}
+                          checked={isMultiSelectEnabled}
+                          onChange={(e) => handleToggleMultiSelect(e.target.checked)}
                           className="h-5 w-5 rounded border-[var(--crm-wine-border)] text-[var(--crm-wine)] accent-[var(--crm-wine)]"
                         />
-                        Обрати кілька дат
+                        ?????? ?????? ???????
                       </label>
+
+                      {showDailyBreakdown ? (
+                        <label className="inline-flex min-h-11 items-center gap-3 rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-2 text-sm font-semibold text-neutral-900 shadow-sm">
+                          <input
+                            type="checkbox"
+                            checked={isMultiDateSelectEnabled}
+                            onChange={(e) => handleToggleMultiDateSelect(e.target.checked)}
+                            className="h-5 w-5 rounded border-[var(--crm-wine-border)] text-[var(--crm-wine)] accent-[var(--crm-wine)]"
+                          />
+                          ?????? ?????? ???
+                        </label>
+                      ) : null}
+                    </div>
+
+                    {showDailyBreakdown && (isMultiSelectEnabled || isMultiDateSelectEnabled) ? (
+                      selectedRoomSelections.length > 0 ? (
+                        <Link
+                          href={createMatrixBookingHref(selectedRoomSelections, searchComposition)}
+                          className="inline-flex min-h-11 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)]"
+                        >
+                          {`??????? ? ${selectedRoomSelections.length} ???????(?)`}
+                        </Link>
+                      ) : (
+                        <div className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-100 px-4 py-2 text-sm font-semibold text-neutral-500">
+                          {isMultiSelectEnabled && isMultiDateSelectEnabled
+                            ? '????? ?????? ???????? ??????? ? ???'
+                            : isMultiSelectEnabled
+                              ? '????? ?????? ?? ???? ????'
+                              : '????? ???? ??? ?????? ??????'}
+                        </div>
+                      )
+                    ) : isMultiSelectEnabled ? (
+                      selectedItems.length > 0 ? (
+                        <Link
+                          href={createMultiRoomBookingHref(
+                            selectedItems,
+                            checkIn,
+                            checkOut,
+                            searchComposition
+                          )}
+                          className="inline-flex min-h-11 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)]"
+                        >
+                          {`??????? ? ${selectedItems.length} ?????(?)`}
+                        </Link>
+                      ) : (
+                        <div className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-100 px-4 py-2 text-sm font-semibold text-neutral-500">
+                          ????? ??????
+                        </div>
+                      )
                     ) : null}
                   </div>
-
-                  {showDailyBreakdown && (isMultiSelectEnabled || isMultiDateSelectEnabled) ? (
-                    selectedRoomSelections.length > 0 ? (
-                      <Link
-                        href={createMatrixBookingHref(selectedRoomSelections, searchComposition)}
-                        className="inline-flex min-h-11 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)]"
-                      >
-                        {`Перейти з ${selectedRoomSelections.length} вибором(и)`}
-                      </Link>
-                    ) : (
-                      <div className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-100 px-4 py-2 text-sm font-semibold text-neutral-500">
-                        {isMultiSelectEnabled && isMultiDateSelectEnabled
-                          ? 'Обери зелені клітинки номерів і дат'
-                          : isMultiSelectEnabled
-                            ? 'Обери номери на одну дату'
-                            : 'Обери дати для одного номера'}
-                      </div>
-                    )
-                  ) : isMultiSelectEnabled ? (
-                    selectedItems.length > 0 ? (
-                      <Link
-                        href={createMultiRoomBookingHref(
-                          selectedItems,
-                          checkIn,
-                          checkOut,
-                          searchComposition
-                        )}
-                        className="inline-flex min-h-11 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)]"
-                      >
-                        {`Перейти з ${selectedItems.length} номер(и)`}
-                      </Link>
-                    ) : (
-                      <div className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-100 px-4 py-2 text-sm font-semibold text-neutral-500">
-                        Обери номери
-                      </div>
-                    )
-                  ) : null}
                 </div>
 
                 <div className="mt-4">
-                  {showDailyBreakdown ? (
+                  {filteredItems.length === 0 ? (
+                    <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4 text-sm leading-6 text-neutral-600">
+                      ?? ???? ????????? ??????? ?? ????????.
+                    </div>
+                  ) : showDailyBreakdown ? (
                     <MultiDayAvailabilityMatrix
-                      items={items}
+                      items={filteredItems}
                       selectedDates={selectedDates}
                       createCellHref={(item, dateValue) => createDailyBookingHref(item, dateValue, searchComposition)}
                       isMultiSelectEnabled={isMultiSelectEnabled}
@@ -899,7 +1063,7 @@ export default function AvailabilityPage() {
                     />
                   ) : (
                     <SingleDayAvailabilityGrid
-                      items={items.filter((item) => item.is_fully_available)}
+                      items={filteredItems.filter((item) => item.is_fully_available)}
                       createHref={(item) => createBookingHref(item, checkIn, checkOut, searchComposition)}
                       isMultiSelectEnabled={isMultiSelectEnabled}
                       selectedRoomIds={selectedRoomIds}

@@ -15,6 +15,7 @@ export type AvailabilityItem = {
   price_extra_total: number
   price_total: number
   free_dates: string[]
+  occupied_booking_ids_by_date: Record<string, string>
   free_dates_count: number
   is_fully_available: boolean
 }

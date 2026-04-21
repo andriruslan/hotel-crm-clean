@@ -370,6 +370,7 @@ function buildDraftRoomFromQueryPayload(
       price_extra_total: pricing.priceExtraTotal,
       price_total: pricing.priceTotal,
       free_dates: [],
+      occupied_booking_ids_by_date: {},
       free_dates_count: 0,
       is_fully_available: true,
     },
