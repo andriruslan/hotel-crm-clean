@@ -464,7 +464,7 @@ function SingleDayAvailabilityGrid({
   onToggleRoom: (roomId: string) => void
 }) {
   return (
-    <div className="grid grid-cols-1 gap-2.5 min-[620px]:justify-center min-[620px]:[grid-template-columns:repeat(auto-fit,minmax(260px,320px))]">
+    <div className="flex flex-wrap justify-center gap-2.5">
       {items.map((item) => {
         const isSelected = selectedRoomIds.includes(item.room_id)
 
@@ -474,7 +474,7 @@ function SingleDayAvailabilityGrid({
               key={item.room_id}
               type="button"
               onClick={() => onToggleRoom(item.room_id)}
-              className={`w-full rounded-3xl border-2 bg-white/90 px-3 py-3 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3.5 sm:py-3.5 ${
+              className={`w-full min-[620px]:w-[calc(50%-0.3125rem)] min-[1180px]:w-[calc(33.333%-0.5rem)] max-w-[360px] rounded-3xl border-2 bg-white/90 px-3 py-3 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3.5 sm:py-3.5 ${
                 isSelected
                   ? 'border-[var(--crm-wine)] ring-2 ring-[var(--crm-wine)] ring-inset'
                   : 'border-[var(--crm-wine-border)] hover:border-[var(--crm-wine)]'
@@ -506,7 +506,7 @@ function SingleDayAvailabilityGrid({
           <Link
             key={item.room_id}
             href={createHref(item)}
-            className="block w-full rounded-3xl border-2 border-[var(--crm-wine-border)] bg-white/90 px-3 py-3 shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3.5 sm:py-3.5"
+            className="block w-full min-[620px]:w-[calc(50%-0.3125rem)] min-[1180px]:w-[calc(33.333%-0.5rem)] max-w-[360px] rounded-3xl border-2 border-[var(--crm-wine-border)] bg-white/90 px-3 py-3 shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3.5 sm:py-3.5"
           >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
@@ -728,12 +728,12 @@ export default function AvailabilityPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--background)] px-3 pt-5 pb-4 sm:px-4 sm:pt-6 sm:pb-5 lg:px-6 lg:pt-7 lg:pb-6 xl:pt-8 xl:pb-8">
+    <main className="min-h-screen bg-[var(--background)] px-3 pt-16 pb-4 sm:px-4 sm:pt-20 sm:pb-5 lg:px-6 lg:pt-20 lg:pb-6 xl:pb-8">
       <div className="mx-auto w-full max-w-[1320px] space-y-3">
-        <section className={sectionClass}>
+        <section className={`${sectionClass} mx-auto max-w-[1180px]`}>
             <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Доступність номерів</h1>
-            <form onSubmit={handleSearch} className="mt-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,220px)_minmax(0,220px)_minmax(320px,1fr)_220px] xl:items-end">
-              <div className="space-y-3 lg:col-span-2 xl:col-span-2">
+            <form onSubmit={handleSearch} className="mt-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] 2xl:grid-cols-[minmax(0,220px)_minmax(0,220px)_minmax(320px,1fr)_220px] 2xl:items-end">
+              <div className="space-y-3 lg:col-span-2 2xl:col-span-2">
                 <div className="grid min-w-0 grid-cols-2 gap-3">
                   <label className="block min-w-0">
                     <span className="block text-center text-[13px] font-medium text-neutral-800 sm:text-sm">Дата заїзду</span>
@@ -771,7 +771,7 @@ export default function AvailabilityPage() {
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-4 lg:col-span-2 xl:col-span-1">
+              <div className="rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-4 lg:col-span-2 2xl:col-span-1">
                 <div className="text-[13px] font-semibold text-[var(--crm-wine)] sm:text-sm">Склад гостей</div>
                 <div className="mt-3 grid gap-3 min-[820px]:grid-cols-3">
                   <CompositionField label="Гості" value={adultsCount} onChange={setAdultsCount} />
@@ -783,7 +783,7 @@ export default function AvailabilityPage() {
                 </div>
               </div>
 
-              <div className="lg:col-span-2 xl:col-span-1 xl:self-end">
+              <div className="lg:col-span-2 2xl:col-span-1 2xl:self-end">
                 <button type="submit" disabled={loading} className={primaryButtonClass}>
                   {loading ? 'Перевірка...' : 'Перевірити доступність'}
                 </button>
@@ -791,7 +791,7 @@ export default function AvailabilityPage() {
             </form>
         </section>
 
-        <section ref={resultsRef} className="min-w-0 space-y-3">
+        <section ref={resultsRef} className="mx-auto min-w-0 max-w-[1180px] space-y-3">
             {error ? (
               <div className="rounded-3xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700 shadow-sm sm:px-5">
                 {error}
@@ -811,7 +811,7 @@ export default function AvailabilityPage() {
             ) : null}
 
             {items.length > 0 ? (
-              <div className={showDailyBreakdown ? sectionClass : `${sectionClass} mx-auto max-w-[1080px]`}>
+              <div className={showDailyBreakdown ? sectionClass : `${sectionClass} mx-auto max-w-[1120px]`}>
                 <div className="flex flex-col gap-1 border-b border-neutral-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <div className="text-lg font-semibold text-neutral-900">
