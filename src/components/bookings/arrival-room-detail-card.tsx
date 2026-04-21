@@ -127,144 +127,148 @@ export function ArrivalRoomDetailCard({
 
   return (
     <article
-      className={`mx-auto max-w-[920px] rounded-3xl border px-4 py-4 shadow-sm ${
+      className={`mx-auto w-full max-w-[1080px] rounded-3xl border px-4 py-4 shadow-sm sm:px-5 sm:py-5 ${
         isCheckedIn
           ? 'border-[var(--crm-vine-border)] bg-[var(--crm-vine-soft)]'
           : 'border-[var(--crm-wine-border)] bg-[var(--crm-panel)]'
       }`}
     >
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_240px] lg:gap-5">
         <div>
           <div className="text-lg font-bold text-neutral-900">
             {`Номер ${item.room_number}${item.building_name ? ` (${item.building_name.toLowerCase()})` : ''}`}
           </div>
-        </div>
 
-        <div className="flex flex-wrap gap-2">
-          <span
-            className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-              isCheckedIn ? 'bg-[var(--crm-vine)] text-white' : 'bg-[var(--crm-wine)] text-white'
-            }`}
-          >
-            {isCheckedIn ? 'Заселено' : 'Очікує заселення'}
-          </span>
-          <span className={`rounded-full px-3 py-1.5 text-xs font-semibold ${getPaymentBadgeClass(item.payment_status)}`}>
-            {getPaymentStatusLabel(item.payment_status)}
-          </span>
-        </div>
-      </div>
-
-      <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-3">
-        <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
-          <div className="text-xs uppercase tracking-wide text-neutral-500">Заїзд</div>
-          <div className="mt-1 font-semibold text-neutral-900">{formatDateForDisplay(item.check_in_date)}</div>
-        </div>
-        <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
-          <div className="text-xs uppercase tracking-wide text-neutral-500">Виїзд</div>
-          <div className="mt-1 font-semibold text-neutral-900">{formatDateForDisplay(item.check_out_date)}</div>
-        </div>
-      </div>
-
-      <div className="mt-2 grid grid-cols-2 gap-2 lg:grid-cols-3">
-        <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
-          <div className="text-xs uppercase tracking-wide text-neutral-500">Вартість</div>
-          <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPrice)}</div>
-        </div>
-        <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
-          <div className="text-xs uppercase tracking-wide text-neutral-500">Оплата</div>
-          <div className="mt-1 font-semibold text-neutral-900">{getPaymentDueStageLabel(item.payment_due_stage)}</div>
-        </div>
-      </div>
-
-      <div className="mt-2 grid grid-cols-2 gap-2 lg:grid-cols-3">
-        <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
-          <div className="text-xs uppercase tracking-wide text-neutral-500">Оплачено</div>
-          <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPaid)}</div>
-        </div>
-        <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
-          <div className="text-xs uppercase tracking-wide text-neutral-500">Залишок</div>
-          <div className={`mt-1 font-semibold ${balance > 0 ? 'text-[var(--crm-wine)]' : 'text-[var(--crm-vine-dark)]'}`}>
-            {formatMoney(balance)}
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+            <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
+              <div className="text-xs uppercase tracking-wide text-neutral-500">Заїзд</div>
+              <div className="mt-1 font-semibold text-neutral-900">{formatDateForDisplay(item.check_in_date)}</div>
+            </div>
+            <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
+              <div className="text-xs uppercase tracking-wide text-neutral-500">Виїзд</div>
+              <div className="mt-1 font-semibold text-neutral-900">{formatDateForDisplay(item.check_out_date)}</div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {showCommentEditor ? (
-        <div className="mt-3 rounded-2xl bg-white px-3 py-3 shadow-sm">
-          <div className="text-sm font-semibold text-neutral-900">Коментар менеджера</div>
-          <textarea
-            value={commentValue}
-            onChange={(event) => onCommentChange(event.target.value)}
-            className={textareaClass}
-            rows={3}
-          />
-          {isCommentDirty ? (
-            <button
-              type="button"
-              onClick={() => void onSaveComment()}
-              disabled={isBusy}
-              className={`${subtleButtonClass} mt-3`}
-            >
-              {isCommentSaving ? 'Збереження...' : 'Зберегти коментар'}
-            </button>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
+              <div className="text-xs uppercase tracking-wide text-neutral-500">Вартість</div>
+              <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPrice)}</div>
+            </div>
+            <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
+              <div className="text-xs uppercase tracking-wide text-neutral-500">Оплата</div>
+              <div className="mt-1 font-semibold text-neutral-900">{getPaymentDueStageLabel(item.payment_due_stage)}</div>
+            </div>
+          </div>
+
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
+              <div className="text-xs uppercase tracking-wide text-neutral-500">Оплачено</div>
+              <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPaid)}</div>
+            </div>
+            <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
+              <div className="text-xs uppercase tracking-wide text-neutral-500">Залишок</div>
+              <div className={`mt-1 font-semibold ${balance > 0 ? 'text-[var(--crm-wine)]' : 'text-[var(--crm-vine-dark)]'}`}>
+                {formatMoney(balance)}
+              </div>
+            </div>
+          </div>
+
+          {showCommentEditor ? (
+            <div className="mt-3 rounded-2xl bg-white px-3 py-3 shadow-sm">
+              <div className="text-sm font-semibold text-neutral-900">Коментар менеджера</div>
+              <textarea
+                value={commentValue}
+                onChange={(event) => onCommentChange(event.target.value)}
+                className={textareaClass}
+                rows={3}
+              />
+              {isCommentDirty ? (
+                <button
+                  type="button"
+                  onClick={() => void onSaveComment()}
+                  disabled={isBusy}
+                  className={`${subtleButtonClass} mt-3 sm:w-auto`}
+                >
+                  {isCommentSaving ? 'Збереження...' : 'Зберегти коментар'}
+                </button>
+              ) : null}
+            </div>
+          ) : visibleBookingNote ? (
+            <div className="mt-3 rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">{visibleBookingNote}</div>
           ) : null}
         </div>
-      ) : visibleBookingNote ? (
-        <div className="mt-3 rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">{visibleBookingNote}</div>
-      ) : null}
 
-      {shouldShowPaymentInput ? (
-        <label className="mt-4 block">
-          <span className="text-sm font-medium text-neutral-800">Оплата, грн</span>
-          <input
-            type="text"
-            inputMode="numeric"
-            value={paymentValue}
-            onChange={(event) => setPaymentValue(sanitizeIntegerInput(event.target.value))}
-            className={fieldClass}
-          />
-        </label>
-      ) : null}
+        <div className="space-y-3">
+          <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
+            <div className="flex flex-wrap gap-2">
+              <span
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                  isCheckedIn ? 'bg-[var(--crm-vine)] text-white' : 'bg-[var(--crm-wine)] text-white'
+                }`}
+              >
+                {isCheckedIn ? 'Заселено' : 'Очікує заселення'}
+              </span>
+              <span className={`rounded-full px-3 py-1.5 text-xs font-semibold ${getPaymentBadgeClass(item.payment_status)}`}>
+                {getPaymentStatusLabel(item.payment_status)}
+              </span>
+            </div>
+          </div>
 
-      <div className="mt-4 grid gap-2">
-        {isCheckedIn ? (
-          shouldShowAddPayment ? (
-            <button
-              type="button"
-              onClick={handleAddPaymentClick}
-              disabled={isBusy || parseIntegerValue(paymentValue) <= 0}
-              className={primaryButtonClass}
-            >
-              {isBusy ? 'Збереження...' : 'Додати оплату'}
-            </button>
-          ) : null
-        ) : isFullyPaid ? (
-          <button type="button" onClick={() => void onCheckIn(item)} disabled={isBusy} className={secondaryButtonClass}>
-            {isBusy ? 'Оновлення...' : 'Заселити номер'}
-          </button>
-        ) : (
-          <>
-            <button type="button" onClick={() => void onCheckIn(item)} disabled={isBusy} className={secondaryButtonClass}>
-              {isBusy ? 'Оновлення...' : 'Заселити номер'}
-            </button>
-            <button
-              type="button"
-              onClick={handlePayAndCheckIn}
-              disabled={isBusy}
-              className={primaryButtonClass}
-            >
-              {isBusy ? 'Збереження...' : 'Заселити + оплата'}
-            </button>
-            <button
-              type="button"
-              onClick={() => void onDeferPaymentToCheckOut(item.id)}
-              disabled={isBusy}
-              className="hidden"
-            >
-              {isBusy ? 'Оновлення...' : 'Оплата при виїзді'}
-            </button>
-          </>
-        )}
+          {shouldShowPaymentInput ? (
+            <label className="block rounded-2xl bg-white px-3 py-3 shadow-sm">
+              <span className="text-sm font-medium text-neutral-800">Оплата, грн</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={paymentValue}
+                onChange={(event) => setPaymentValue(sanitizeIntegerInput(event.target.value))}
+                className={fieldClass}
+              />
+            </label>
+          ) : null}
+
+          <div className="grid gap-2">
+            {isCheckedIn ? (
+              shouldShowAddPayment ? (
+                <button
+                  type="button"
+                  onClick={handleAddPaymentClick}
+                  disabled={isBusy || parseIntegerValue(paymentValue) <= 0}
+                  className={primaryButtonClass}
+                >
+                  {isBusy ? 'Збереження...' : 'Додати оплату'}
+                </button>
+              ) : null
+            ) : isFullyPaid ? (
+              <button type="button" onClick={() => void onCheckIn(item)} disabled={isBusy} className={secondaryButtonClass}>
+                {isBusy ? 'Оновлення...' : 'Заселити номер'}
+              </button>
+            ) : (
+              <>
+                <button type="button" onClick={() => void onCheckIn(item)} disabled={isBusy} className={secondaryButtonClass}>
+                  {isBusy ? 'Оновлення...' : 'Заселити номер'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePayAndCheckIn}
+                  disabled={isBusy}
+                  className={primaryButtonClass}
+                >
+                  {isBusy ? 'Збереження...' : 'Заселити + оплата'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void onDeferPaymentToCheckOut(item.id)}
+                  disabled={isBusy}
+                  className="hidden"
+                >
+                  {isBusy ? 'Оновлення...' : 'Оплата при виїзді'}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </article>
   )

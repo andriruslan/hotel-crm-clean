@@ -237,36 +237,35 @@ export function DepartureRoomPage({
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-8">
-      <div className="mx-auto max-w-3xl space-y-3">
-        <section className={sectionClass}>
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-            <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Картка виїзду</h1>
-                {item?.occupancy_status === 'checked_out' ? (
-                  <span className="rounded-full bg-[var(--crm-vine)] px-3 py-1.5 text-xs font-semibold text-white shadow-sm">
-                    Виселено
-                  </span>
-                ) : null}
-              </div>
-              {item ? (
-                <div className="mt-3 space-y-1 text-sm text-neutral-700">
-                  <div className="text-base font-semibold text-neutral-900">{normalizePhone(item.guest_phone || '') || 'Телефон не вказано'}</div>
-                  {visibleGuestName ? <div>{visibleGuestName}</div> : null}
-                </div>
+      <div className="mx-auto max-w-[1080px] space-y-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <section className={`${sectionClass} w-full lg:max-w-[360px]`}>
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Картка виїзду</h1>
+              {item?.occupancy_status === 'checked_out' ? (
+                <span className="rounded-full bg-[var(--crm-vine)] px-3 py-1.5 text-xs font-semibold text-white shadow-sm">
+                  Виселено
+                </span>
               ) : null}
             </div>
 
-            <div>
-              <Link
-                href={`/bookings/departures?date=${encodeURIComponent(dateInputToIso(safeInitialDate))}`}
-                className={inlineButtonClass}
-              >
-                Повернутися до виїздів
-              </Link>
-            </div>
+            {item ? (
+              <div className="mt-3 space-y-1 text-sm text-neutral-700">
+                <div className="text-base font-semibold text-neutral-900">{normalizePhone(item.guest_phone || '') || 'Телефон не вказано'}</div>
+                {visibleGuestName ? <div className="break-words">{visibleGuestName}</div> : null}
+              </div>
+            ) : null}
+          </section>
+
+          <div className="flex w-full justify-start lg:w-auto lg:justify-end lg:pt-4">
+            <Link
+              href={`/bookings/departures?date=${encodeURIComponent(dateInputToIso(safeInitialDate))}`}
+              className={`${inlineButtonClass} w-full sm:w-auto`}
+            >
+              Повернутися до виїздів
+            </Link>
           </div>
-        </section>
+        </div>
 
         {error ? <div className="rounded-3xl border border-[var(--crm-danger)] bg-[var(--crm-danger-soft)] px-4 py-3 text-sm text-[var(--crm-danger)]">{error}</div> : null}
 
