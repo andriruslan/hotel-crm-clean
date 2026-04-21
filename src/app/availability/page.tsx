@@ -729,10 +729,10 @@ export default function AvailabilityPage() {
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-3 pt-3 pb-4 sm:px-4 sm:pt-4 sm:pb-5 lg:px-5 lg:pt-5 lg:pb-6 xl:pb-8">
-      <div className="mx-auto w-full max-w-[1280px] space-y-4">
-        <section className={`${sectionClass} mx-auto max-w-[980px]`}>
+      <div className="mx-auto w-full max-w-[1280px] space-y-4 lg:grid lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start lg:gap-4 lg:space-y-0">
+        <section className={`${sectionClass} lg:mx-0 lg:max-w-none`}>
             <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Доступність номерів</h1>
-            <form onSubmit={handleSearch} className="mt-4 grid gap-3 xl:grid-cols-[minmax(260px,320px)_minmax(0,1fr)] xl:items-start">
+            <form onSubmit={handleSearch} className="mt-4 grid gap-3">
               <div className="space-y-3">
                 <div className="grid min-w-0 grid-cols-2 gap-3">
                   <label className="block min-w-0">
@@ -783,15 +783,15 @@ export default function AvailabilityPage() {
                 </div>
               </div>
 
-              <div className="xl:col-span-2 xl:flex xl:justify-center">
-                <button type="submit" disabled={loading} className={`${primaryButtonClass} xl:max-w-[360px]`}>
+              <div>
+                <button type="submit" disabled={loading} className={primaryButtonClass}>
                   {loading ? 'Перевірка...' : 'Перевірити доступність'}
                 </button>
               </div>
             </form>
         </section>
 
-        <section ref={resultsRef} className="mx-auto min-w-0 max-w-[1040px] space-y-3">
+        <section ref={resultsRef} className="min-w-0 space-y-3 lg:mx-0 lg:max-w-none">
             {error ? (
               <div className="rounded-3xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700 shadow-sm sm:px-5">
                 {error}
