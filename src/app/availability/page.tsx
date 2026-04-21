@@ -65,17 +65,17 @@ type BuildingFilterValue = 'all' | '1' | '2' | '3'
 type RoomTypeFilterValue = 'all' | 'lux' | 'semi_lux' | 'standard'
 
 const buildingFilterOptions: Array<{ value: BuildingFilterValue; label: string }> = [
-  { value: 'all', label: 'Усі корпуси' },
-  { value: '1', label: '1 Корпус' },
-  { value: '2', label: '2 Корпус' },
-  { value: '3', label: '3 Корпус' },
+  { value: 'all', label: '\u0423\u0441\u0456 \u043a\u043e\u0440\u043f.' },
+  { value: '1', label: '1 \u041a\u043e\u0440\u043f.' },
+  { value: '2', label: '2 \u041a\u043e\u0440\u043f.' },
+  { value: '3', label: '3 \u041a\u043e\u0440\u043f.' },
 ]
 
 const roomTypeFilterOptions: Array<{ value: RoomTypeFilterValue; label: string }> = [
-  { value: 'all', label: 'Усі типи' },
-  { value: 'lux', label: 'Люкс' },
-  { value: 'semi_lux', label: 'НапівЛ.' },
-  { value: 'standard', label: 'Стан.' },
+  { value: 'all', label: '\u0423\u0441\u0456 \u0442\u0438\u043f\u0438' },
+  { value: 'lux', label: '\u041b\u044e\u043a\u0441' },
+  { value: 'semi_lux', label: '\u041d\u0430\u043f\u0456\u0432\u041b.' },
+  { value: 'standard', label: '\u0421\u0442\u0430\u043d.' },
 ]
 
 const fieldClass =
@@ -340,72 +340,83 @@ function normalizeFilterValue(value: string) {
   return value.toLocaleLowerCase('uk-UA').trim()
 }
 
-function matchesBuildingFilter(item: AvailabilityItem, selectedBuildingFilter: BuildingFilterValue) {
-  if (selectedBuildingFilter === 'all') {
+function matchesBuildingFilters(item: AvailabilityItem, selectedBuildingFilters: BuildingFilterValue[]) {
+  if (selectedBuildingFilters.includes('all')) {
     return true
   }
 
   const normalizedBuildingName = normalizeFilterValue(item.building_name)
-  return normalizedBuildingName.includes(`корпус ${selectedBuildingFilter}`) || normalizedBuildingName.includes(selectedBuildingFilter)
+  return selectedBuildingFilters.some(
+    (selectedBuildingFilter) =>
+      normalizedBuildingName.includes(`\u043a\u043e\u0440\u043f\u0443\u0441 ${selectedBuildingFilter}`) || normalizedBuildingName.includes(selectedBuildingFilter)
+  )
 }
 
-function matchesRoomTypeFilter(item: AvailabilityItem, selectedRoomTypeFilter: RoomTypeFilterValue) {
-  if (selectedRoomTypeFilter === 'all') {
+function matchesRoomTypeFilters(item: AvailabilityItem, selectedRoomTypeFilters: RoomTypeFilterValue[]) {
+  if (selectedRoomTypeFilters.includes('all')) {
     return true
   }
 
   const normalizedRoomTypeName = normalizeFilterValue(item.room_type_name)
 
-  if (selectedRoomTypeFilter === 'semi_lux') {
-    return normalizedRoomTypeName.includes('напів')
-  }
+  return selectedRoomTypeFilters.some((selectedRoomTypeFilter) => {
+    if (selectedRoomTypeFilter === 'semi_lux') {
+      return normalizedRoomTypeName.includes('\u043d\u0430\u043f\u0456\u0432')
+    }
 
-  if (selectedRoomTypeFilter === 'lux') {
-    return normalizedRoomTypeName.includes('люкс') && !normalizedRoomTypeName.includes('напів')
-  }
+    if (selectedRoomTypeFilter === 'lux') {
+      return normalizedRoomTypeName.includes('\u043b\u044e\u043a\u0441') && !normalizedRoomTypeName.includes('\u043d\u0430\u043f\u0456\u0432')
+    }
 
-  return normalizedRoomTypeName.includes('станд')
+    return normalizedRoomTypeName.includes('\u0441\u0442\u0430\u043d\u0434')
+  })
 }
 
-function FilterRadioGroup<TValue extends string>({
+function toggleFilterValues<TValue extends string>(currentValues: TValue[], nextValue: TValue, allValue: TValue) {
+  if (nextValue === allValue) {
+    return [allValue]
+  }
+
+  const valuesWithoutAll = currentValues.filter((value) => value !== allValue)
+  const nextValues = valuesWithoutAll.includes(nextValue)
+    ? valuesWithoutAll.filter((value) => value !== nextValue)
+    : [...valuesWithoutAll, nextValue]
+
+  return nextValues.length > 0 ? nextValues : [allValue]
+}
+
+function FilterToggleGroup<TValue extends string>({
   legend,
-  name,
-  value,
+  selectedValues,
   options,
-  onChange,
+  onToggle,
 }: {
   legend: string
-  name: string
-  value: TValue
+  selectedValues: TValue[]
   options: Array<{ value: TValue; label: string }>
-  onChange: (nextValue: TValue) => void
+  onToggle: (nextValue: TValue) => void
 }) {
   return (
     <fieldset className="space-y-2">
-      <legend className="text-[13px] font-semibold text-[var(--crm-wine)] sm:text-sm">{legend}</legend>
-      <div className="flex flex-wrap gap-2">
+      <legend className="text-[12px] font-semibold text-[var(--crm-wine)] sm:text-sm">{legend}</legend>
+      <div className="grid grid-cols-4 gap-2">
         {options.map((option) => {
-          const isActive = option.value === value
+          const isActive = selectedValues.includes(option.value)
 
           return (
-            <label
+            <button
               key={option.value}
-              className={`inline-flex min-h-10 cursor-pointer items-center justify-center rounded-2xl border px-3 py-2 text-sm font-semibold shadow-sm transition ${
+              type="button"
+              onClick={() => onToggle(option.value)}
+              aria-pressed={isActive}
+              className={`inline-flex min-h-10 items-center justify-center rounded-2xl border px-1.5 py-2 text-[11px] font-semibold shadow-sm transition sm:text-xs ${
                 isActive
                   ? 'border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] text-white'
                   : 'border-[var(--crm-wine-border)] bg-[var(--crm-panel)] text-neutral-900 hover:bg-[var(--crm-wine-soft-hover)]'
               }`}
             >
-              <input
-                type="radio"
-                name={name}
-                value={option.value}
-                checked={isActive}
-                onChange={() => onChange(option.value)}
-                className="sr-only"
-              />
-              {option.label}
-            </label>
+              <span className="truncate">{option.label}</span>
+            </button>
           )
         })}
       </div>
@@ -436,16 +447,16 @@ function MultiDayAvailabilityMatrix({
 
   return (
     <div className="min-w-0 space-y-3">
-      <div className="flex flex-wrap items-center gap-2 text-sm">
-        <span className="rounded-full bg-[var(--crm-vine-soft)] px-3 py-1.5 font-semibold text-[var(--crm-vine-dark)]">
-          Клітинка зелена = вільно
+      <div className="crm-horizontal-scroll flex flex-nowrap items-center gap-2 text-[12px] sm:text-sm">
+        <span className="whitespace-nowrap rounded-full bg-[var(--crm-vine-soft)] px-2.5 py-1.5 font-semibold text-[var(--crm-vine-dark)]">
+          {'\u041a\u043b\u0456\u0442\u0438\u043d\u043a\u0430 \u0437\u0435\u043b\u0435\u043d\u0430 = \u0432\u0456\u043b\u044c\u043d\u043e'}
         </span>
-        <span className="rounded-full bg-neutral-100 px-3 py-1.5 font-semibold text-neutral-600">
-          Сіра = зайнято
+        <span className="whitespace-nowrap rounded-full bg-neutral-100 px-2.5 py-1.5 font-semibold text-neutral-600">
+          {'\u0421\u0456\u0440\u0430 = \u0437\u0430\u0439\u043d\u044f\u0442\u043e'}
         </span>
       </div>
 
-      <div className="text-xs font-medium text-neutral-500 sm:text-sm">На телефоні таблицю можна гортати вліво та вправо.</div>
+      <div className="text-xs font-medium text-neutral-500 sm:text-sm">{'\u041d\u0430 \u0442\u0435\u043b\u0435\u0444\u043e\u043d\u0456 \u0442\u0430\u0431\u043b\u0438\u0446\u044e \u043c\u043e\u0436\u043d\u0430 \u0433\u043e\u0440\u0442\u0430\u0442\u0438 \u0432\u043b\u0456\u0432\u043e \u0442\u0430 \u0432\u043f\u0440\u0430\u0432\u043e.'}</div>
 
       <div className="-mx-2 w-auto max-w-none overflow-hidden rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] shadow-sm sm:mx-0 sm:w-full sm:max-w-full">
         <div className="crm-horizontal-scroll w-full max-w-full px-1 pb-2 sm:px-0 sm:pb-0">
@@ -657,8 +668,8 @@ export default function AvailabilityPage() {
   const [children6PlusCount, setChildren6PlusCount] = useState(0)
   const [loading, setLoading] = useState(false)
   const [items, setItems] = useState<AvailabilityItem[]>([])
-  const [selectedBuildingFilter, setSelectedBuildingFilter] = useState<BuildingFilterValue>('all')
-  const [selectedRoomTypeFilter, setSelectedRoomTypeFilter] = useState<RoomTypeFilterValue>('all')
+  const [selectedBuildingFilters, setSelectedBuildingFilters] = useState<BuildingFilterValue[]>(['all'])
+  const [selectedRoomTypeFilters, setSelectedRoomTypeFilters] = useState<RoomTypeFilterValue[]>(['all'])
   const [isMultiSelectEnabled, setIsMultiSelectEnabled] = useState(false)
   const [isMultiDateSelectEnabled, setIsMultiDateSelectEnabled] = useState(false)
   const [selectedRoomIds, setSelectedRoomIds] = useState<string[]>([])
@@ -786,10 +797,10 @@ export default function AvailabilityPage() {
     () =>
       items.filter(
         (item) =>
-          matchesBuildingFilter(item, selectedBuildingFilter) &&
-          matchesRoomTypeFilter(item, selectedRoomTypeFilter)
+          matchesBuildingFilters(item, selectedBuildingFilters) &&
+          matchesRoomTypeFilters(item, selectedRoomTypeFilters)
       ),
-    [items, selectedBuildingFilter, selectedRoomTypeFilter]
+    [items, selectedBuildingFilters, selectedRoomTypeFilters]
   )
   const filteredRoomIdsSet = useMemo(() => new Set(filteredItems.map((item) => item.room_id)), [filteredItems])
   const selectedItems = useMemo(
@@ -956,29 +967,27 @@ export default function AvailabilityPage() {
                 <div className="flex flex-col gap-1 border-b border-neutral-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <div className="text-lg font-semibold text-neutral-900">
-                      {showDailyBreakdown ? '?????? ?????? ?? ????' : '?????? ??????'}
+                      {showDailyBreakdown ? '\u0412\u0456\u043b\u044c\u043d\u0456 \u043d\u043e\u043c\u0435\u0440\u0438 \u043f\u043e \u0434\u043d\u044f\u0445' : '\u0412\u0456\u043b\u044c\u043d\u0456 \u043d\u043e\u043c\u0435\u0440\u0438'}
                     </div>
                   </div>
                   <div className="text-sm font-medium text-neutral-500">
-                    {showDailyBreakdown ? `${selectedDates.length} ??.` : `${filteredItems.length} ?????(?)`}
+                    {showDailyBreakdown ? `${selectedDates.length} \u0434\u043d.` : `${filteredItems.length} \u043d\u043e\u043c\u0435\u0440(\u0438)`}
                   </div>
                 </div>
 
                 <div className="mt-4 space-y-4">
                   <div className="grid gap-3 xl:grid-cols-2">
-                    <FilterRadioGroup
-                      legend="??????"
-                      name="availability-building-filter"
-                      value={selectedBuildingFilter}
+                    <FilterToggleGroup
+                      legend="\u041a\u043e\u0440\u043f\u0443\u0441\u0438"
+                                            selectedValues={selectedBuildingFilters}
                       options={buildingFilterOptions}
-                      onChange={setSelectedBuildingFilter}
+                      onToggle={(nextValue) => setSelectedBuildingFilters((current) => toggleFilterValues(current, nextValue, 'all'))}
                     />
-                    <FilterRadioGroup
-                      legend="??? ??????"
-                      name="availability-room-type-filter"
-                      value={selectedRoomTypeFilter}
+                    <FilterToggleGroup
+                      legend="\u0422\u0438\u043f \u043d\u043e\u043c\u0435\u0440\u0430"
+                                            selectedValues={selectedRoomTypeFilters}
                       options={roomTypeFilterOptions}
-                      onChange={setSelectedRoomTypeFilter}
+                      onToggle={(nextValue) => setSelectedRoomTypeFilters((current) => toggleFilterValues(current, nextValue, 'all'))}
                     />
                   </div>
 
@@ -991,7 +1000,7 @@ export default function AvailabilityPage() {
                           onChange={(e) => handleToggleMultiSelect(e.target.checked)}
                           className="h-5 w-5 rounded border-[var(--crm-wine-border)] text-[var(--crm-wine)] accent-[var(--crm-wine)]"
                         />
-                        ?????? ?????? ???????
+                        {'\u041e\u0431\u0440\u0430\u0442\u0438 \u043a\u0456\u043b\u044c\u043a\u0430 \u043d\u043e\u043c\u0435\u0440\u0456\u0432'}
                       </label>
 
                       {showDailyBreakdown ? (
@@ -1002,7 +1011,7 @@ export default function AvailabilityPage() {
                             onChange={(e) => handleToggleMultiDateSelect(e.target.checked)}
                             className="h-5 w-5 rounded border-[var(--crm-wine-border)] text-[var(--crm-wine)] accent-[var(--crm-wine)]"
                           />
-                          ?????? ?????? ???
+                          {'\u041e\u0431\u0440\u0430\u0442\u0438 \u043a\u0456\u043b\u044c\u043a\u0430 \u0434\u0430\u0442'}
                         </label>
                       ) : null}
                     </div>
@@ -1013,15 +1022,15 @@ export default function AvailabilityPage() {
                           href={createMatrixBookingHref(selectedRoomSelections, searchComposition)}
                           className="inline-flex min-h-11 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)]"
                         >
-                          {`??????? ? ${selectedRoomSelections.length} ???????(?)`}
+                          {`\u041f\u0435\u0440\u0435\u0439\u0442\u0438 \u0437 ${selectedRoomSelections.length} \u0432\u0438\u0431\u043e\u0440\u043e\u043c(\u0438)`}
                         </Link>
                       ) : (
                         <div className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-100 px-4 py-2 text-sm font-semibold text-neutral-500">
                           {isMultiSelectEnabled && isMultiDateSelectEnabled
-                            ? '????? ?????? ???????? ??????? ? ???'
+                            ? '\u041e\u0431\u0435\u0440\u0438 \u0437\u0435\u043b\u0435\u043d\u0456 \u043a\u043b\u0456\u0442\u0438\u043d\u043a\u0438 \u043d\u043e\u043c\u0435\u0440\u0456\u0432 \u0456 \u0434\u0430\u0442'
                             : isMultiSelectEnabled
-                              ? '????? ?????? ?? ???? ????'
-                              : '????? ???? ??? ?????? ??????'}
+                              ? '\u041e\u0431\u0435\u0440\u0438 \u043d\u043e\u043c\u0435\u0440\u0438 \u043d\u0430 \u043e\u0434\u043d\u0443 \u0434\u0430\u0442\u0443'
+                              : '\u041e\u0431\u0435\u0440\u0438 \u0434\u0430\u0442\u0438 \u0434\u043b\u044f \u043e\u0434\u043d\u043e\u0433\u043e \u043d\u043e\u043c\u0435\u0440\u0430'}
                         </div>
                       )
                     ) : isMultiSelectEnabled ? (
@@ -1035,11 +1044,11 @@ export default function AvailabilityPage() {
                           )}
                           className="inline-flex min-h-11 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] px-4 py-2 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(143,45,86,0.22)] transition hover:bg-[var(--crm-wine-dark)]"
                         >
-                          {`??????? ? ${selectedItems.length} ?????(?)`}
+                          {`\u041f\u0435\u0440\u0435\u0439\u0442\u0438 \u0437 ${selectedItems.length} \u043d\u043e\u043c\u0435\u0440(\u0438)`}
                         </Link>
                       ) : (
                         <div className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-100 px-4 py-2 text-sm font-semibold text-neutral-500">
-                          ????? ??????
+                          \u041e\u0431\u0435\u0440\u0438 \u043d\u043e\u043c\u0435\u0440\u0438
                         </div>
                       )
                     ) : null}
@@ -1049,7 +1058,7 @@ export default function AvailabilityPage() {
                 <div className="mt-4">
                   {filteredItems.length === 0 ? (
                     <div className="rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-4 text-sm leading-6 text-neutral-600">
-                      ?? ???? ????????? ??????? ?? ????????.
+                      {'\u0417\u0430 \u0446\u0438\u043c\u0438 \u0444\u0456\u043b\u044c\u0442\u0440\u0430\u043c\u0438 \u043d\u043e\u043c\u0435\u0440\u0456\u0432 \u043d\u0435 \u0437\u043d\u0430\u0439\u0434\u0435\u043d\u043e.'}
                     </div>
                   ) : showDailyBreakdown ? (
                     <MultiDayAvailabilityMatrix
