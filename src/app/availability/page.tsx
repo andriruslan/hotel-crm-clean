@@ -773,7 +773,7 @@ export default function AvailabilityPage() {
 
               <div className="rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-4">
                 <div className="text-[13px] font-semibold text-[var(--crm-wine)] sm:text-sm">Склад гостей</div>
-                <div className="mt-3 grid gap-3 min-[820px]:grid-cols-3">
+                <div className="mt-3 grid gap-3 min-[820px]:grid-cols-3 lg:grid-cols-1">
                   <CompositionField label="Гості" value={adultsCount} onChange={setAdultsCount} />
                   <CompositionField label="Додаткові гості" value={children6PlusCount} onChange={setChildren6PlusCount} />
                   <CompositionField label="До 6 років" value={childrenUnder6Count} onChange={setChildrenUnder6Count} />
