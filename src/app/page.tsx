@@ -11,6 +11,8 @@ const actions = [
   { href: '/bookings/search', title: 'Контроль передоплат' },
 ]
 
+const DEPLOY_MARKER_LABEL = 'Оновлено: 21.04.2026 12:36'
+
 export default async function HomePage() {
   const cookieStore = await cookies()
   const session = getAuthSessionFromToken(cookieStore.get(AUTH_SESSION_COOKIE)?.value)
@@ -22,6 +24,9 @@ export default async function HomePage() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-2">
               <h1 className="text-2xl font-bold leading-tight sm:text-3xl lg:text-4xl">CRM &quot;VILLAGE WINE&quot;</h1>
+              <div className="text-xs font-medium uppercase tracking-[0.12em] text-neutral-500 sm:text-sm">
+                {DEPLOY_MARKER_LABEL}
+              </div>
               {session ? (
                 <div className="inline-flex items-center rounded-full bg-[var(--crm-wine-soft)] px-3 py-1 text-sm font-medium text-[var(--crm-wine)]">
                   {session.displayName} · {session.role}
