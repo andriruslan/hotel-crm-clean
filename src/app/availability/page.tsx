@@ -464,7 +464,7 @@ function SingleDayAvailabilityGrid({
   onToggleRoom: (roomId: string) => void
 }) {
   return (
-    <div className="grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-3">
+    <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3 min-[1180px]:grid-cols-4">
       {items.map((item) => {
         const isSelected = selectedRoomIds.includes(item.room_id)
 
@@ -474,7 +474,7 @@ function SingleDayAvailabilityGrid({
               key={item.room_id}
               type="button"
               onClick={() => onToggleRoom(item.room_id)}
-              className={`w-full min-w-0 rounded-3xl border-2 bg-white/90 px-3 py-3 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3.5 sm:py-3.5 ${
+              className={`w-full min-w-0 rounded-3xl border-2 bg-white/90 px-2.5 py-2.5 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3 sm:py-3 ${
                 isSelected
                   ? 'border-[var(--crm-wine)] ring-2 ring-[var(--crm-wine)] ring-inset'
                   : 'border-[var(--crm-wine-border)] hover:border-[var(--crm-wine)]'
@@ -482,8 +482,8 @@ function SingleDayAvailabilityGrid({
             >
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
-                  <div className="truncate text-sm font-bold leading-tight sm:text-base">Номер {item.room_number}</div>
-                  <div className="mt-1 text-[11px] leading-5 text-neutral-500 sm:text-xs">{item.building_name}, {item.room_type_name}</div>
+                  <div className="truncate text-sm font-bold leading-tight lg:text-[15px]">Номер {item.room_number}</div>
+                  <div className="mt-1 text-[10px] leading-4 text-neutral-500 sm:text-[11px]">{item.building_name}, {item.room_type_name}</div>
                 </div>
                 <span
                   className={`inline-flex self-start rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-sm ${
@@ -494,7 +494,7 @@ function SingleDayAvailabilityGrid({
                 </span>
               </div>
 
-              <div className="mt-3 flex items-center gap-1 text-[10px] text-neutral-700 sm:gap-1.5 sm:text-[12px]">
+              <div className="mt-2.5 flex items-center gap-1 text-[10px] text-neutral-700 sm:gap-1.5 sm:text-[11px]">
                 <span className="inline-flex whitespace-nowrap rounded-full bg-white px-2 py-1 shadow-sm">{item.guests_count} гост.</span>
                 <span className="inline-flex whitespace-nowrap rounded-full bg-white px-2 py-1 shadow-sm">доп. місць: {item.extra_beds_count + item.free_extra_beds_count}</span>
               </div>
@@ -506,16 +506,16 @@ function SingleDayAvailabilityGrid({
           <Link
             key={item.room_id}
             href={createHref(item)}
-            className="block w-full min-w-0 rounded-3xl border-2 border-[var(--crm-wine-border)] bg-white/90 px-3 py-3 shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3.5 sm:py-3.5"
+            className="block w-full min-w-0 rounded-3xl border-2 border-[var(--crm-wine-border)] bg-white/90 px-2.5 py-2.5 shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3 sm:py-3"
           >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
-                <div className="truncate text-sm font-bold leading-tight sm:text-base">Номер {item.room_number}</div>
-                <div className="mt-1 text-[11px] leading-5 text-neutral-500 sm:text-xs">{item.building_name}, {item.room_type_name}</div>
+                <div className="truncate text-sm font-bold leading-tight lg:text-[15px]">Номер {item.room_number}</div>
+                <div className="mt-1 text-[10px] leading-4 text-neutral-500 sm:text-[11px]">{item.building_name}, {item.room_type_name}</div>
               </div>
             </div>
 
-            <div className="mt-3 flex items-center gap-1 text-[10px] text-neutral-700 sm:gap-1.5 sm:text-[12px]">
+            <div className="mt-2.5 flex items-center gap-1 text-[10px] text-neutral-700 sm:gap-1.5 sm:text-[11px]">
               <span className="inline-flex whitespace-nowrap rounded-full bg-[var(--crm-wine)] px-2 py-1 text-white shadow-sm">{item.guests_count} гост.</span>
               <span className="inline-flex whitespace-nowrap rounded-full bg-white px-2 py-1 shadow-sm">доп. місць: {item.extra_beds_count + item.free_extra_beds_count}</span>
             </div>
@@ -729,7 +729,7 @@ export default function AvailabilityPage() {
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-3 pt-3 pb-4 sm:px-4 sm:pt-4 sm:pb-5 lg:px-5 lg:pt-5 lg:pb-6 xl:pb-8">
-      <div className="mx-auto w-full max-w-[1280px] space-y-4 lg:grid lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start lg:gap-4 lg:space-y-0">
+      <div className="mx-auto w-full max-w-[1280px] space-y-4 lg:grid lg:grid-cols-[300px_minmax(0,1fr)] lg:items-start lg:gap-4 lg:space-y-0">
         <section className={`${sectionClass} lg:mx-0 lg:max-w-none`}>
             <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Доступність номерів</h1>
             <form onSubmit={handleSearch} className="mt-4 grid gap-3">
