@@ -964,28 +964,17 @@ export default function AvailabilityPage() {
 
             {items.length > 0 ? (
               <div className={showDailyBreakdown ? sectionClass : `${sectionClass} mx-auto max-w-[920px]`}>
-                <div className="flex flex-col gap-1 border-b border-neutral-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
-                  <div>
-                    <div className="text-lg font-semibold text-neutral-900">
-                      {showDailyBreakdown ? '\u0412\u0456\u043b\u044c\u043d\u0456 \u043d\u043e\u043c\u0435\u0440\u0438 \u043f\u043e \u0434\u043d\u044f\u0445' : '\u0412\u0456\u043b\u044c\u043d\u0456 \u043d\u043e\u043c\u0435\u0440\u0438'}
-                    </div>
-                  </div>
-                  <div className="text-sm font-medium text-neutral-500">
-                    {showDailyBreakdown ? `${selectedDates.length} \u0434\u043d.` : `${filteredItems.length} \u043d\u043e\u043c\u0435\u0440(\u0438)`}
-                  </div>
-                </div>
-
-                <div className="mt-4 space-y-4">
+                <div className="space-y-4">
                   <div className="grid gap-3 xl:grid-cols-2">
                     <FilterToggleGroup
-                      legend="\u041a\u043e\u0440\u043f\u0443\u0441\u0438"
-                                            selectedValues={selectedBuildingFilters}
+                      legend={'\u041a\u043e\u0440\u043f\u0443\u0441\u0438'}
+                      selectedValues={selectedBuildingFilters}
                       options={buildingFilterOptions}
                       onToggle={(nextValue) => setSelectedBuildingFilters((current) => toggleFilterValues(current, nextValue, 'all'))}
                     />
                     <FilterToggleGroup
-                      legend="\u0422\u0438\u043f \u043d\u043e\u043c\u0435\u0440\u0430"
-                                            selectedValues={selectedRoomTypeFilters}
+                      legend={'\u0422\u0438\u043f \u043d\u043e\u043c\u0435\u0440\u0430'}
+                      selectedValues={selectedRoomTypeFilters}
                       options={roomTypeFilterOptions}
                       onToggle={(nextValue) => setSelectedRoomTypeFilters((current) => toggleFilterValues(current, nextValue, 'all'))}
                     />
