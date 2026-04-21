@@ -464,7 +464,7 @@ function SingleDayAvailabilityGrid({
   onToggleRoom: (roomId: string) => void
 }) {
   return (
-    <div className="grid grid-cols-2 gap-2 xl:grid-cols-3">
+    <div className="flex flex-wrap gap-2.5">
       {items.map((item) => {
         const isSelected = selectedRoomIds.includes(item.room_id)
 
@@ -474,7 +474,7 @@ function SingleDayAvailabilityGrid({
               key={item.room_id}
               type="button"
               onClick={() => onToggleRoom(item.room_id)}
-              className={`w-full rounded-3xl border-2 bg-white/90 px-3 py-3 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3.5 sm:py-3.5 ${
+              className={`w-full min-[620px]:w-[calc(50%-0.3125rem)] min-[980px]:w-[calc(33.333%-0.4375rem)] min-[1480px]:w-[calc(25%-0.5rem)] rounded-3xl border-2 bg-white/90 px-3 py-3 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3.5 sm:py-3.5 ${
                 isSelected
                   ? 'border-[var(--crm-wine)] ring-2 ring-[var(--crm-wine)] ring-inset'
                   : 'border-[var(--crm-wine-border)] hover:border-[var(--crm-wine)]'
@@ -483,7 +483,7 @@ function SingleDayAvailabilityGrid({
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <div className="truncate text-sm font-bold leading-tight sm:text-base">Номер {item.room_number}</div>
-                  <div className="mt-1 text-xs leading-5 text-neutral-500">{item.building_name} � {item.room_type_name}</div>
+                  <div className="mt-1 text-[11px] leading-5 text-neutral-500 sm:text-xs">{item.building_name}, {item.room_type_name}</div>
                 </div>
                 <span
                   className={`inline-flex self-start rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-sm ${
@@ -494,9 +494,9 @@ function SingleDayAvailabilityGrid({
                 </span>
               </div>
 
-              <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px] text-neutral-700">
-                <span className="rounded-full bg-white px-2.5 py-1 shadow-sm">{item.guests_count} гост.</span>
-                <span className="rounded-full bg-white px-2.5 py-1 shadow-sm">доп.місць: {item.extra_beds_count + item.free_extra_beds_count}</span>
+              <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] text-neutral-700 sm:text-[12px]">
+                <span className="rounded-full bg-white px-2 py-1 shadow-sm">{item.guests_count} гост.</span>
+                <span className="rounded-full bg-white px-2 py-1 shadow-sm">доп. місць: {item.extra_beds_count + item.free_extra_beds_count}</span>
               </div>
             </button>
           )
@@ -506,18 +506,18 @@ function SingleDayAvailabilityGrid({
           <Link
             key={item.room_id}
             href={createHref(item)}
-            className="rounded-3xl border-2 border-[var(--crm-wine-border)] bg-white/90 px-3 py-3 shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3.5 sm:py-3.5"
+            className="block w-full min-[620px]:w-[calc(50%-0.3125rem)] min-[980px]:w-[calc(33.333%-0.4375rem)] min-[1480px]:w-[calc(25%-0.5rem)] rounded-3xl border-2 border-[var(--crm-wine-border)] bg-white/90 px-3 py-3 shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3.5 sm:py-3.5"
           >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
                 <div className="truncate text-sm font-bold leading-tight sm:text-base">Номер {item.room_number}</div>
-                <div className="mt-1 text-xs leading-5 text-neutral-500">{item.building_name} � {item.room_type_name}</div>
+                <div className="mt-1 text-[11px] leading-5 text-neutral-500 sm:text-xs">{item.building_name}, {item.room_type_name}</div>
               </div>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px] text-neutral-700">
-              <span className="rounded-full bg-[var(--crm-wine)] px-2.5 py-1 text-white shadow-sm">{item.guests_count} гост.</span>
-              <span className="rounded-full bg-white px-2.5 py-1 shadow-sm">доп.місць: {item.extra_beds_count + item.free_extra_beds_count}</span>
+            <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] text-neutral-700 sm:text-[12px]">
+              <span className="rounded-full bg-[var(--crm-wine)] px-2 py-1 text-white shadow-sm">{item.guests_count} гост.</span>
+              <span className="rounded-full bg-white px-2 py-1 shadow-sm">доп. місць: {item.extra_beds_count + item.free_extra_beds_count}</span>
             </div>
           </Link>
         )
@@ -729,12 +729,11 @@ export default function AvailabilityPage() {
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-6 xl:py-8">
-      <div className="mx-auto w-full max-w-6xl">
-        <div className="grid gap-3 xl:grid-cols-[minmax(320px,380px)_minmax(0,1fr)] xl:items-start">
-          <section className={`${sectionClass} xl:sticky xl:top-24`}>
+      <div className="mx-auto w-full max-w-[1320px] space-y-3">
+        <section className={sectionClass}>
             <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Доступність номерів</h1>
-            <form onSubmit={handleSearch} className="mt-5 grid gap-3 lg:max-xl:grid-cols-2 xl:grid-cols-1">
-              <div className="space-y-3">
+            <form onSubmit={handleSearch} className="mt-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,220px)_minmax(0,220px)_minmax(320px,1fr)_220px] xl:items-end">
+              <div className="space-y-3 lg:col-span-2 xl:col-span-2">
                 <div className="grid min-w-0 grid-cols-2 gap-3">
                   <label className="block min-w-0">
                     <span className="block text-center text-[13px] font-medium text-neutral-800 sm:text-sm">Дата заїзду</span>
@@ -772,9 +771,9 @@ export default function AvailabilityPage() {
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-4">
+              <div className="rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-4 py-4 lg:col-span-2 xl:col-span-1">
                 <div className="text-[13px] font-semibold text-[var(--crm-wine)] sm:text-sm">Склад гостей</div>
-                <div className="mt-3 grid gap-3 md:grid-cols-3 lg:grid-cols-1 xl:grid-cols-1">
+                <div className="mt-3 grid gap-3 min-[820px]:grid-cols-3">
                   <CompositionField label="Гості" value={adultsCount} onChange={setAdultsCount} />
                   <CompositionField label="Додаткові гості" value={children6PlusCount} onChange={setChildren6PlusCount} />
                   <CompositionField label="До 6 років" value={childrenUnder6Count} onChange={setChildrenUnder6Count} />
@@ -784,15 +783,15 @@ export default function AvailabilityPage() {
                 </div>
               </div>
 
-              <div className="lg:max-xl:col-span-2 xl:col-span-1">
+              <div className="lg:col-span-2 xl:col-span-1 xl:self-end">
                 <button type="submit" disabled={loading} className={primaryButtonClass}>
                   {loading ? 'Перевірка...' : 'Перевірити доступність'}
                 </button>
               </div>
             </form>
-          </section>
+        </section>
 
-          <section ref={resultsRef} className="min-w-0 space-y-3">
+        <section ref={resultsRef} className="min-w-0 space-y-3">
             {error ? (
               <div className="rounded-3xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700 shadow-sm sm:px-5">
                 {error}
@@ -910,8 +909,7 @@ export default function AvailabilityPage() {
                 </div>
               </div>
             ) : null}
-          </section>
-        </div>
+        </section>
       </div>
     </main>
   )
