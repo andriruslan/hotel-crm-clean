@@ -464,7 +464,7 @@ function SingleDayAvailabilityGrid({
   onToggleRoom: (roomId: string) => void
 }) {
   return (
-    <div className="flex flex-wrap justify-center gap-2.5">
+    <div className="grid grid-cols-2 gap-2.5 sm:gap-3 xl:grid-cols-3">
       {items.map((item) => {
         const isSelected = selectedRoomIds.includes(item.room_id)
 
@@ -474,7 +474,7 @@ function SingleDayAvailabilityGrid({
               key={item.room_id}
               type="button"
               onClick={() => onToggleRoom(item.room_id)}
-              className={`w-full min-[620px]:w-[calc(50%-0.3125rem)] xl:w-[calc(33.333%-0.5rem)] max-w-[320px] rounded-3xl border-2 bg-white/90 px-3 py-3 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3.5 sm:py-3.5 ${
+              className={`w-full min-w-0 rounded-3xl border-2 bg-white/90 px-3 py-3 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3.5 sm:py-3.5 ${
                 isSelected
                   ? 'border-[var(--crm-wine)] ring-2 ring-[var(--crm-wine)] ring-inset'
                   : 'border-[var(--crm-wine-border)] hover:border-[var(--crm-wine)]'
@@ -506,7 +506,7 @@ function SingleDayAvailabilityGrid({
           <Link
             key={item.room_id}
             href={createHref(item)}
-            className="block w-full min-[620px]:w-[calc(50%-0.3125rem)] xl:w-[calc(33.333%-0.5rem)] max-w-[320px] rounded-3xl border-2 border-[var(--crm-wine-border)] bg-white/90 px-3 py-3 shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3.5 sm:py-3.5"
+            className="block w-full min-w-0 rounded-3xl border-2 border-[var(--crm-wine-border)] bg-white/90 px-3 py-3 shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3.5 sm:py-3.5"
           >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
