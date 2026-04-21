@@ -494,9 +494,9 @@ function SingleDayAvailabilityGrid({
                 </span>
               </div>
 
-              <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] text-neutral-700 sm:text-[12px]">
-                <span className="rounded-full bg-white px-2 py-1 shadow-sm">{item.guests_count} гост.</span>
-                <span className="rounded-full bg-white px-2 py-1 shadow-sm">доп. місць: {item.extra_beds_count + item.free_extra_beds_count}</span>
+              <div className="mt-3 flex items-center gap-1 text-[10px] text-neutral-700 sm:gap-1.5 sm:text-[12px]">
+                <span className="inline-flex whitespace-nowrap rounded-full bg-white px-2 py-1 shadow-sm">{item.guests_count} гост.</span>
+                <span className="inline-flex whitespace-nowrap rounded-full bg-white px-2 py-1 shadow-sm">доп. місць: {item.extra_beds_count + item.free_extra_beds_count}</span>
               </div>
             </button>
           )
@@ -515,9 +515,9 @@ function SingleDayAvailabilityGrid({
               </div>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] text-neutral-700 sm:text-[12px]">
-              <span className="rounded-full bg-[var(--crm-wine)] px-2 py-1 text-white shadow-sm">{item.guests_count} гост.</span>
-              <span className="rounded-full bg-white px-2 py-1 shadow-sm">доп. місць: {item.extra_beds_count + item.free_extra_beds_count}</span>
+            <div className="mt-3 flex items-center gap-1 text-[10px] text-neutral-700 sm:gap-1.5 sm:text-[12px]">
+              <span className="inline-flex whitespace-nowrap rounded-full bg-[var(--crm-wine)] px-2 py-1 text-white shadow-sm">{item.guests_count} гост.</span>
+              <span className="inline-flex whitespace-nowrap rounded-full bg-white px-2 py-1 shadow-sm">доп. місць: {item.extra_beds_count + item.free_extra_beds_count}</span>
             </div>
           </Link>
         )
@@ -914,3 +914,4 @@ export default function AvailabilityPage() {
     </main>
   )
 }
+
