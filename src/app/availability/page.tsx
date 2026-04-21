@@ -340,6 +340,11 @@ function normalizeFilterValue(value: string) {
   return value.toLocaleLowerCase('uk-UA').trim()
 }
 
+function getBuildingSortOrder(value: string) {
+  const matchedBuildingNumber = normalizeFilterValue(value).match(/\d+/)?.[0]
+  return matchedBuildingNumber ? Number(matchedBuildingNumber) : Number.MAX_SAFE_INTEGER
+}
+
 function matchesBuildingFilters(item: AvailabilityItem, selectedBuildingFilters: BuildingFilterValue[]) {
   if (selectedBuildingFilters.includes('all')) {
     return true
@@ -732,6 +737,24 @@ export default function AvailabilityPage() {
       const nextItems = [...(data.items || [])].sort((left, right) => {
         if (left.is_fully_available !== right.is_fully_available) {
           return left.is_fully_available ? -1 : 1
+        }
+
+        const buildingOrderDiff = getBuildingSortOrder(left.building_name) - getBuildingSortOrder(right.building_name)
+
+        if (buildingOrderDiff !== 0) {
+          return buildingOrderDiff
+        }
+
+        const roomNumberOrderDiff = Number(left.room_number) - Number(right.room_number)
+
+        if (Number.isFinite(roomNumberOrderDiff) && roomNumberOrderDiff !== 0) {
+          return roomNumberOrderDiff
+        }
+
+        const roomNumberLabelDiff = left.room_number.localeCompare(right.room_number, 'uk-UA', { numeric: true })
+
+        if (roomNumberLabelDiff !== 0) {
+          return roomNumberLabelDiff
         }
 
         if (left.is_fully_available && right.is_fully_available) {

@@ -181,6 +181,13 @@ export function ArrivalsGroups({ initialDate = '' }: { initialDate?: string }) {
     () => items.filter((item) => item.occupancy_status === 'checked_in').filter((item) => matchesSearch(item, searchValue)),
     [items, searchValue]
   )
+  const totalArrivalsCount = items.length
+  const totalCheckedInCount = useMemo(
+    () => items.filter((item) => item.occupancy_status === 'checked_in').length,
+    [items]
+  )
+  const totalPendingCount = Math.max(0, totalArrivalsCount - totalCheckedInCount)
+  const checkedInProgressPercent = totalArrivalsCount > 0 ? Math.round((totalCheckedInCount / totalArrivalsCount) * 100) : 0
   const duplicateGuestMap = useMemo(() => buildDuplicateGuestMap(items), [items])
 
   return (
@@ -231,6 +238,26 @@ export function ArrivalsGroups({ initialDate = '' }: { initialDate?: string }) {
 
           <section className="space-y-3">
             {error ? <div className="rounded-3xl border border-[var(--crm-danger)] bg-[var(--crm-danger-soft)] px-4 py-3 text-sm text-[var(--crm-danger)]">{error}</div> : null}
+
+            <div className="rounded-3xl border border-[var(--crm-vine-border)] bg-white/95 px-4 py-4 shadow-sm sm:px-5">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-sm font-semibold text-neutral-900">{'\u0417\u0430\u0457\u0437\u0434\u0438 \u043d\u0430 \u0446\u044e \u0434\u0430\u0442\u0443'}</div>
+                  <div className="mt-1 text-sm text-neutral-600">{`${totalCheckedInCount} \u0456\u0437 ${totalArrivalsCount} \u0437\u0430\u0441\u0435\u043b\u0435\u043d\u043e`}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-[var(--crm-vine-dark)]">{`${checkedInProgressPercent}%`}</div>
+                  <div className="text-xs font-medium text-neutral-500">{`${totalPendingCount} \u043e\u0447\u0456\u043a\u0443\u044e\u0442\u044c`}</div>
+                </div>
+              </div>
+
+              <div className="mt-4 h-3 overflow-hidden rounded-full bg-[var(--crm-vine-soft)]">
+                <div
+                  className="h-full rounded-full bg-[var(--crm-vine)] transition-all"
+                  style={{ width: `${checkedInProgressPercent}%` }}
+                />
+              </div>
+            </div>
 
             <div className={sectionClass}>
               <div className="flex items-end justify-between gap-3">
