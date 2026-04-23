@@ -599,7 +599,7 @@ function SingleDayAvailabilityGrid({
   onToggleRoom: (roomId: string) => void
 }) {
   return (
-    <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3 min-[1120px]:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
       {items.map((item) => {
         const isSelected = selectedRoomIds.includes(item.room_id)
 
@@ -609,7 +609,7 @@ function SingleDayAvailabilityGrid({
               key={item.room_id}
               type="button"
               onClick={() => onToggleRoom(item.room_id)}
-              className={`w-full min-w-0 rounded-3xl border-2 bg-white/90 px-2.5 py-2.5 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3 sm:py-3 ${
+              className={`w-full min-w-0 rounded-3xl border-2 bg-white/90 px-2.5 py-2.5 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3 sm:py-3 lg:px-2.5 lg:py-2.5 ${
                 isSelected
                   ? 'border-[var(--crm-wine)] ring-2 ring-[var(--crm-wine)] ring-inset'
                   : 'border-[var(--crm-wine-border)] hover:border-[var(--crm-wine)]'
@@ -617,8 +617,8 @@ function SingleDayAvailabilityGrid({
             >
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
-                  <div className="truncate text-sm font-bold leading-tight lg:text-[15px]">Номер {item.room_number}</div>
-                  <div className="mt-1 text-[10px] leading-4 text-neutral-500 sm:text-[11px]">{item.building_name}, {item.room_type_name}</div>
+                  <div className="truncate text-sm font-bold leading-tight lg:text-[14px]">Номер {item.room_number}</div>
+                  <div className="mt-1 text-[10px] leading-4 text-neutral-500 sm:text-[11px] lg:text-[10px]">{item.building_name}, {item.room_type_name}</div>
                 </div>
                 <span
                   className={`inline-flex self-start rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-sm ${
@@ -629,7 +629,7 @@ function SingleDayAvailabilityGrid({
                 </span>
               </div>
 
-              <div className="mt-2.5 flex items-center gap-1 text-[10px] text-neutral-700 sm:gap-1.5 sm:text-[11px]">
+              <div className="mt-2.5 flex items-center gap-1 text-[10px] text-neutral-700 sm:gap-1.5 sm:text-[11px] lg:text-[10px]">
                 <span className="inline-flex whitespace-nowrap rounded-full bg-white px-2 py-1 shadow-sm">{item.guests_count} гост.</span>
                 <span className="inline-flex whitespace-nowrap rounded-full bg-white px-2 py-1 shadow-sm">доп. місць: {item.extra_beds_count + item.free_extra_beds_count}</span>
               </div>
@@ -641,16 +641,16 @@ function SingleDayAvailabilityGrid({
           <Link
             key={item.room_id}
             href={createHref(item)}
-            className="block w-full min-w-0 rounded-3xl border-2 border-[var(--crm-wine-border)] bg-white/90 px-2.5 py-2.5 shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3 sm:py-3"
+            className="block w-full min-w-0 rounded-3xl border-2 border-[var(--crm-wine-border)] bg-white/90 px-2.5 py-2.5 shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--crm-wine)] hover:bg-[var(--crm-panel)] hover:shadow-lg sm:px-3 sm:py-3 lg:px-2.5 lg:py-2.5"
           >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
-                <div className="truncate text-sm font-bold leading-tight lg:text-[15px]">Номер {item.room_number}</div>
-                <div className="mt-1 text-[10px] leading-4 text-neutral-500 sm:text-[11px]">{item.building_name}, {item.room_type_name}</div>
+                <div className="truncate text-sm font-bold leading-tight lg:text-[14px]">Номер {item.room_number}</div>
+                <div className="mt-1 text-[10px] leading-4 text-neutral-500 sm:text-[11px] lg:text-[10px]">{item.building_name}, {item.room_type_name}</div>
               </div>
             </div>
 
-            <div className="mt-2.5 flex items-center gap-1 text-[10px] text-neutral-700 sm:gap-1.5 sm:text-[11px]">
+            <div className="mt-2.5 flex items-center gap-1 text-[10px] text-neutral-700 sm:gap-1.5 sm:text-[11px] lg:text-[10px]">
               <span className="inline-flex whitespace-nowrap rounded-full bg-[var(--crm-wine)] px-2 py-1 text-white shadow-sm">{item.guests_count} гост.</span>
               <span className="inline-flex whitespace-nowrap rounded-full bg-white px-2 py-1 shadow-sm">доп. місць: {item.extra_beds_count + item.free_extra_beds_count}</span>
             </div>
