@@ -560,6 +560,7 @@ export function NewBookingForm() {
   const [availableRooms, setAvailableRooms] = useState<AvailabilityItem[]>([])
   const [draftRooms, setDraftRooms] = useState<DraftRoom[]>([])
   const [isAddRoomSectionOpen, setIsAddRoomSectionOpen] = useState(true)
+  const [isOpenedFromAvailability, setIsOpenedFromAvailability] = useState(false)
 
   const [searchingGuest, setSearchingGuest] = useState(false)
   const [loadingRooms, setLoadingRooms] = useState(false)
@@ -591,6 +592,7 @@ export function NewBookingForm() {
     setAvailableRooms([])
     setDraftRooms([])
     setIsAddRoomSectionOpen(true)
+    setIsOpenedFromAvailability(false)
     setGuestMessage('')
     setRoomsMessage('')
     setError('')
@@ -609,6 +611,7 @@ export function NewBookingForm() {
       setChildren6PlusCount(firstDraftRoom.children6PlusCount)
       setDraftRooms(nextDraftRooms)
       setIsAddRoomSectionOpen(false)
+      setIsOpenedFromAvailability(true)
       setRoomsMessage(nextDraftRooms.length > 1 ? 'Номери додано з екрана доступності.' : 'Номер додано з екрана доступності.')
     }
   }, [])
@@ -639,6 +642,12 @@ export function NewBookingForm() {
   const totalPrice = draftRooms.reduce((sum, room) => sum + getDraftRoomTotalPrice(room), 0)
   const totalGuestsInBooking = draftRooms.reduce((sum, room) => sum + room.guestsCount, 0)
   const totalExtraBedsInBooking = draftRooms.reduce((sum, room) => sum + room.paidExtraBedsCount + room.freeExtraBedsCount, 0)
+  const pageContainerClass = isOpenedFromAvailability
+    ? 'mx-auto w-full max-w-[560px] lg:max-w-[600px]'
+    : 'mx-auto w-full max-w-[980px] min-[1180px]:max-w-[1100px] 2xl:max-w-[1240px]'
+  const formLayoutClass = isOpenedFromAvailability
+    ? 'mt-3 grid gap-3'
+    : 'mt-3 grid gap-3 2xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.95fr)] 2xl:items-start'
 
   async function handleFindGuest() {
     setGuestMessage('')
@@ -919,12 +928,12 @@ export function NewBookingForm() {
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-8">
-      <div className="mx-auto w-full max-w-[980px] min-[1180px]:max-w-[1100px] 2xl:max-w-[1240px]">
+      <div className={pageContainerClass}>
         <section className={sectionClass}>
           <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Нове бронювання</h1>
         </section>
 
-        <div className="mt-3 grid gap-3 2xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.95fr)] 2xl:items-start">
+        <div className={formLayoutClass}>
           <form id="booking-form" onSubmit={handleCreateBooking} className="space-y-3">
             {error ? <div className="rounded-3xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div> : null}
             {success ? <div className="rounded-3xl border border-[var(--crm-vine-border)] bg-[var(--crm-vine-soft)] px-4 py-3 text-sm text-[var(--crm-vine-dark)]">{success}</div> : null}
