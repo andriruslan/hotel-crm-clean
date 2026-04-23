@@ -644,10 +644,11 @@ export function NewBookingForm() {
     () => Boolean(searchParams.get('roomSelections') || searchParams.get('rooms') || searchParams.get('roomId')),
     [searchParams]
   )
-  const pageContainerClass = isOpenedFromAvailability
-    ? 'mx-auto w-full max-w-[560px] lg:max-w-[600px]'
+  const useCompactBookingLayout = isOpenedFromAvailability || (draftRooms.length > 0 && !isAddRoomSectionOpen)
+  const pageContainerClass = useCompactBookingLayout
+    ? 'mx-auto w-full max-w-[520px] lg:max-w-[540px]'
     : 'mx-auto w-full max-w-[980px] min-[1180px]:max-w-[1100px] 2xl:max-w-[1240px]'
-  const formLayoutClass = isOpenedFromAvailability
+  const formLayoutClass = useCompactBookingLayout
     ? 'mt-3 grid gap-3'
     : 'mt-3 grid gap-3 2xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.95fr)] 2xl:items-start'
 
