@@ -506,6 +506,16 @@ function readDraftRoomsFromQuery() {
   return [buildDraftRoomFromQueryPayload(singleRoom, checkIn, checkOut, guestsCount, composition)]
 }
 
+function hasAvailabilityDraftQuery() {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  const params = new URLSearchParams(window.location.search)
+
+  return Boolean(params.get('roomSelections') || params.get('rooms') || params.get('roomId'))
+}
+
 function CompositionField({
   label,
   value,
@@ -560,7 +570,7 @@ export function NewBookingForm() {
   const [availableRooms, setAvailableRooms] = useState<AvailabilityItem[]>([])
   const [draftRooms, setDraftRooms] = useState<DraftRoom[]>([])
   const [isAddRoomSectionOpen, setIsAddRoomSectionOpen] = useState(true)
-  const [isOpenedFromAvailability, setIsOpenedFromAvailability] = useState(false)
+  const [isOpenedFromAvailability, setIsOpenedFromAvailability] = useState(() => hasAvailabilityDraftQuery())
 
   const [searchingGuest, setSearchingGuest] = useState(false)
   const [loadingRooms, setLoadingRooms] = useState(false)
