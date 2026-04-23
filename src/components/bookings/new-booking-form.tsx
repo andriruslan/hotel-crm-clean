@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { DatePickerField } from '@/components/ui/date-picker-field'
 import { getDefaultPaymentDueStage, getPaymentDueStageLabel, type PaymentDueStage } from '@/lib/booking-note-meta'
@@ -506,16 +506,6 @@ function readDraftRoomsFromQuery() {
   return [buildDraftRoomFromQueryPayload(singleRoom, checkIn, checkOut, guestsCount, composition)]
 }
 
-function hasAvailabilityDraftQuery() {
-  if (typeof window === 'undefined') {
-    return false
-  }
-
-  const params = new URLSearchParams(window.location.search)
-
-  return Boolean(params.get('roomSelections') || params.get('rooms') || params.get('roomId'))
-}
-
 function CompositionField({
   label,
   value,
@@ -550,6 +540,7 @@ function CompositionField({
 
 export function NewBookingForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const today = useMemo(() => isoDateToInputValue(getTodayDate()), [])
   const tomorrow = useMemo(() => isoDateToInputValue(addOneDay(getTodayDate())), [])
   const availableRoomsRef = useRef<HTMLDivElement | null>(null)
@@ -570,7 +561,6 @@ export function NewBookingForm() {
   const [availableRooms, setAvailableRooms] = useState<AvailabilityItem[]>([])
   const [draftRooms, setDraftRooms] = useState<DraftRoom[]>([])
   const [isAddRoomSectionOpen, setIsAddRoomSectionOpen] = useState(true)
-  const [isOpenedFromAvailability, setIsOpenedFromAvailability] = useState(() => hasAvailabilityDraftQuery())
 
   const [searchingGuest, setSearchingGuest] = useState(false)
   const [loadingRooms, setLoadingRooms] = useState(false)
@@ -602,7 +592,6 @@ export function NewBookingForm() {
     setAvailableRooms([])
     setDraftRooms([])
     setIsAddRoomSectionOpen(true)
-    setIsOpenedFromAvailability(false)
     setGuestMessage('')
     setRoomsMessage('')
     setError('')
@@ -621,7 +610,6 @@ export function NewBookingForm() {
       setChildren6PlusCount(firstDraftRoom.children6PlusCount)
       setDraftRooms(nextDraftRooms)
       setIsAddRoomSectionOpen(false)
-      setIsOpenedFromAvailability(true)
       setRoomsMessage(nextDraftRooms.length > 1 ? 'Номери додано з екрана доступності.' : 'Номер додано з екрана доступності.')
     }
   }, [])
@@ -652,6 +640,10 @@ export function NewBookingForm() {
   const totalPrice = draftRooms.reduce((sum, room) => sum + getDraftRoomTotalPrice(room), 0)
   const totalGuestsInBooking = draftRooms.reduce((sum, room) => sum + room.guestsCount, 0)
   const totalExtraBedsInBooking = draftRooms.reduce((sum, room) => sum + room.paidExtraBedsCount + room.freeExtraBedsCount, 0)
+  const isOpenedFromAvailability = useMemo(
+    () => Boolean(searchParams.get('roomSelections') || searchParams.get('rooms') || searchParams.get('roomId')),
+    [searchParams]
+  )
   const pageContainerClass = isOpenedFromAvailability
     ? 'mx-auto w-full max-w-[560px] lg:max-w-[600px]'
     : 'mx-auto w-full max-w-[980px] min-[1180px]:max-w-[1100px] 2xl:max-w-[1240px]'
