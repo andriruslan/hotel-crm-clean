@@ -599,7 +599,7 @@ function SingleDayAvailabilityGrid({
   onToggleRoom: (roomId: string) => void
 }) {
   return (
-    <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3 min-[1180px]:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3 min-[1120px]:grid-cols-4">
       {items.map((item) => {
         const isSelected = selectedRoomIds.includes(item.room_id)
 
@@ -904,7 +904,7 @@ export default function AvailabilityPage() {
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-3 pt-3 pb-4 sm:px-4 sm:pt-4 sm:pb-5 lg:px-5 lg:pt-5 lg:pb-6 xl:pb-8">
-      <div className="mx-auto w-full max-w-[1280px] space-y-4 lg:grid lg:grid-cols-[300px_minmax(0,1fr)] lg:items-start lg:gap-4 lg:space-y-0">
+      <div className="mx-auto w-full max-w-[1320px] space-y-4 lg:grid lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start lg:gap-4 lg:space-y-0">
         <section className={`${sectionClass} lg:mx-0 lg:max-w-none lg:px-3 lg:py-3`}>
             <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Доступність номерів</h1>
             <form onSubmit={handleSearch} className="mt-4 grid gap-3 lg:mt-3 lg:gap-2.5">
@@ -986,7 +986,7 @@ export default function AvailabilityPage() {
             ) : null}
 
             {items.length > 0 ? (
-              <div className={showDailyBreakdown ? sectionClass : `${sectionClass} mx-auto max-w-[920px]`}>
+              <div className={showDailyBreakdown ? sectionClass : `${sectionClass} mx-auto max-w-[920px] lg:mx-0 lg:max-w-none`}>
                 <div className="space-y-4">
                   <div className="grid gap-3 xl:grid-cols-2">
                     <FilterToggleGroup

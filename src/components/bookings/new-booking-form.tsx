@@ -919,7 +919,7 @@ export function NewBookingForm() {
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-8">
-      <div className="mx-auto w-full max-w-6xl">
+      <div className="mx-auto w-full max-w-[980px] min-[1180px]:max-w-[1100px] 2xl:max-w-[1240px]">
         <section className={sectionClass}>
           <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Нове бронювання</h1>
         </section>
