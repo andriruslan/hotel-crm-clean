@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { DatePickerField } from '@/components/ui/date-picker-field'
 import { getDefaultPaymentDueStage, getPaymentDueStageLabel, type PaymentDueStage } from '@/lib/booking-note-meta'
@@ -538,9 +538,12 @@ function CompositionField({
   )
 }
 
-export function NewBookingForm() {
+export function NewBookingForm({
+  compactFromAvailability = false,
+}: {
+  compactFromAvailability?: boolean
+}) {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const today = useMemo(() => isoDateToInputValue(getTodayDate()), [])
   const tomorrow = useMemo(() => isoDateToInputValue(addOneDay(getTodayDate())), [])
   const availableRoomsRef = useRef<HTMLDivElement | null>(null)
@@ -640,13 +643,12 @@ export function NewBookingForm() {
   const totalPrice = draftRooms.reduce((sum, room) => sum + getDraftRoomTotalPrice(room), 0)
   const totalGuestsInBooking = draftRooms.reduce((sum, room) => sum + room.guestsCount, 0)
   const totalExtraBedsInBooking = draftRooms.reduce((sum, room) => sum + room.paidExtraBedsCount + room.freeExtraBedsCount, 0)
-  const isOpenedFromAvailability = useMemo(
-    () => Boolean(searchParams.get('roomSelections') || searchParams.get('rooms') || searchParams.get('roomId')),
-    [searchParams]
-  )
-  const useCompactBookingLayout = isOpenedFromAvailability || (draftRooms.length > 0 && !isAddRoomSectionOpen)
+  const useCompactBookingLayout = compactFromAvailability || (draftRooms.length > 0 && !isAddRoomSectionOpen)
+  const pageClass = useCompactBookingLayout
+    ? 'min-h-screen bg-[var(--background)] px-3 py-3 sm:px-4 sm:py-4 lg:px-4 lg:py-5'
+    : 'min-h-screen bg-[var(--background)] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-8'
   const pageContainerClass = useCompactBookingLayout
-    ? 'mx-auto w-full max-w-[520px] lg:max-w-[540px]'
+    ? 'mx-auto w-full max-w-[500px] lg:max-w-[520px]'
     : 'mx-auto w-full max-w-[980px] min-[1180px]:max-w-[1100px] 2xl:max-w-[1240px]'
   const formLayoutClass = useCompactBookingLayout
     ? 'mt-3 grid gap-3'
@@ -930,7 +932,7 @@ export function NewBookingForm() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--background)] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-8">
+    <main className={pageClass}>
       <div className={pageContainerClass}>
         <section className={sectionClass}>
           <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Нове бронювання</h1>
