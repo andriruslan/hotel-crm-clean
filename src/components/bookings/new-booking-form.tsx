@@ -648,7 +648,7 @@ export function NewBookingForm({
     ? 'min-h-screen bg-[var(--background)] px-3 py-3 sm:px-4 sm:py-4 lg:px-4 lg:py-5'
     : 'min-h-screen bg-[var(--background)] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-8'
   const pageContainerClass = useCompactBookingLayout
-    ? 'mx-auto w-full max-w-[500px] lg:max-w-[520px]'
+    ? 'mx-auto w-full max-w-[390px] md:max-w-[420px] lg:max-w-[440px]'
     : 'mx-auto w-full max-w-[980px] min-[1180px]:max-w-[1100px] 2xl:max-w-[1240px]'
   const formLayoutClass = useCompactBookingLayout
     ? 'mt-3 grid gap-3'

@@ -11,7 +11,7 @@ const actions = [
   { href: '/bookings/search', title: 'Контроль передоплат' },
 ]
 
-const DEPLOY_MARKER_LABEL = '????????: 23.04.2026 11:16'
+const DEPLOY_MARKER_LABEL = '????????: 23.04.2026 11:25'
 
 export default async function HomePage() {
   const cookieStore = await cookies()

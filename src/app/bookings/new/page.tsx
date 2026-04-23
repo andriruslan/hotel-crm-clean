@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import { NewBookingForm } from '@/components/bookings/new-booking-form'
 
 type NewBookingSearchParams = {
+  source?: string
   roomId?: string
   rooms?: string
   roomSelections?: string
@@ -14,7 +15,10 @@ export default async function NewBookingPage({
 }) {
   const resolvedSearchParams = await searchParams
   const compactFromAvailability = Boolean(
-    resolvedSearchParams.roomId || resolvedSearchParams.rooms || resolvedSearchParams.roomSelections
+    resolvedSearchParams.source === 'availability' ||
+      resolvedSearchParams.roomId ||
+      resolvedSearchParams.rooms ||
+      resolvedSearchParams.roomSelections
   )
 
   return (

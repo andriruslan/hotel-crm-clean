@@ -163,6 +163,7 @@ function createBaseBookingParams(checkIn: string, checkOut: string, composition:
   const checkOutIso = dateInputToIso(checkOut)
 
   return new URLSearchParams({
+    source: 'availability',
     checkIn: checkInIso,
     checkOut: checkOutIso,
     guestsCount: String(guestsCount),
