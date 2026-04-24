@@ -1349,7 +1349,7 @@ export function NewBookingForm({
                   Додати дегустацію
                 </label>
               </div>
-              <div className="mt-4 grid gap-3 md:grid-cols-2 md:items-end">
+              <div className="mt-4 grid grid-cols-2 gap-3 items-end">
                 {degustationApplied ? (
                   <>
                     <label className="block min-w-0">
