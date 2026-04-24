@@ -499,18 +499,19 @@ function CompositionField({
   onChange: (nextValue: number) => void
   compact?: boolean
 }) {
-  const labelClass = compact ? 'text-xs font-medium leading-4' : 'text-sm font-medium'
-  const controlsClass = compact ? 'mt-1 grid grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] gap-1.5' : 'mt-1.5 grid grid-cols-[3rem_minmax(0,1fr)_3rem] gap-2'
+  const wrapperClass = compact ? 'block min-w-0' : 'block'
+  const labelClass = compact ? 'text-[11px] font-medium leading-4 whitespace-nowrap' : 'text-sm font-medium'
+  const controlsClass = compact ? 'mt-1 grid grid-cols-[2.2rem_minmax(2.35rem,1fr)_2.2rem] gap-1' : 'mt-1.5 grid grid-cols-[3rem_minmax(0,1fr)_3rem] gap-2'
   const secondaryButtonClass = compact
-    ? 'flex h-11 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] text-lg font-semibold text-[var(--crm-wine-dark)] shadow-[0_6px_16px_rgba(143,45,86,0.08)] transition hover:bg-[var(--crm-wine-soft-hover)]'
+    ? 'flex h-10 items-center justify-center rounded-xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] text-base font-semibold text-[var(--crm-wine-dark)] shadow-[0_4px_12px_rgba(143,45,86,0.08)] transition hover:bg-[var(--crm-wine-soft-hover)]'
     : counterButtonClass
   const primaryCompactButtonClass = compact
-    ? 'flex h-11 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] text-lg font-semibold text-white shadow-[0_8px_18px_rgba(143,45,86,0.18)] transition hover:bg-[var(--crm-wine-dark)]'
+    ? 'flex h-10 items-center justify-center rounded-xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] text-base font-semibold text-white shadow-[0_6px_14px_rgba(143,45,86,0.16)] transition hover:bg-[var(--crm-wine-dark)]'
     : counterPrimaryButtonClass
-  const inputClass = compact ? `${fieldClass} mt-0 h-11 px-2 text-center text-[15px] font-semibold` : `${fieldClass} mt-0 text-center font-semibold`
+  const inputClass = compact ? `${fieldClass} mt-0 h-10 min-w-0 px-1.5 text-center text-[14px] font-semibold` : `${fieldClass} mt-0 text-center font-semibold`
 
   return (
-    <label className="block">
+    <label className={wrapperClass}>
       <span className={labelClass}>{label}</span>
       <div className={controlsClass}>
         <button type="button" onClick={() => onChange(Math.max(0, value - 1))} className={secondaryButtonClass}>
@@ -666,7 +667,7 @@ export function NewBookingForm({
   const draftRoomHeaderClass = useCompactBookingLayout
     ? 'grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2'
     : 'flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'
-  const draftRoomStatsGridClass = useCompactBookingLayout ? 'mt-2.5 grid grid-cols-3 gap-2' : 'mt-4 grid grid-cols-2 gap-2'
+  const draftRoomStatsGridClass = useCompactBookingLayout ? 'mt-2.5 grid grid-cols-3 gap-1.5' : 'mt-4 grid grid-cols-2 gap-2'
   const draftRoomPriceTotalCardClass = useCompactBookingLayout
     ? 'rounded-2xl bg-white px-2.5 py-2 text-sm text-neutral-700 shadow-sm'
     : 'col-span-2 rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm'
@@ -1143,7 +1144,7 @@ export function NewBookingForm({
                             <div className="mt-0.5 text-lg font-semibold text-neutral-900">{draftRoom.guestsCount}</div>
                           </div>
                           <div className="rounded-2xl bg-white px-2.5 py-2 text-sm text-neutral-700 shadow-sm">
-                            <div className="text-xs uppercase tracking-wide text-neutral-500">Дод. місця</div>
+                            <div className="text-[10px] font-semibold uppercase tracking-[0.04em] whitespace-nowrap text-neutral-500">Дод. місця</div>
                             <div className="mt-0.5 text-lg font-semibold text-neutral-900">
                               {draftRoom.paidExtraBedsCount + draftRoom.freeExtraBedsCount}
                             </div>
