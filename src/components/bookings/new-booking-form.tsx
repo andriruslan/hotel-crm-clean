@@ -671,11 +671,16 @@ export function NewBookingForm({
   const draftRoomPriceTotalCardClass = useCompactBookingLayout
     ? 'rounded-2xl bg-white px-2.5 py-2 text-sm text-neutral-700 shadow-sm'
     : 'col-span-2 rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm'
-  const draftRoomDatesGridClass = useCompactBookingLayout ? 'mt-3 grid min-w-0 grid-cols-2 gap-2' : 'mt-4 grid min-w-0 grid-cols-2 gap-3'
+  const draftRoomDatesGridClass = useCompactBookingLayout
+    ? 'mt-3 grid min-w-0 gap-2 md:grid-cols-[minmax(0,8.75rem)_minmax(0,8.75rem)_minmax(0,1fr)] md:items-end'
+    : 'mt-4 grid min-w-0 gap-3 md:grid-cols-[minmax(0,10rem)_minmax(0,10rem)_minmax(0,1fr)] md:items-end'
   const draftRoomCompositionGridClass = useCompactBookingLayout ? 'mt-3 grid grid-cols-3 gap-2' : 'mt-4 grid gap-3 md:grid-cols-3'
   const draftRoomCertificateWrapClass = useCompactBookingLayout
-    ? 'mt-3 rounded-3xl border border-[var(--crm-wine-border)] bg-white px-3 py-3 shadow-sm'
-    : 'mt-4 rounded-3xl border border-[var(--crm-wine-border)] bg-white px-3.5 py-3.5 shadow-sm sm:px-4 sm:py-4'
+    ? 'min-w-0'
+    : 'min-w-0'
+  const draftRoomCertificateInlineClass = useCompactBookingLayout
+    ? 'grid gap-2 md:grid-cols-[minmax(0,1fr)_12.5rem] md:items-end'
+    : 'grid gap-2 md:grid-cols-[minmax(0,1fr)_14rem] md:items-end'
   const draftRoomPriceGridClass = useCompactBookingLayout ? 'mt-3 grid grid-cols-3 gap-2' : 'mt-4 grid grid-cols-2 gap-3'
   const draftRoomPaymentFieldClass = useCompactBookingLayout ? 'block' : 'block col-span-2'
   const compactInlineSummaryGridClass = 'mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4'
@@ -1120,7 +1125,6 @@ export function NewBookingForm({
                     const directPaid = getDraftRoomDirectPaid(draftRoom)
                     const roomTotalPaid = directPaid + certificateAmount
                     const roomBalance = Math.max(0, roomTotalPrice - roomTotalPaid)
-                    const roomCertificateSurplus = Math.max(0, certificateAmount - roomTotalPrice)
 
                     return (
                       <article key={draftRoom.key} className={draftRoomArticleClass}>
@@ -1172,6 +1176,43 @@ export function NewBookingForm({
                               className={fieldClass}
                             />
                           </label>
+                          <div className={draftRoomCertificateWrapClass}>
+                            <div className={draftRoomCertificateInlineClass}>
+                              <label className="inline-flex min-h-11 items-center gap-3 text-sm font-semibold text-neutral-900">
+                                <input
+                                  type="checkbox"
+                                  checked={draftRoom.certificateApplied}
+                                  onChange={(e) =>
+                                    updateDraftRoom(draftRoom.key, {
+                                      certificateApplied: e.target.checked,
+                                      certificateAmount: e.target.checked
+                                        ? draftRoom.certificateAmount || String(roomTotalPrice)
+                                        : '',
+                                    })
+                                  }
+                                  className="h-5 w-5 rounded border-[var(--crm-wine-border)] text-[var(--crm-wine)] accent-[var(--crm-wine)]"
+                                />
+                                Проживання по сертифікату
+                              </label>
+
+                              {draftRoom.certificateApplied ? (
+                                <label className="block min-w-0">
+                                  <span className="text-sm font-medium">Сума сертифіката</span>
+                                  <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    value={draftRoom.certificateAmount}
+                                    onChange={(e) =>
+                                      updateDraftRoom(draftRoom.key, {
+                                        certificateAmount: sanitizeIntegerInput(e.target.value),
+                                      })
+                                    }
+                                    className={fieldClass}
+                                  />
+                                </label>
+                              ) : null}
+                            </div>
+                          </div>
                         </div>
 
                         <div className={draftRoomCompositionGridClass}>
@@ -1193,53 +1234,6 @@ export function NewBookingForm({
                             onChange={(nextValue) => updateDraftRoomComposition(draftRoom.key, { childrenUnder6Count: nextValue })}
                             compact={useCompactBookingLayout}
                           />
-                        </div>
-
-                        <div className={draftRoomCertificateWrapClass}>
-                          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_15rem] md:items-end">
-                            <label className="inline-flex min-h-11 items-center gap-3 text-sm font-semibold text-neutral-900">
-                              <input
-                                type="checkbox"
-                                checked={draftRoom.certificateApplied}
-                                onChange={(e) =>
-                                  updateDraftRoom(draftRoom.key, {
-                                    certificateApplied: e.target.checked,
-                                    certificateAmount: e.target.checked
-                                      ? draftRoom.certificateAmount || String(roomTotalPrice)
-                                      : '',
-                                  })
-                                }
-                                className="h-5 w-5 rounded border-[var(--crm-wine-border)] text-[var(--crm-wine)] accent-[var(--crm-wine)]"
-                              />
-                              Проживання по сертифікату
-                            </label>
-
-                            {draftRoom.certificateApplied ? (
-                              <label className="block">
-                                <span className="text-sm font-medium">Сума сертифіката</span>
-                                <input
-                                  type="text"
-                                  inputMode="numeric"
-                                  value={draftRoom.certificateAmount}
-                                  onChange={(e) =>
-                                    updateDraftRoom(draftRoom.key, {
-                                      certificateAmount: sanitizeIntegerInput(e.target.value),
-                                    })
-                                  }
-                                  className={fieldClass}
-                                />
-                              </label>
-                            ) : null}
-                          </div>
-
-                          {draftRoom.certificateApplied ? (
-                            <div className="mt-3 rounded-2xl bg-[var(--crm-vine-soft)] px-3 py-3 text-sm text-[var(--crm-vine-dark)] shadow-sm">
-                              <div className="font-semibold">Сертифікат враховано в оплаті</div>
-                              <div className="mt-1">Покриття: {formatMoney(certificateAmount)}</div>
-                              {roomBalance > 0 ? <div className="mt-1">Гість має доплатити: {formatMoney(roomBalance)}</div> : null}
-                              {roomCertificateSurplus > 0 ? <div className="mt-1">Сертифікат перекриває на: {formatMoney(roomCertificateSurplus)}</div> : null}
-                            </div>
-                          ) : null}
                         </div>
 
                         <div className={draftRoomPriceGridClass}>
