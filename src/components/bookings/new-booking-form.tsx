@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -127,24 +127,6 @@ function getDefaultCompositionFromGuestsCount(guestsCount: number): GuestComposi
     childrenUnder6Count: 0,
     children6PlusCount: 0,
   }
-}
-
-function getExtraBedSummaryLabel(paidExtraBedsCount: number, freeExtraBedsCount: number) {
-  if (paidExtraBedsCount === 0 && freeExtraBedsCount === 0) {
-    return 'Без додаткових місць'
-  }
-
-  const parts: string[] = []
-
-  if (paidExtraBedsCount > 0) {
-    parts.push(`платних: ${paidExtraBedsCount}`)
-  }
-
-  if (freeExtraBedsCount > 0) {
-    parts.push(`безкоштовних: ${freeExtraBedsCount}`)
-  }
-
-  return `Додаткові місця: ${parts.join(', ')}`
 }
 
 function createDraftRoom(
@@ -510,16 +492,28 @@ function CompositionField({
   label,
   value,
   onChange,
+  compact = false,
 }: {
   label: string
   value: number
   onChange: (nextValue: number) => void
+  compact?: boolean
 }) {
+  const labelClass = compact ? 'text-xs font-medium leading-4' : 'text-sm font-medium'
+  const controlsClass = compact ? 'mt-1 grid grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] gap-1.5' : 'mt-1.5 grid grid-cols-[3rem_minmax(0,1fr)_3rem] gap-2'
+  const secondaryButtonClass = compact
+    ? 'flex h-11 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] text-lg font-semibold text-[var(--crm-wine-dark)] shadow-[0_6px_16px_rgba(143,45,86,0.08)] transition hover:bg-[var(--crm-wine-soft-hover)]'
+    : counterButtonClass
+  const primaryCompactButtonClass = compact
+    ? 'flex h-11 items-center justify-center rounded-2xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] text-lg font-semibold text-white shadow-[0_8px_18px_rgba(143,45,86,0.18)] transition hover:bg-[var(--crm-wine-dark)]'
+    : counterPrimaryButtonClass
+  const inputClass = compact ? `${fieldClass} mt-0 h-11 px-2 text-center text-[15px] font-semibold` : `${fieldClass} mt-0 text-center font-semibold`
+
   return (
     <label className="block">
-      <span className="text-sm font-medium">{label}</span>
-      <div className="mt-1.5 grid grid-cols-[3rem_minmax(0,1fr)_3rem] gap-2">
-        <button type="button" onClick={() => onChange(Math.max(0, value - 1))} className={counterButtonClass}>
+      <span className={labelClass}>{label}</span>
+      <div className={controlsClass}>
+        <button type="button" onClick={() => onChange(Math.max(0, value - 1))} className={secondaryButtonClass}>
           -
         </button>
         <input
@@ -528,9 +522,9 @@ function CompositionField({
           pattern="[0-9]*"
           value={String(value)}
           onChange={(e) => onChange(parseIntegerValue(e.target.value))}
-          className={`${fieldClass} mt-0 text-center font-semibold`}
+          className={inputClass}
         />
-        <button type="button" onClick={() => onChange(value + 1)} className={counterPrimaryButtonClass}>
+        <button type="button" onClick={() => onChange(value + 1)} className={primaryCompactButtonClass}>
           +
         </button>
       </div>
@@ -665,16 +659,16 @@ export function NewBookingForm({
   const addRoomCompositionGridClass = useCompactBookingLayout ? 'mt-3 grid gap-3' : 'mt-3 grid gap-3 md:grid-cols-3'
   const addRoomSummaryGridClass = useCompactBookingLayout ? 'mt-4 grid gap-2' : 'mt-4 grid gap-2 sm:grid-cols-3'
   const availableRoomsGridClass = useCompactBookingLayout ? 'grid gap-3' : 'grid gap-3 xl:grid-cols-2'
-  const generalParamsGridClass = useCompactBookingLayout ? 'mt-4 grid gap-3' : 'mt-4 grid grid-cols-2 gap-3'
+  const generalParamsGridClass = useCompactBookingLayout ? 'mt-4 grid grid-cols-2 gap-2' : 'mt-4 grid grid-cols-2 gap-3'
   const draftRoomArticleClass = useCompactBookingLayout
     ? 'rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3 py-3 shadow-sm'
     : 'rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3.5 shadow-sm sm:px-4 sm:py-4'
   const draftRoomHeaderClass = useCompactBookingLayout
     ? 'grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2'
     : 'flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'
-  const draftRoomStatsGridClass = useCompactBookingLayout ? 'mt-3 grid grid-cols-3 gap-2' : 'mt-4 grid grid-cols-2 gap-2'
+  const draftRoomStatsGridClass = useCompactBookingLayout ? 'mt-2.5 grid grid-cols-3 gap-2' : 'mt-4 grid grid-cols-2 gap-2'
   const draftRoomPriceTotalCardClass = useCompactBookingLayout
-    ? 'rounded-2xl bg-white px-2.5 py-2.5 text-sm text-neutral-700 shadow-sm'
+    ? 'rounded-2xl bg-white px-2.5 py-2 text-sm text-neutral-700 shadow-sm'
     : 'col-span-2 rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm'
   const draftRoomDatesGridClass = useCompactBookingLayout ? 'mt-3 grid min-w-0 grid-cols-2 gap-2' : 'mt-4 grid min-w-0 grid-cols-2 gap-3'
   const draftRoomCompositionGridClass = useCompactBookingLayout ? 'mt-3 grid grid-cols-3 gap-2' : 'mt-4 grid gap-3 md:grid-cols-3'
@@ -1104,7 +1098,7 @@ export function NewBookingForm({
                   ) : null}
                 </>
               ) : (
-                <div className="mt-4 rounded-2xl bg-neutral-50 px-4 py-4 text-sm text-neutral-600">
+                <div className="hidden">
                   Номер уже додано з екрана доступності. За потреби можна відкрити цей блок і додати ще номер.
                 </div>
               )}
@@ -1132,10 +1126,8 @@ export function NewBookingForm({
                       <article key={draftRoom.key} className={draftRoomArticleClass}>
                         <div className={draftRoomHeaderClass}>
                           <div>
-                            <div className="text-base font-bold">
-                              {`Номер ${index + 1}: ${draftRoom.room.room_number} (${draftRoom.room.room_type_name}, ${draftRoom.room.building_name})`}
-                            </div>
-                            <div className="mt-1 text-xs text-neutral-500">{draftRoom.checkIn} - {draftRoom.checkOut} · {draftRoom.guestsCount} гост.</div>
+                            <div className="text-base font-bold leading-tight">{`Номер ${index + 1}: ${draftRoom.room.room_number}`}</div>
+                            <div className="mt-1 text-sm font-medium leading-tight text-neutral-600">{`(${draftRoom.room.room_type_name}, ${draftRoom.room.building_name})`}</div>
                           </div>
                           <button
                             type="button"
@@ -1147,14 +1139,14 @@ export function NewBookingForm({
                         </div>
 
                         <div className={draftRoomStatsGridClass}>
-                          <div className="rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">
+                          <div className="rounded-2xl bg-white px-2.5 py-2 text-sm text-neutral-700 shadow-sm">
                             <div className="text-xs uppercase tracking-wide text-neutral-500">Всього</div>
-                            <div className="mt-1 text-lg font-semibold text-neutral-900">{draftRoom.guestsCount}</div>
+                            <div className="mt-0.5 text-lg font-semibold text-neutral-900">{draftRoom.guestsCount}</div>
                           </div>
-                          <div className="rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">
-                            <div className="text-xs uppercase tracking-wide text-neutral-500">Додаткові місця</div>
-                            <div className="mt-1 font-medium text-neutral-900">
-                              {getExtraBedSummaryLabel(draftRoom.paidExtraBedsCount, draftRoom.freeExtraBedsCount)}
+                          <div className="rounded-2xl bg-white px-2.5 py-2 text-sm text-neutral-700 shadow-sm">
+                            <div className="text-xs uppercase tracking-wide text-neutral-500">Дод. місця</div>
+                            <div className="mt-0.5 text-lg font-semibold text-neutral-900">
+                              {draftRoom.paidExtraBedsCount + draftRoom.freeExtraBedsCount}
                             </div>
                           </div>
                           <div className={draftRoomPriceTotalCardClass}>
@@ -1187,16 +1179,19 @@ export function NewBookingForm({
                             label="Гості"
                             value={draftRoom.adultsCount}
                             onChange={(nextValue) => updateDraftRoomComposition(draftRoom.key, { adultsCount: nextValue })}
+                            compact={useCompactBookingLayout}
                           />
                           <CompositionField
                             label="Додаткові гості"
                             value={draftRoom.children6PlusCount}
                             onChange={(nextValue) => updateDraftRoomComposition(draftRoom.key, { children6PlusCount: nextValue })}
+                            compact={useCompactBookingLayout}
                           />
                           <CompositionField
                             label="До 6 років"
                             value={draftRoom.childrenUnder6Count}
                             onChange={(nextValue) => updateDraftRoomComposition(draftRoom.key, { childrenUnder6Count: nextValue })}
+                            compact={useCompactBookingLayout}
                           />
                         </div>
 
@@ -1250,11 +1245,11 @@ export function NewBookingForm({
                             <input type="text" inputMode="numeric" value={draftRoom.priceBaseTotal} onChange={(e) => updateDraftRoom(draftRoom.key, { priceBaseTotal: sanitizeIntegerInput(e.target.value) })} className={fieldClass} />
                           </label>
                           <label className="block">
-                            <span className="text-sm font-medium">Доп. місця, грн</span>
+                            <span className="text-sm font-medium">Доп. місця</span>
                             <input type="text" inputMode="numeric" value={draftRoom.priceExtraTotal} onChange={(e) => updateDraftRoom(draftRoom.key, { priceExtraTotal: sanitizeIntegerInput(e.target.value) })} className={fieldClass} />
                           </label>
                           <label className={draftRoomPaymentFieldClass}>
-                            <span className="text-sm font-medium">Оплата, грн</span>
+                            <span className="text-sm font-medium">Оплата</span>
                             <input
                               type="text"
                               inputMode="numeric"
@@ -1310,28 +1305,28 @@ export function NewBookingForm({
             </section>
             {useCompactBookingLayout ? (
               <section className={sectionClass}>
-                <div className="text-base font-semibold sm:text-lg">ÐŸÑ–Ð´ÑÑƒÐ¼Ð¾Ðº</div>
+                <div className="text-base font-semibold sm:text-lg">Підсумок</div>
                 <div className={compactInlineSummaryGridClass}>
                   <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3 py-2.5 shadow-sm">
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-neutral-500">ÐÐ¾Ð¼ÐµÑ€Ñ–Ð²</div>
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-neutral-500">Номерів</div>
                     <div className="mt-1.5 text-xl font-bold leading-none text-neutral-900">{draftRooms.length}</div>
                   </div>
                   <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3 py-2.5 shadow-sm">
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-neutral-500">Ð“Ð¾ÑÑ‚ÐµÐ¹</div>
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-neutral-500">Гостей</div>
                     <div className="mt-1.5 text-xl font-bold leading-none text-neutral-900">{totalGuestsInBooking}</div>
                   </div>
                   <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3 py-2.5 shadow-sm">
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-neutral-500">Ð”Ð¾Ð¿. Ð¼Ñ–ÑÑ†Ñ</div>
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-neutral-500">Доп. місця</div>
                     <div className="mt-1.5 text-xl font-bold leading-none text-neutral-900">{totalExtraBedsInBooking}</div>
                   </div>
                   <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-wine-soft)] px-3 py-2.5 shadow-sm">
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--crm-wine-dark)]">Ð’Ð°Ñ€Ñ‚Ñ–ÑÑ‚ÑŒ</div>
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--crm-wine-dark)]">Вартість</div>
                     <div className="mt-1.5 text-base font-bold leading-tight text-[var(--crm-wine-dark)]">{formatMoney(totalPrice)}</div>
                   </div>
                 </div>
 
                 <button type="submit" form="booking-form" disabled={saving} className={`mt-4 ${primaryButtonClass}`}>
-                  {saving ? 'Ð¡Ñ‚Ð²Ð¾Ñ€ÐµÐ½Ð½Ñ Ð±Ñ€Ð¾Ð½ÑŽÐ²Ð°Ð½Ð½Ñ...' : draftRooms.length > 1 ? 'Ð¡Ñ‚Ð²Ð¾Ñ€Ð¸Ñ‚Ð¸ Ð¾Ð´Ð½Ðµ Ð±Ñ€Ð¾Ð½ÑŽÐ²Ð°Ð½Ð½Ñ Ð½Ð° Ð²ÑÑ– Ð½Ð¾Ð¼ÐµÑ€Ð¸' : 'Ð¡Ñ‚Ð²Ð¾Ñ€Ð¸Ñ‚Ð¸ Ð±Ñ€Ð¾Ð½ÑŽÐ²Ð°Ð½Ð½Ñ'}
+                  {saving ? 'Створення бронювання...' : draftRooms.length > 1 ? 'Створити одне бронювання на всі номери' : 'Створити бронювання'}
                 </button>
               </section>
             ) : null}
