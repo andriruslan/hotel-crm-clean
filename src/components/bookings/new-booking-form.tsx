@@ -501,14 +501,14 @@ function CompositionField({
 }) {
   const wrapperClass = compact ? 'block min-w-0' : 'block'
   const labelClass = compact ? 'text-[11px] font-medium leading-4 whitespace-nowrap' : 'text-sm font-medium'
-  const controlsClass = compact ? 'mt-1 grid grid-cols-[2.2rem_minmax(2.35rem,1fr)_2.2rem] gap-1' : 'mt-1.5 grid grid-cols-[3rem_minmax(0,1fr)_3rem] gap-2'
+  const controlsClass = compact ? 'mt-1 grid grid-cols-[1.9rem_minmax(1.75rem,1fr)_1.9rem] gap-1' : 'mt-1.5 grid grid-cols-[3rem_minmax(0,1fr)_3rem] gap-2'
   const secondaryButtonClass = compact
-    ? 'flex h-10 items-center justify-center rounded-xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] text-base font-semibold text-[var(--crm-wine-dark)] shadow-[0_4px_12px_rgba(143,45,86,0.08)] transition hover:bg-[var(--crm-wine-soft-hover)]'
+    ? 'flex h-9 items-center justify-center rounded-xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] text-sm font-semibold text-[var(--crm-wine-dark)] shadow-[0_4px_10px_rgba(143,45,86,0.08)] transition hover:bg-[var(--crm-wine-soft-hover)]'
     : counterButtonClass
   const primaryCompactButtonClass = compact
-    ? 'flex h-10 items-center justify-center rounded-xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] text-base font-semibold text-white shadow-[0_6px_14px_rgba(143,45,86,0.16)] transition hover:bg-[var(--crm-wine-dark)]'
+    ? 'flex h-9 items-center justify-center rounded-xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] text-sm font-semibold text-white shadow-[0_6px_12px_rgba(143,45,86,0.16)] transition hover:bg-[var(--crm-wine-dark)]'
     : counterPrimaryButtonClass
-  const inputClass = compact ? `${fieldClass} mt-0 h-10 min-w-0 px-1.5 text-center text-[14px] font-semibold` : `${fieldClass} mt-0 text-center font-semibold`
+  const inputClass = compact ? `${fieldClass} mt-0 h-9 min-w-0 px-1 text-center text-[13px] font-semibold` : `${fieldClass} mt-0 text-center font-semibold`
 
   return (
     <label className={wrapperClass}>
@@ -672,11 +672,11 @@ export function NewBookingForm({
     ? 'rounded-2xl bg-white px-2.5 py-2 text-sm text-neutral-700 shadow-sm'
     : 'col-span-2 rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm'
   const draftRoomDatesGridClass = useCompactBookingLayout
-    ? 'mt-3 grid min-w-0 gap-2 md:grid-cols-[minmax(0,8.75rem)_minmax(0,8.75rem)_minmax(0,1fr)] md:items-end'
+    ? 'mt-3 grid min-w-0 grid-cols-2 gap-2 md:grid-cols-[minmax(0,8.75rem)_minmax(0,8.75rem)_minmax(0,1fr)] md:items-end'
     : 'mt-4 grid min-w-0 gap-3 md:grid-cols-[minmax(0,10rem)_minmax(0,10rem)_minmax(0,1fr)] md:items-end'
-  const draftRoomCompositionGridClass = useCompactBookingLayout ? 'mt-3 grid grid-cols-3 gap-2' : 'mt-4 grid gap-3 md:grid-cols-3'
+  const draftRoomCompositionGridClass = useCompactBookingLayout ? 'mt-3 grid grid-cols-3 gap-1' : 'mt-4 grid gap-3 md:grid-cols-3'
   const draftRoomCertificateWrapClass = useCompactBookingLayout
-    ? 'min-w-0'
+    ? 'col-span-2 min-w-0 md:col-span-1'
     : 'min-w-0'
   const draftRoomCertificateInlineClass = useCompactBookingLayout
     ? 'grid gap-2 md:grid-cols-[minmax(0,1fr)_12.5rem] md:items-end'
