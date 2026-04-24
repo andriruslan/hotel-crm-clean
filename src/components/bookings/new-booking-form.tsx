@@ -653,6 +653,19 @@ export function NewBookingForm({
   const formLayoutClass = useCompactBookingLayout
     ? 'mt-3 grid gap-3'
     : 'mt-3 grid gap-3 2xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.95fr)] 2xl:items-start'
+  const guestGridClass = useCompactBookingLayout
+    ? 'mt-4 grid grid-cols-[minmax(0,1fr)_8.5rem] gap-3'
+    : 'mt-4 grid gap-3 md:grid-cols-2'
+  const guestFindButtonWrapClass = useCompactBookingLayout ? 'pt-[1.9rem]' : 'md:pt-[1.9rem]'
+  const guestWideFieldClass = useCompactBookingLayout ? 'col-span-2' : 'md:col-span-2'
+  const addRoomSearchGridClass = useCompactBookingLayout
+    ? 'mt-4 grid min-w-0 grid-cols-2 gap-3'
+    : 'mt-4 grid min-w-0 grid-cols-2 gap-3 2xl:grid-cols-3'
+  const addRoomWideFieldClass = useCompactBookingLayout ? 'col-span-2' : 'col-span-2 2xl:col-span-3'
+  const addRoomCompositionGridClass = useCompactBookingLayout ? 'mt-3 grid gap-3' : 'mt-3 grid gap-3 md:grid-cols-3'
+  const addRoomSummaryGridClass = useCompactBookingLayout ? 'mt-4 grid gap-2' : 'mt-4 grid gap-2 sm:grid-cols-3'
+  const availableRoomsGridClass = useCompactBookingLayout ? 'grid gap-3' : 'grid gap-3 xl:grid-cols-2'
+  const generalParamsGridClass = useCompactBookingLayout ? 'mt-4 grid gap-3' : 'mt-4 grid grid-cols-2 gap-3'
 
   async function handleFindGuest() {
     setGuestMessage('')
@@ -945,7 +958,7 @@ export function NewBookingForm({
 
             <section className={sectionClass}>
               <div className="text-base font-semibold sm:text-lg">1. Гість</div>
-              <div className="mt-4 grid gap-3 md:grid-cols-2">
+              <div className={guestGridClass}>
                 <label className="block">
                   <span className="text-sm font-medium">Телефон *</span>
                   <input
@@ -958,12 +971,12 @@ export function NewBookingForm({
                     required
                   />
                 </label>
-                <div className="md:pt-[1.9rem]">
+                <div className={guestFindButtonWrapClass}>
                   <button type="button" onClick={handleFindGuest} disabled={searchingGuest} className={secondaryButtonClass}>
                     {searchingGuest ? 'Пошук...' : 'Знайти'}
                   </button>
                 </div>
-                {guestMessage ? <div className="rounded-2xl bg-neutral-100 px-3 py-3 text-sm text-neutral-700 md:col-span-2">{guestMessage}</div> : null}
+                {guestMessage ? <div className={`rounded-2xl bg-neutral-100 px-3 py-3 text-sm text-neutral-700 ${guestWideFieldClass}`}>{guestMessage}</div> : null}
                 <label className="block">
                   <span className="text-sm font-medium">ПІБ</span>
                   <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} className={fieldClass} />
@@ -979,7 +992,7 @@ export function NewBookingForm({
                     className={fieldClass}
                   />
                 </label>
-                <label className="block md:col-span-2">
+                <label className={`block ${guestWideFieldClass}`}>
                   <span className="text-sm font-medium">Коментар по гостю</span>
                   <textarea value={guestNote} onChange={(e) => setGuestNote(e.target.value)} rows={4} className={textAreaClass} />
                 </label>
@@ -1000,7 +1013,7 @@ export function NewBookingForm({
 
               {isAddRoomSectionOpen ? (
                 <>
-                  <div className="mt-4 grid min-w-0 grid-cols-2 gap-3 2xl:grid-cols-3">
+                  <div className={addRoomSearchGridClass}>
                     <label className="block min-w-0">
                       <span className="block text-center text-sm font-medium">Дата заїзду</span>
                       <DatePickerField
@@ -1016,32 +1029,32 @@ export function NewBookingForm({
                       <span className="block text-center text-sm font-medium">Дата виїзду</span>
                       <DatePickerField value={checkOut} onChange={setCheckOut} className={fieldClass} />
                     </label>
-                    <div className="col-span-2 rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3.5 2xl:col-span-3 sm:px-4 sm:py-4">
+                    <div className={`${addRoomWideFieldClass} rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3.5 sm:px-4 sm:py-4`}>
                       <div className="text-sm font-semibold text-[var(--crm-wine)]">Склад гостей для пошуку номера</div>
-                      <div className="mt-3 grid gap-3 md:grid-cols-3">
+                      <div className={addRoomCompositionGridClass}>
                         <CompositionField label="Гості" value={adultsCount} onChange={setAdultsCount} />
                         <CompositionField label="Додаткові гості" value={children6PlusCount} onChange={setChildren6PlusCount} />
                         <CompositionField label="До 6 років" value={childrenUnder6Count} onChange={setChildrenUnder6Count} />
                       </div>
-                      <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                      <div className={addRoomSummaryGridClass}>
                         <div className="rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">
                           <div className="text-xs uppercase tracking-wide text-neutral-500">Всього</div>
                           <div className="mt-1 text-lg font-semibold text-neutral-900">{guestsCount}</div>
                         </div>
                       </div>
                     </div>
-                    <div className="col-span-2 2xl:col-span-3">
+                    <div className={addRoomWideFieldClass}>
                       <button type="button" onClick={handleFindRooms} disabled={loadingRooms} className={primaryButtonClass}>
                         {loadingRooms ? 'Пошук номерів...' : 'Підібрати номер'}
                       </button>
                     </div>
-                    {roomsMessage ? <div className="col-span-2 rounded-2xl bg-neutral-100 px-3 py-3 text-sm text-neutral-700 2xl:col-span-3">{roomsMessage}</div> : null}
+                    {roomsMessage ? <div className={`${addRoomWideFieldClass} rounded-2xl bg-neutral-100 px-3 py-3 text-sm text-neutral-700`}>{roomsMessage}</div> : null}
                   </div>
 
                   {availableRooms.length > 0 ? (
                     <div ref={availableRoomsRef} className="mt-4 space-y-3">
                       <div className="text-sm font-semibold text-[var(--crm-wine-dark)]">Доступні номери</div>
-                      <div className="grid gap-3 xl:grid-cols-2">
+                      <div className={availableRoomsGridClass}>
                       {availableRooms.map((room) => (
                         <button
                           key={`${room.room_id}-${room.room_number}`}
@@ -1258,7 +1271,7 @@ export function NewBookingForm({
 
             <section className={sectionClass}>
               <div className="text-base font-semibold sm:text-lg">4. Загальні параметри</div>
-              <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className={generalParamsGridClass}>
                 <label className="block">
                   <span className="text-sm font-medium">Статус бронювання</span>
                   <select value={status} onChange={(e) => setStatus(e.target.value as 'new' | 'confirmed')} className={fieldClass}>
