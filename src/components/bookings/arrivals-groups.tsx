@@ -62,7 +62,7 @@ function getPreviewCardsGridClass(itemsCount: number) {
     return 'mt-4'
   }
 
-  return 'mt-4 flex flex-wrap items-start gap-3 min-[1180px]:gap-2.5'
+  return 'mt-4 flex flex-wrap items-start gap-2.5 min-[1180px]:gap-2.5'
 }
 
 function buildDuplicateGuestMap(items: ArrivalGroupItem[]) {
@@ -101,7 +101,7 @@ function ArrivalBookingCard({
   return (
     <Link
       href={`/bookings/arrivals/${item.id}?date=${encodeURIComponent(appliedDate)}`}
-      className={`block w-full self-start min-[700px]:w-[calc(50%-0.375rem)] min-[1180px]:w-[calc(33.333%-0.5rem)] min-[1480px]:w-[calc(25%-0.5625rem)] rounded-3xl border-2 px-3 py-3 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:shadow-lg sm:px-3.5 sm:py-3.5 min-[1180px]:px-3 min-[1180px]:py-2.5 ${
+      className={`block w-full self-start min-[700px]:w-[calc(50%-0.375rem)] min-[1180px]:w-[calc(33.333%-0.5rem)] min-[1480px]:w-[calc(25%-0.5625rem)] rounded-3xl border-2 px-3 py-2.5 text-left shadow-[0_10px_24px_rgba(143,45,86,0.08)] transition hover:-translate-y-0.5 hover:shadow-lg sm:px-3.5 sm:py-3.5 min-[1180px]:px-3 min-[1180px]:py-2.5 ${
         item.occupancy_status === 'checked_in'
           ? 'border-[var(--crm-vine-border)] bg-[var(--crm-vine-soft)] hover:border-[var(--crm-vine-dark)]'
           : 'border-[var(--crm-wine-border)] bg-white/95 hover:border-[var(--crm-wine)]'
@@ -109,12 +109,14 @@ function ArrivalBookingCard({
     >
       <div className="flex items-start justify-between gap-2 min-[1180px]:gap-1.5">
         <div className="min-w-0 flex-1">
-          <div className="truncate text-[15px] font-bold leading-tight text-neutral-900 sm:text-base min-[1180px]:text-[14px] min-[1280px]:text-[15px]">{normalizePhone(item.guest_phone || '') || 'Телефон не вказано'}</div>
-          {visibleGuestName ? <div className="mt-1 break-words text-sm leading-5 text-neutral-700">{visibleGuestName}</div> : null}
-          {showRoomHint ? <div className="mt-2 text-xs font-medium text-neutral-500">{`Номер ${item.room_number}`}</div> : null}
+          <div className="truncate text-[13px] font-bold leading-tight text-neutral-900 sm:text-base min-[1180px]:text-[14px] min-[1280px]:text-[15px]">
+            {normalizePhone(item.guest_phone || '') || 'Телефон не вказано'}
+          </div>
+          {visibleGuestName ? <div className="mt-0.5 break-words text-[13px] leading-4 text-neutral-700">{visibleGuestName}</div> : null}
+          {showRoomHint ? <div className="mt-1.5 text-xs font-medium text-neutral-500">{`Номер ${item.room_number}`}</div> : null}
         </div>
 
-        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold min-[1180px]:px-2 min-[1180px]:py-0.5 min-[1180px]:text-[10px] ${getPaymentBadgeClass(item.payment_status)}`}>
+        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold min-[1180px]:px-2 min-[1180px]:py-0.5 min-[1180px]:text-[10px] ${getPaymentBadgeClass(item.payment_status)}`}>
           {getPaymentStatusLabel(item.payment_status)}
         </span>
       </div>
@@ -195,7 +197,22 @@ export function ArrivalsGroups({ initialDate = '' }: { initialDate?: string }) {
       <div className="mx-auto max-w-[1280px]">
         <div className="grid gap-3 xl:grid-cols-[300px_minmax(0,1fr)] xl:items-start">
           <section className={`${sectionClass} xl:sticky xl:top-24`}>
-            <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Заїзди</h1>
+            <div className="flex items-start justify-between gap-3">
+              <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Заїзди</h1>
+              <div className="min-w-[88px] text-right">
+                <div className="text-2xl font-bold text-[var(--crm-vine-dark)]">{`${checkedInProgressPercent}%`}</div>
+                <div className="mt-1 text-[11px] font-medium text-neutral-500">{`${totalPendingCount} очікують`}</div>
+              </div>
+            </div>
+
+            <div className="mt-2 h-3 overflow-hidden rounded-full bg-[var(--crm-vine-soft)]">
+              <div
+                className="h-full rounded-full bg-[var(--crm-vine)] transition-all"
+                style={{ width: `${checkedInProgressPercent}%` }}
+              />
+            </div>
+            <div className="mt-2 text-sm text-neutral-600">{`${totalCheckedInCount} із ${totalArrivalsCount} заселено`}</div>
+
             <div className="mt-4 space-y-3">
               <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
                 <label className="block min-w-0">
@@ -238,29 +255,6 @@ export function ArrivalsGroups({ initialDate = '' }: { initialDate?: string }) {
 
           <section className="space-y-3">
             {error ? <div className="rounded-3xl border border-[var(--crm-danger)] bg-[var(--crm-danger-soft)] px-4 py-3 text-sm text-[var(--crm-danger)]">{error}</div> : null}
-
-            <div className="rounded-3xl border border-[var(--crm-vine-border)] bg-white/95 px-4 py-4 shadow-sm sm:px-5">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <div className="text-sm font-semibold text-neutral-900">{'\u0417\u0430\u0457\u0437\u0434\u0438 \u043d\u0430 \u0446\u044e \u0434\u0430\u0442\u0443'}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-[var(--crm-vine-dark)]">{`${checkedInProgressPercent}%`}</div>
-                </div>
-              </div>
-
-              <div className="mt-2 h-3 overflow-hidden rounded-full bg-[var(--crm-vine-soft)]">
-                <div
-                  className="h-full rounded-full bg-[var(--crm-vine)] transition-all"
-                  style={{ width: `${checkedInProgressPercent}%` }}
-                />
-              </div>
-
-              <div className="mt-2 flex items-center justify-between gap-3 text-sm text-neutral-600">
-                <div>{`${totalCheckedInCount} \u0456\u0437 ${totalArrivalsCount} \u0437\u0430\u0441\u0435\u043b\u0435\u043d\u043e`}</div>
-                <div className="text-xs font-medium text-neutral-500">{`${totalPendingCount} \u043e\u0447\u0456\u043a\u0443\u044e\u0442\u044c`}</div>
-              </div>
-            </div>
 
             <div className={sectionClass}>
               <div className="flex items-end justify-between gap-3">

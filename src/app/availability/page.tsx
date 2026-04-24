@@ -536,7 +536,6 @@ function MultiDayAvailabilityMatrix({
                             href={occupiedArrivalHref}
                             className={`flex items-center justify-center rounded-none transition hover:brightness-[0.98] ${cellClassName}`}
                             style={{ touchAction: 'pan-x' }}
-                            scroll={false}
                           >
                             <div className={contentClassName}>—</div>
                           </Link>
@@ -570,7 +569,6 @@ function MultiDayAvailabilityMatrix({
                         href={createCellHref(item, dateValue)}
                         className={`flex items-center justify-center rounded-none transition hover:brightness-[0.98] ${cellClassName}`}
                         style={{ touchAction: 'pan-x' }}
-                        scroll={false}
                       >
                         <div className={contentClassName}>•</div>
                       </Link>

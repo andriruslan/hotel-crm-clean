@@ -57,6 +57,10 @@ type DraftRoom = {
   certificateApplied: boolean
   certificateAmount: string
   paymentAmount: string
+  degustationApplied: boolean
+  degustationGuestsCount: number
+  degustationAmount: string
+  degustationAmountManual: boolean
 }
 
 type QueryRoomPayload = {
@@ -113,6 +117,10 @@ function sanitizeIntegerInput(value: string) {
   return value.replace(/\D/g, '')
 }
 
+function getDefaultDegustationAmount(guestsCount: number) {
+  return Math.max(0, guestsCount) * 2500
+}
+
 function getSearchComposition(adultsCount: number, childrenUnder6Count: number, children6PlusCount: number): GuestComposition {
   return {
     adultsCount: Math.max(0, adultsCount),
@@ -165,6 +173,10 @@ function createDraftRoom(
     certificateApplied: false,
     certificateAmount: '',
     paymentAmount: '',
+    degustationApplied: false,
+    degustationGuestsCount: 2,
+    degustationAmount: '',
+    degustationAmountManual: false,
   }
 }
 
@@ -264,8 +276,24 @@ function buildBookingNoteWithGuestSummary(note: string, room: DraftRoom) {
   const extraInfo = `Додаткові місця: платних ${room.paidExtraBedsCount}, безкоштовних ${room.freeExtraBedsCount}`
   const certificateAmount = room.certificateApplied ? parseIntegerValue(room.certificateAmount) : 0
   const certificateInfo = certificateAmount > 0 ? `Оплата сертифікатом: ${certificateAmount} грн` : ''
+  const degustationAmount = room.degustationApplied ? parseIntegerValue(room.degustationAmount) : 0
+  const degustationInfo =
+    room.degustationApplied && degustationAmount > 0
+      ? `Дегустація: ${room.degustationGuestsCount} гост., ${degustationAmount} грн`
+      : ''
 
-  return [visibleNote, certificateInfo, summary, extraInfo].filter(Boolean).join('\n')
+  const visibleParts = [visibleNote, certificateInfo, degustationInfo, summary, extraInfo].filter(Boolean)
+  const metaParts = []
+
+  if (room.degustationApplied && room.degustationGuestsCount > 0) {
+    metaParts.push(`[[degustation_guests:${room.degustationGuestsCount}]]`)
+  }
+
+  if (room.degustationApplied && degustationAmount > 0) {
+    metaParts.push(`[[degustation_amount:${degustationAmount}]]`)
+  }
+
+  return [...visibleParts, ...metaParts].filter(Boolean).join('\n')
 }
 
 function getDraftRoomCertificateAmount(room: DraftRoom) {
@@ -273,7 +301,12 @@ function getDraftRoomCertificateAmount(room: DraftRoom) {
 }
 
 function getDraftRoomTotalPrice(room: DraftRoom) {
-  return parseIntegerValue(room.priceBaseTotal) + parseIntegerValue(room.priceExtraTotal)
+  const degustationAmount = room.degustationApplied ? parseIntegerValue(room.degustationAmount) : 0
+  return parseIntegerValue(room.priceBaseTotal) + parseIntegerValue(room.priceExtraTotal) + degustationAmount
+}
+
+function getDraftRoomAmountDue(room: DraftRoom) {
+  return Math.max(0, getDraftRoomTotalPrice(room) - getDraftRoomCertificateAmount(room))
 }
 
 function createQueryRoomPayload(value: unknown): QueryRoomPayload | null {
@@ -497,14 +530,14 @@ function CompositionField({
 }) {
   const wrapperClass = compact ? 'block min-w-0' : 'block'
   const labelClass = compact ? 'text-[11px] font-medium leading-4 whitespace-nowrap' : 'text-sm font-medium'
-  const controlsClass = compact ? 'mt-1 grid grid-cols-[1.9rem_minmax(1.75rem,1fr)_1.9rem] gap-1' : 'mt-1.5 grid grid-cols-[3rem_minmax(0,1fr)_3rem] gap-2'
+  const controlsClass = compact ? 'mt-1 grid grid-cols-[1.65rem_minmax(1.45rem,1fr)_1.65rem] gap-1' : 'mt-1.5 grid grid-cols-[3rem_minmax(0,1fr)_3rem] gap-2'
   const secondaryButtonClass = compact
-    ? 'flex h-9 items-center justify-center rounded-xl border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] text-sm font-semibold text-[var(--crm-wine-dark)] shadow-[0_4px_10px_rgba(143,45,86,0.08)] transition hover:bg-[var(--crm-wine-soft-hover)]'
+    ? 'flex h-8 items-center justify-center rounded-lg border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] text-xs font-semibold text-[var(--crm-wine-dark)] shadow-[0_4px_10px_rgba(143,45,86,0.08)] transition hover:bg-[var(--crm-wine-soft-hover)]'
     : counterButtonClass
   const primaryCompactButtonClass = compact
-    ? 'flex h-9 items-center justify-center rounded-xl border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] text-sm font-semibold text-white shadow-[0_6px_12px_rgba(143,45,86,0.16)] transition hover:bg-[var(--crm-wine-dark)]'
+    ? 'flex h-8 items-center justify-center rounded-lg border-2 border-[var(--crm-wine-dark)] bg-[var(--crm-wine)] text-xs font-semibold text-white shadow-[0_6px_12px_rgba(143,45,86,0.16)] transition hover:bg-[var(--crm-wine-dark)]'
     : counterPrimaryButtonClass
-  const inputClass = compact ? `${fieldClass} mt-0 h-9 min-w-0 px-1 text-center text-[13px] font-semibold` : `${fieldClass} mt-0 text-center font-semibold`
+  const inputClass = compact ? `${fieldClass} mt-0 h-8 min-w-0 px-0.5 text-center text-[12px] font-semibold` : `${fieldClass} mt-0 text-center font-semibold`
 
   return (
     <label className={wrapperClass}>
@@ -605,6 +638,7 @@ export function NewBookingForm({
       setDraftRooms(nextDraftRooms)
       setIsAddRoomSectionOpen(false)
       setRoomsMessage(nextDraftRooms.length > 1 ? 'Номери додано з екрана доступності.' : 'Номер додано з екрана доступності.')
+      window.scrollTo({ top: 0, behavior: 'auto' })
     }
   }, [])
 
@@ -631,7 +665,7 @@ export function NewBookingForm({
     return () => window.cancelAnimationFrame(frameId)
   }, [availableRooms, loadingRooms])
 
-  const totalPrice = draftRooms.reduce((sum, room) => sum + getDraftRoomTotalPrice(room), 0)
+  const totalAmountDue = draftRooms.reduce((sum, room) => sum + getDraftRoomAmountDue(room), 0)
   const totalGuestsInBooking = draftRooms.reduce((sum, room) => sum + room.guestsCount, 0)
   const totalExtraBedsInBooking = draftRooms.reduce((sum, room) => sum + room.paidExtraBedsCount + room.freeExtraBedsCount, 0)
   const useCompactBookingLayout = compactFromAvailability || (draftRooms.length > 0 && !isAddRoomSectionOpen)
@@ -654,7 +688,7 @@ export function NewBookingForm({
     : 'mt-4 grid min-w-0 grid-cols-2 gap-3 2xl:grid-cols-3'
   const addRoomWideFieldClass = useCompactBookingLayout ? 'col-span-2' : 'col-span-2 2xl:col-span-3'
   const addRoomCompositionGridClass = useCompactBookingLayout ? 'mt-3 grid gap-3' : 'mt-3 grid gap-3 md:grid-cols-3'
-  const addRoomSummaryGridClass = useCompactBookingLayout ? 'mt-4 grid gap-2' : 'mt-4 grid gap-2 sm:grid-cols-3'
+  const addRoomSummaryGridClass = useCompactBookingLayout ? 'mt-4 hidden gap-2' : 'mt-4 grid gap-2 sm:grid-cols-3'
   const availableRoomsGridClass = useCompactBookingLayout ? 'grid gap-3' : 'grid gap-3 xl:grid-cols-2'
   const generalParamsGridClass = useCompactBookingLayout ? 'mt-4 grid grid-cols-2 gap-2' : 'mt-4 grid grid-cols-2 gap-3'
   const draftRoomArticleClass = useCompactBookingLayout
@@ -670,7 +704,7 @@ export function NewBookingForm({
   const draftRoomDatesGridClass = useCompactBookingLayout
     ? 'mt-3 grid min-w-0 grid-cols-2 gap-2 md:grid-cols-[minmax(0,8.75rem)_minmax(0,8.75rem)_minmax(0,1fr)] md:items-end'
     : 'mt-4 grid min-w-0 gap-3 md:grid-cols-[minmax(0,10rem)_minmax(0,10rem)_minmax(0,1fr)] md:items-end'
-  const draftRoomCompositionGridClass = useCompactBookingLayout ? 'mt-3 grid grid-cols-3 gap-1' : 'mt-4 grid gap-3 md:grid-cols-3'
+  const draftRoomCompositionGridClass = useCompactBookingLayout ? 'mt-3 grid grid-cols-3 gap-1.5' : 'mt-4 grid gap-3 md:grid-cols-3'
   const draftRoomCertificateWrapClass = useCompactBookingLayout
     ? 'col-span-2 min-w-0 md:col-span-1'
     : 'min-w-0'
@@ -680,6 +714,36 @@ export function NewBookingForm({
   const draftRoomPriceGridClass = useCompactBookingLayout ? 'mt-3 grid grid-cols-3 gap-2' : 'mt-4 grid grid-cols-2 gap-3'
   const draftRoomPaymentFieldClass = useCompactBookingLayout ? 'block' : 'block col-span-2'
   const compactInlineSummaryGridClass = 'mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4'
+
+  function updateDraftRoomDegustation(
+    key: string,
+    patch: Partial<Pick<DraftRoom, 'degustationApplied' | 'degustationGuestsCount' | 'degustationAmount' | 'degustationAmountManual'>>
+  ) {
+    setDraftRooms((current) =>
+      current.map((room) => {
+        if (room.key !== key) {
+          return room
+        }
+
+        const nextRoom = { ...room, ...patch }
+
+        if (!nextRoom.degustationApplied) {
+          return {
+            ...nextRoom,
+            degustationGuestsCount: 2,
+            degustationAmount: '',
+            degustationAmountManual: false,
+          }
+        }
+
+        if (!nextRoom.degustationAmountManual) {
+          nextRoom.degustationAmount = String(getDefaultDegustationAmount(nextRoom.degustationGuestsCount || 0))
+        }
+
+        return nextRoom
+      })
+    )
+  }
 
   async function handleFindGuest() {
     setGuestMessage('')
@@ -919,11 +983,11 @@ export function NewBookingForm({
             status,
             payment_cash_amount: parseIntegerValue(room.paymentAmount),
             payment_card_amount: 0,
-            certificate_amount: getDraftRoomCertificateAmount(room),
-            price_base_total: parseIntegerValue(room.priceBaseTotal),
-            price_extra_total: parseIntegerValue(room.priceExtraTotal),
-            price_total: parseIntegerValue(room.priceBaseTotal) + parseIntegerValue(room.priceExtraTotal),
-          })),
+              certificate_amount: getDraftRoomCertificateAmount(room),
+              price_base_total: parseIntegerValue(room.priceBaseTotal),
+              price_extra_total: parseIntegerValue(room.priceExtraTotal),
+              price_total: getDraftRoomTotalPrice(room),
+            })),
         }),
       })
 
@@ -933,10 +997,10 @@ export function NewBookingForm({
         throw new Error(data.error || 'Не вдалося створити бронювання')
       }
 
-      const successMessage =
-        draftRooms.length > 1
-          ? `Успішно: створено одне замовлення на ${draftRooms.length} номерів.`
-          : 'Успішно: бронювання створено.'
+        const successMessage =
+          draftRooms.length > 1
+          ? `Бронювання успішне. Створено одне замовлення на ${draftRooms.length} номерів.`
+          : 'Бронювання успішне.'
 
       resetForm()
       setBookingCreatedMessage(successMessage)
@@ -1116,7 +1180,7 @@ export function NewBookingForm({
               ) : (
                 <div className="mt-4 space-y-3">
                   {draftRooms.map((draftRoom, index) => {
-                    const roomTotalPrice = getDraftRoomTotalPrice(draftRoom)
+                    const roomAmountDue = getDraftRoomAmountDue(draftRoom)
 
                     return (
                       <article key={draftRoom.key} className={draftRoomArticleClass}>
@@ -1147,7 +1211,7 @@ export function NewBookingForm({
                           </div>
                           <div className={draftRoomPriceTotalCardClass}>
                             <div className="text-xs uppercase tracking-wide text-neutral-500">До сплати</div>
-                            <div className="mt-1 text-lg font-semibold text-neutral-900">{formatMoney(roomTotalPrice)}</div>
+                            <div className="mt-1 text-lg font-semibold text-neutral-900">{formatMoney(roomAmountDue)}</div>
                           </div>
                         </div>
 
@@ -1178,10 +1242,10 @@ export function NewBookingForm({
                                     updateDraftRoom(draftRoom.key, {
                                       certificateApplied: e.target.checked,
                                       certificateAmount: e.target.checked
-                                        ? draftRoom.certificateAmount || String(roomTotalPrice)
+                                        ? draftRoom.certificateAmount || draftRoom.priceBaseTotal
                                         : '',
-                                    })
-                                  }
+                                      })
+                                    }
                                   className="h-5 w-5 rounded border-[var(--crm-wine-border)] text-[var(--crm-wine)] accent-[var(--crm-wine)]"
                                 />
                                 Проживання по сертифікату
@@ -1226,6 +1290,63 @@ export function NewBookingForm({
                             onChange={(nextValue) => updateDraftRoomComposition(draftRoom.key, { childrenUnder6Count: nextValue })}
                             compact={useCompactBookingLayout}
                           />
+                        </div>
+
+                        <div className="mt-3 rounded-2xl border border-[var(--crm-wine-border)] bg-white px-3 py-3 shadow-sm">
+                          <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_8rem_10rem] md:items-end">
+                            <label className="inline-flex min-h-11 items-center gap-3 text-sm font-semibold text-neutral-900">
+                              <input
+                                type="checkbox"
+                                checked={draftRoom.degustationApplied}
+                                onChange={(e) =>
+                                  updateDraftRoomDegustation(draftRoom.key, {
+                                    degustationApplied: e.target.checked,
+                                    degustationGuestsCount: e.target.checked ? draftRoom.degustationGuestsCount || 2 : 2,
+                                    degustationAmount: e.target.checked
+                                      ? draftRoom.degustationAmount || String(getDefaultDegustationAmount(draftRoom.degustationGuestsCount || 2))
+                                      : '',
+                                    degustationAmountManual: false,
+                                  })
+                                }
+                                className="h-5 w-5 rounded border-[var(--crm-wine-border)] text-[var(--crm-wine)] accent-[var(--crm-wine)]"
+                              />
+                              Дегустація
+                            </label>
+
+                            {draftRoom.degustationApplied ? (
+                              <>
+                                <label className="block min-w-0">
+                                  <span className="text-sm font-medium">К-сть гостей</span>
+                                  <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    value={String(draftRoom.degustationGuestsCount)}
+                                    onChange={(e) =>
+                                      updateDraftRoomDegustation(draftRoom.key, {
+                                        degustationGuestsCount: Math.max(0, parseIntegerValue(e.target.value)),
+                                      })
+                                    }
+                                    className={fieldClass}
+                                  />
+                                </label>
+                                <label className="block min-w-0">
+                                  <span className="text-sm font-medium">Сума</span>
+                                  <input
+                                    type="text"
+                                    inputMode="numeric"
+                                    value={draftRoom.degustationAmount}
+                                    onChange={(e) =>
+                                      updateDraftRoomDegustation(draftRoom.key, {
+                                        degustationAmount: sanitizeIntegerInput(e.target.value),
+                                        degustationAmountManual: true,
+                                      })
+                                    }
+                                    className={fieldClass}
+                                  />
+                                </label>
+                              </>
+                            ) : null}
+                          </div>
                         </div>
 
                         <div className={draftRoomPriceGridClass}>
@@ -1297,8 +1418,8 @@ export function NewBookingForm({
                     <div className="mt-1.5 text-xl font-bold leading-none text-neutral-900">{totalExtraBedsInBooking}</div>
                   </div>
                   <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-wine-soft)] px-3 py-2.5 shadow-sm">
-                    <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--crm-wine-dark)]">Вартість</div>
-                    <div className="mt-1.5 text-base font-bold leading-tight text-[var(--crm-wine-dark)]">{formatMoney(totalPrice)}</div>
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--crm-wine-dark)]">Сума до оплати</div>
+                    <div className="mt-1.5 text-base font-bold leading-tight text-[var(--crm-wine-dark)]">{formatMoney(totalAmountDue)}</div>
                   </div>
                 </div>
 
@@ -1326,8 +1447,8 @@ export function NewBookingForm({
                   <div className="mt-1.5 text-xl font-bold leading-none text-neutral-900">{totalExtraBedsInBooking}</div>
                 </div>
                 <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-wine-soft)] px-3 py-2.5 shadow-sm">
-                  <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--crm-wine-dark)]">Вартість</div>
-                  <div className="mt-1.5 text-base font-bold leading-tight text-[var(--crm-wine-dark)]">{formatMoney(totalPrice)}</div>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--crm-wine-dark)]">Сума до оплати</div>
+                  <div className="mt-1.5 text-base font-bold leading-tight text-[var(--crm-wine-dark)]">{formatMoney(totalAmountDue)}</div>
                 </div>
               </div>
 
@@ -1348,7 +1469,7 @@ export function NewBookingForm({
             className="w-full max-w-[32rem] rounded-[28px] border border-[var(--crm-vine-border)] bg-white px-5 py-5 shadow-2xl sm:px-6 sm:py-6"
           >
             <div id="booking-created-title" className="text-xl font-bold text-neutral-900">
-              Бронювання записано
+              Бронювання успішне 👍
             </div>
             <div className="mt-3 text-sm leading-6 text-neutral-700">{bookingCreatedMessage}</div>
             <div className="mt-5 flex justify-center">

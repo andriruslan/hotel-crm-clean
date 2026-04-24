@@ -13,6 +13,8 @@ const BOOKING_GROUP_TAG = /\[\[booking_group_id:([A-Z0-9-]+)\]\]/g
 const RESERVE_UNTIL_TAG = /\[\[reserve_until:(\d{4}-\d{2}-\d{2})\]\]/g
 const LAST_REMINDER_AT_TAG = /\[\[last_reminder_at:([^\]]+)\]\]/g
 const CERTIFICATE_AMOUNT_TAG = /\[\[certificate_amount:(\d+)\]\]/g
+const DEGUSTATION_GUESTS_TAG = /\[\[degustation_guests:(\d+)\]\]/g
+const DEGUSTATION_AMOUNT_TAG = /\[\[degustation_amount:(\d+)\]\]/g
 
 export function getDefaultPaymentDueStage(): PaymentDueStage {
   return DEFAULT_PAYMENT_DUE_STAGE
@@ -37,7 +39,11 @@ export function parseBookingNoteMeta(note: string | null | undefined) {
   const reserveUntilMatch = source.match(RESERVE_UNTIL_TAG)
   const lastReminderAtMatch = source.match(LAST_REMINDER_AT_TAG)
   const certificateAmountMatch = source.match(CERTIFICATE_AMOUNT_TAG)
+  const degustationGuestsMatch = source.match(DEGUSTATION_GUESTS_TAG)
+  const degustationAmountMatch = source.match(DEGUSTATION_AMOUNT_TAG)
   const certificateAmount = Number(certificateAmountMatch?.at(-1)?.match(/\d+/)?.[0] || 0)
+  const degustationGuestsCount = Number(degustationGuestsMatch?.at(-1)?.match(/\d+/)?.[0] || 0)
+  const degustationAmount = Number(degustationAmountMatch?.at(-1)?.match(/\d+/)?.[0] || 0)
 
   return {
     paymentDueStage: dueStage || DEFAULT_PAYMENT_DUE_STAGE,
@@ -45,12 +51,16 @@ export function parseBookingNoteMeta(note: string | null | undefined) {
     reserveUntilDate: reserveUntilMatch?.at(-1)?.match(/\d{4}-\d{2}-\d{2}/)?.[0] || '',
     lastReminderAt: lastReminderAtMatch?.at(-1)?.match(/[^\]]+/)?.[0] || '',
     certificateAmount,
+    degustationGuestsCount,
+    degustationAmount,
     visibleNote: source
       .replace(PAYMENT_DUE_STAGE_TAG, '')
       .replace(BOOKING_GROUP_TAG, '')
       .replace(RESERVE_UNTIL_TAG, '')
       .replace(LAST_REMINDER_AT_TAG, '')
       .replace(CERTIFICATE_AMOUNT_TAG, '')
+      .replace(DEGUSTATION_GUESTS_TAG, '')
+      .replace(DEGUSTATION_AMOUNT_TAG, '')
       .trim(),
   }
 }
@@ -63,6 +73,8 @@ export function buildBookingNoteWithMeta(
     reserveUntilDate?: string
     lastReminderAt?: string
     certificateAmount?: number
+    degustationGuestsCount?: number
+    degustationAmount?: number
   }
 ) {
   const visibleNote = parseBookingNoteMeta(note).visibleNote
@@ -82,6 +94,14 @@ export function buildBookingNoteWithMeta(
 
   if (Number(options.certificateAmount || 0) > 0) {
     metaTags.push(`[[certificate_amount:${Math.max(0, Math.round(Number(options.certificateAmount || 0)))}]]`)
+  }
+
+  if (Number(options.degustationGuestsCount || 0) > 0) {
+    metaTags.push(`[[degustation_guests:${Math.max(0, Math.round(Number(options.degustationGuestsCount || 0)))}]]`)
+  }
+
+  if (Number(options.degustationAmount || 0) > 0) {
+    metaTags.push(`[[degustation_amount:${Math.max(0, Math.round(Number(options.degustationAmount || 0)))}]]`)
   }
 
   const metaBlock = metaTags.join('\n')

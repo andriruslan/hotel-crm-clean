@@ -55,6 +55,8 @@ export async function POST(request: NextRequest) {
         reserveUntilDate: bookingMeta.reserveUntilDate,
         lastReminderAt: bookingMeta.lastReminderAt,
         certificateAmount: bookingMeta.certificateAmount,
+        degustationGuestsCount: bookingMeta.degustationGuestsCount,
+        degustationAmount: bookingMeta.degustationAmount,
       }
     )
     const nextStatus = booking.status === 'new' && totalPaid > 0 ? 'confirmed' : booking.status

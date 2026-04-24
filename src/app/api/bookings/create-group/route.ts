@@ -4,6 +4,7 @@ import {
   generateBookingGroupId,
   getDefaultPaymentDueStage,
   getDefaultReservationPaymentTermDays,
+  parseBookingNoteMeta,
   type PaymentDueStage,
 } from '@/lib/booking-note-meta'
 import { addDays, getTodayDate } from '@/lib/dates'
@@ -143,6 +144,8 @@ export async function POST(request: NextRequest) {
         bookingGroupId,
         reserveUntilDate,
         certificateAmount,
+        degustationGuestsCount: parseBookingNoteMeta(bookingInput.booking_note || '').degustationGuestsCount,
+        degustationAmount: parseBookingNoteMeta(bookingInput.booking_note || '').degustationAmount,
       })
 
       const { data: booking, error: bookingError } = await supabaseAdmin

@@ -67,6 +67,23 @@ function getPaymentBadgeClass(status: PaymentStatus) {
   }
 }
 
+function InfoCard({
+  label,
+  value,
+  valueClassName = 'text-neutral-900',
+}: {
+  label: string
+  value: string
+  valueClassName?: string
+}) {
+  return (
+    <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
+      <div className="text-xs uppercase tracking-wide text-neutral-500">{label}</div>
+      <div className={`mt-1 font-semibold ${valueClassName}`}>{value}</div>
+    </div>
+  )
+}
+
 export function ArrivalRoomDetailCard({
   item,
   savingKey,
@@ -139,39 +156,23 @@ export function ArrivalRoomDetailCard({
             {`Номер ${item.room_number}${item.building_name ? ` (${item.building_name.toLowerCase()})` : ''}`}
           </div>
 
-          <div className="mt-4 grid gap-2 sm:grid-cols-2">
-            <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
-              <div className="text-xs uppercase tracking-wide text-neutral-500">Заїзд</div>
-              <div className="mt-1 font-semibold text-neutral-900">{formatDateForDisplay(item.check_in_date)}</div>
-            </div>
-            <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
-              <div className="text-xs uppercase tracking-wide text-neutral-500">Виїзд</div>
-              <div className="mt-1 font-semibold text-neutral-900">{formatDateForDisplay(item.check_out_date)}</div>
-            </div>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <InfoCard label="Заїзд" value={formatDateForDisplay(item.check_in_date)} />
+            <InfoCard label="Виїзд" value={formatDateForDisplay(item.check_out_date)} />
           </div>
 
-          <div className="mt-2 grid gap-2 sm:grid-cols-2">
-            <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
-              <div className="text-xs uppercase tracking-wide text-neutral-500">Вартість</div>
-              <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPrice)}</div>
-            </div>
-            <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
-              <div className="text-xs uppercase tracking-wide text-neutral-500">Оплата</div>
-              <div className="mt-1 font-semibold text-neutral-900">{getPaymentDueStageLabel(item.payment_due_stage)}</div>
-            </div>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <InfoCard label="Вартість" value={formatMoney(totalPrice)} />
+            <InfoCard label="Оплата" value={getPaymentDueStageLabel(item.payment_due_stage)} />
           </div>
 
-          <div className="mt-2 grid gap-2 sm:grid-cols-2">
-            <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
-              <div className="text-xs uppercase tracking-wide text-neutral-500">Оплачено</div>
-              <div className="mt-1 font-semibold text-neutral-900">{formatMoney(totalPaid)}</div>
-            </div>
-            <div className="rounded-2xl bg-white px-3 py-2.5 shadow-sm">
-              <div className="text-xs uppercase tracking-wide text-neutral-500">Залишок</div>
-              <div className={`mt-1 font-semibold ${balance > 0 ? 'text-[var(--crm-wine)]' : 'text-[var(--crm-vine-dark)]'}`}>
-                {formatMoney(balance)}
-              </div>
-            </div>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <InfoCard label="Оплачено" value={formatMoney(totalPaid)} />
+            <InfoCard
+              label="Залишок"
+              value={formatMoney(balance)}
+              valueClassName={balance > 0 ? 'text-[var(--crm-wine)]' : 'text-[var(--crm-vine-dark)]'}
+            />
           </div>
 
           {showCommentEditor ? (
@@ -197,10 +198,25 @@ export function ArrivalRoomDetailCard({
           ) : visibleBookingNote ? (
             <div className="mt-3 rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">{visibleBookingNote}</div>
           ) : null}
+
+          <div className="mt-3 rounded-2xl bg-white px-3 py-3 shadow-sm lg:hidden">
+            <div className="flex flex-wrap gap-2">
+              <span
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                  isCheckedIn ? 'bg-[var(--crm-vine)] text-white' : 'bg-[var(--crm-wine)] text-white'
+                }`}
+              >
+                {isCheckedIn ? 'Заселено' : 'Очікує заселення'}
+              </span>
+              <span className={`rounded-full px-3 py-1.5 text-xs font-semibold ${getPaymentBadgeClass(item.payment_status)}`}>
+                {getPaymentStatusLabel(item.payment_status)}
+              </span>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-3">
-          <div className="rounded-2xl bg-white px-3 py-3 shadow-sm">
+          <div className="hidden rounded-2xl bg-white px-3 py-3 shadow-sm lg:block">
             <div className="flex flex-wrap gap-2">
               <span
                 className={`rounded-full px-3 py-1.5 text-xs font-semibold ${

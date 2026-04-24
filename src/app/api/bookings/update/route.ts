@@ -72,6 +72,8 @@ export async function POST(request: NextRequest) {
         reserveUntilDate: reserveUntilDate === undefined ? bookingMeta.reserveUntilDate : reserveUntilDate || '',
         lastReminderAt: markReminder ? new Date().toISOString() : bookingMeta.lastReminderAt,
         certificateAmount: bookingMeta.certificateAmount,
+        degustationGuestsCount: bookingMeta.degustationGuestsCount,
+        degustationAmount: bookingMeta.degustationAmount,
       })
     }
 
