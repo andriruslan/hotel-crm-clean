@@ -675,7 +675,6 @@ export function NewBookingForm({
   const draftRoomCertificateWrapClass = useCompactBookingLayout
     ? 'mt-3 rounded-3xl border border-[var(--crm-wine-border)] bg-white px-3 py-3 shadow-sm'
     : 'mt-4 rounded-3xl border border-[var(--crm-wine-border)] bg-white px-3.5 py-3.5 shadow-sm sm:px-4 sm:py-4'
-  const draftRoomCertificateGridClass = useCompactBookingLayout ? 'mt-3 grid grid-cols-2 gap-2' : 'mt-3 grid gap-3 md:grid-cols-2'
   const draftRoomPriceGridClass = useCompactBookingLayout ? 'mt-3 grid grid-cols-3 gap-2' : 'mt-4 grid grid-cols-2 gap-3'
   const draftRoomPaymentFieldClass = useCompactBookingLayout ? 'block' : 'block col-span-2'
   const compactInlineSummaryGridClass = 'mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4'
@@ -1196,27 +1195,27 @@ export function NewBookingForm({
                         </div>
 
                         <div className={draftRoomCertificateWrapClass}>
-                          <label className="inline-flex min-h-11 items-center gap-3 text-sm font-semibold text-neutral-900">
-                            <input
-                              type="checkbox"
-                              checked={draftRoom.certificateApplied}
-                              onChange={(e) =>
-                                updateDraftRoom(draftRoom.key, {
-                                  certificateApplied: e.target.checked,
-                                  certificateAmount: e.target.checked
-                                    ? draftRoom.certificateAmount || String(roomTotalPrice)
-                                    : '',
-                                })
-                              }
-                              className="h-5 w-5 rounded border-[var(--crm-wine-border)] text-[var(--crm-wine)] accent-[var(--crm-wine)]"
-                            />
-                            Проживання по сертифікату
-                          </label>
+                          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_15rem] md:items-end">
+                            <label className="inline-flex min-h-11 items-center gap-3 text-sm font-semibold text-neutral-900">
+                              <input
+                                type="checkbox"
+                                checked={draftRoom.certificateApplied}
+                                onChange={(e) =>
+                                  updateDraftRoom(draftRoom.key, {
+                                    certificateApplied: e.target.checked,
+                                    certificateAmount: e.target.checked
+                                      ? draftRoom.certificateAmount || String(roomTotalPrice)
+                                      : '',
+                                  })
+                                }
+                                className="h-5 w-5 rounded border-[var(--crm-wine-border)] text-[var(--crm-wine)] accent-[var(--crm-wine)]"
+                              />
+                              Проживання по сертифікату
+                            </label>
 
-                          {draftRoom.certificateApplied ? (
-                            <div className={draftRoomCertificateGridClass}>
+                            {draftRoom.certificateApplied ? (
                               <label className="block">
-                                <span className="text-sm font-medium">Сума сертифіката, грн</span>
+                                <span className="text-sm font-medium">Сума сертифіката</span>
                                 <input
                                   type="text"
                                   inputMode="numeric"
@@ -1229,12 +1228,15 @@ export function NewBookingForm({
                                   className={fieldClass}
                                 />
                               </label>
-                              <div className="rounded-2xl bg-[var(--crm-vine-soft)] px-3 py-3 text-sm text-[var(--crm-vine-dark)] shadow-sm">
-                                <div className="font-semibold">Сертифікат враховано в оплаті</div>
-                                <div className="mt-1">Покриття: {formatMoney(certificateAmount)}</div>
-                                {roomBalance > 0 ? <div className="mt-1">Гість має доплатити: {formatMoney(roomBalance)}</div> : null}
-                                {roomCertificateSurplus > 0 ? <div className="mt-1">Сертифікат перекриває на: {formatMoney(roomCertificateSurplus)}</div> : null}
-                              </div>
+                            ) : null}
+                          </div>
+
+                          {draftRoom.certificateApplied ? (
+                            <div className="mt-3 rounded-2xl bg-[var(--crm-vine-soft)] px-3 py-3 text-sm text-[var(--crm-vine-dark)] shadow-sm">
+                              <div className="font-semibold">Сертифікат враховано в оплаті</div>
+                              <div className="mt-1">Покриття: {formatMoney(certificateAmount)}</div>
+                              {roomBalance > 0 ? <div className="mt-1">Гість має доплатити: {formatMoney(roomBalance)}</div> : null}
+                              {roomCertificateSurplus > 0 ? <div className="mt-1">Сертифікат перекриває на: {formatMoney(roomCertificateSurplus)}</div> : null}
                             </div>
                           ) : null}
                         </div>
