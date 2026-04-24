@@ -525,9 +525,9 @@ function CompositionField({
   onChange: (nextValue: number) => void
   compact?: boolean
 }) {
-  const wrapperClass = compact ? 'block min-w-0' : 'block'
-  const labelClass = compact ? 'text-[11px] font-medium leading-4 whitespace-nowrap' : 'text-sm font-medium'
-  const controlsClass = compact ? 'mt-1 grid grid-cols-[1.65rem_minmax(1.45rem,1fr)_1.65rem] gap-1' : 'mt-1.5 grid grid-cols-[3rem_minmax(0,1fr)_3rem] gap-2'
+  const wrapperClass = compact ? 'grid min-w-0 content-start grid-rows-[1.75rem_auto]' : 'block'
+  const labelClass = compact ? 'flex min-h-[1.75rem] items-end text-[11px] font-medium leading-4 whitespace-nowrap' : 'text-sm font-medium'
+  const controlsClass = compact ? 'mt-0 grid grid-cols-[1.65rem_minmax(1.45rem,1fr)_1.65rem] items-center gap-1' : 'mt-1.5 grid grid-cols-[3rem_minmax(0,1fr)_3rem] gap-2'
   const secondaryButtonClass = compact
     ? 'flex h-7.5 items-center justify-center rounded-lg border-2 border-[var(--crm-wine)] bg-[color:rgba(143,45,86,0.12)] text-[11px] font-semibold text-[var(--crm-wine-dark)] shadow-[0_4px_10px_rgba(143,45,86,0.08)] transition hover:bg-[var(--crm-wine-soft-hover)]'
     : counterButtonClass
@@ -710,7 +710,7 @@ export function NewBookingForm({
   const draftRoomDatesGridClass = useCompactBookingLayout
     ? 'mt-3 grid min-w-0 grid-cols-2 gap-2 md:grid-cols-[minmax(0,8.75rem)_minmax(0,8.75rem)_minmax(0,1fr)] md:items-end'
     : 'mt-4 grid min-w-0 gap-3 md:grid-cols-[minmax(0,10rem)_minmax(0,10rem)_minmax(0,1fr)] md:items-end'
-  const draftRoomCompositionGridClass = useCompactBookingLayout ? 'mt-3 grid grid-cols-3 gap-2' : 'mt-4 grid gap-3 md:grid-cols-3'
+  const draftRoomCompositionGridClass = useCompactBookingLayout ? 'mt-3 grid grid-cols-3 items-start gap-2' : 'mt-4 grid gap-3 md:grid-cols-3'
   const draftRoomCertificateWrapClass = useCompactBookingLayout
     ? 'col-span-2 min-w-0 md:col-span-1'
     : 'min-w-0'
@@ -1337,8 +1337,8 @@ export function NewBookingForm({
             </section>
 
             <section className={sectionClass}>
-              <div className="text-base font-semibold sm:text-lg">Дегустація</div>
-              <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_8rem_10rem] md:items-end">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="text-base font-semibold sm:text-lg">Дегустація</div>
                 <label className="inline-flex min-h-11 items-center gap-3 text-sm font-semibold text-neutral-900">
                   <input
                     type="checkbox"
@@ -1348,7 +1348,8 @@ export function NewBookingForm({
                   />
                   Додати дегустацію
                 </label>
-
+              </div>
+              <div className="mt-4 grid gap-3 md:grid-cols-2 md:items-end">
                 {degustationApplied ? (
                   <>
                     <label className="block min-w-0">
