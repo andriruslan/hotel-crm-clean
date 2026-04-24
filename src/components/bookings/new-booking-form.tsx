@@ -276,10 +276,6 @@ function getDraftRoomTotalPrice(room: DraftRoom) {
   return parseIntegerValue(room.priceBaseTotal) + parseIntegerValue(room.priceExtraTotal)
 }
 
-function getDraftRoomDirectPaid(room: DraftRoom) {
-  return parseIntegerValue(room.paymentAmount)
-}
-
 function createQueryRoomPayload(value: unknown): QueryRoomPayload | null {
   if (!value || typeof value !== 'object') {
     return null
@@ -1120,11 +1116,7 @@ export function NewBookingForm({
               ) : (
                 <div className="mt-4 space-y-3">
                   {draftRooms.map((draftRoom, index) => {
-                    const certificateAmount = getDraftRoomCertificateAmount(draftRoom)
                     const roomTotalPrice = getDraftRoomTotalPrice(draftRoom)
-                    const directPaid = getDraftRoomDirectPaid(draftRoom)
-                    const roomTotalPaid = directPaid + certificateAmount
-                    const roomBalance = Math.max(0, roomTotalPrice - roomTotalPaid)
 
                     return (
                       <article key={draftRoom.key} className={draftRoomArticleClass}>
@@ -1260,18 +1252,6 @@ export function NewBookingForm({
                               className={fieldClass}
                             />
                           </label>
-                          {draftRoom.certificateApplied ? (
-                            <div className="rounded-2xl bg-neutral-50 px-3 py-3 text-sm text-neutral-700 shadow-sm">
-                              <div className="text-xs uppercase tracking-wide text-neutral-500">Вже покрито</div>
-                              <div className="mt-1 font-semibold text-neutral-900">{formatMoney(roomTotalPaid)}</div>
-                            </div>
-                          ) : null}
-                          {draftRoom.certificateApplied ? (
-                            <div className="rounded-2xl bg-neutral-50 px-3 py-3 text-sm text-neutral-700 shadow-sm">
-                              <div className="text-xs uppercase tracking-wide text-neutral-500">Залишок гостя</div>
-                              <div className="mt-1 font-semibold text-neutral-900">{formatMoney(roomBalance)}</div>
-                            </div>
-                          ) : null}
                         </div>
                       </article>
                     )
