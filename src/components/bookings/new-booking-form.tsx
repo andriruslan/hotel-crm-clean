@@ -666,6 +666,25 @@ export function NewBookingForm({
   const addRoomSummaryGridClass = useCompactBookingLayout ? 'mt-4 grid gap-2' : 'mt-4 grid gap-2 sm:grid-cols-3'
   const availableRoomsGridClass = useCompactBookingLayout ? 'grid gap-3' : 'grid gap-3 xl:grid-cols-2'
   const generalParamsGridClass = useCompactBookingLayout ? 'mt-4 grid gap-3' : 'mt-4 grid grid-cols-2 gap-3'
+  const draftRoomArticleClass = useCompactBookingLayout
+    ? 'rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3 py-3 shadow-sm'
+    : 'rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3.5 shadow-sm sm:px-4 sm:py-4'
+  const draftRoomHeaderClass = useCompactBookingLayout
+    ? 'grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2'
+    : 'flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'
+  const draftRoomStatsGridClass = useCompactBookingLayout ? 'mt-3 grid grid-cols-3 gap-2' : 'mt-4 grid grid-cols-2 gap-2'
+  const draftRoomPriceTotalCardClass = useCompactBookingLayout
+    ? 'rounded-2xl bg-white px-2.5 py-2.5 text-sm text-neutral-700 shadow-sm'
+    : 'col-span-2 rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm'
+  const draftRoomDatesGridClass = useCompactBookingLayout ? 'mt-3 grid min-w-0 grid-cols-2 gap-2' : 'mt-4 grid min-w-0 grid-cols-2 gap-3'
+  const draftRoomCompositionGridClass = useCompactBookingLayout ? 'mt-3 grid grid-cols-3 gap-2' : 'mt-4 grid gap-3 md:grid-cols-3'
+  const draftRoomCertificateWrapClass = useCompactBookingLayout
+    ? 'mt-3 rounded-3xl border border-[var(--crm-wine-border)] bg-white px-3 py-3 shadow-sm'
+    : 'mt-4 rounded-3xl border border-[var(--crm-wine-border)] bg-white px-3.5 py-3.5 shadow-sm sm:px-4 sm:py-4'
+  const draftRoomCertificateGridClass = useCompactBookingLayout ? 'mt-3 grid grid-cols-2 gap-2' : 'mt-3 grid gap-3 md:grid-cols-2'
+  const draftRoomPriceGridClass = useCompactBookingLayout ? 'mt-3 grid grid-cols-3 gap-2' : 'mt-4 grid grid-cols-2 gap-3'
+  const draftRoomPaymentFieldClass = useCompactBookingLayout ? 'block' : 'block col-span-2'
+  const compactInlineSummaryGridClass = 'mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4'
 
   async function handleFindGuest() {
     setGuestMessage('')
@@ -1110,8 +1129,8 @@ export function NewBookingForm({
                     const roomCertificateSurplus = Math.max(0, certificateAmount - roomTotalPrice)
 
                     return (
-                      <article key={draftRoom.key} className="rounded-3xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3.5 py-3.5 shadow-sm sm:px-4 sm:py-4">
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <article key={draftRoom.key} className={draftRoomArticleClass}>
+                        <div className={draftRoomHeaderClass}>
                           <div>
                             <div className="text-base font-bold">
                               {`Номер ${index + 1}: ${draftRoom.room.room_number} (${draftRoom.room.room_type_name}, ${draftRoom.room.building_name})`}
@@ -1127,7 +1146,7 @@ export function NewBookingForm({
                           </button>
                         </div>
 
-                        <div className="mt-4 grid grid-cols-2 gap-2">
+                        <div className={draftRoomStatsGridClass}>
                           <div className="rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">
                             <div className="text-xs uppercase tracking-wide text-neutral-500">Всього</div>
                             <div className="mt-1 text-lg font-semibold text-neutral-900">{draftRoom.guestsCount}</div>
@@ -1138,13 +1157,13 @@ export function NewBookingForm({
                               {getExtraBedSummaryLabel(draftRoom.paidExtraBedsCount, draftRoom.freeExtraBedsCount)}
                             </div>
                           </div>
-                          <div className="col-span-2 rounded-2xl bg-white px-3 py-3 text-sm text-neutral-700 shadow-sm">
+                          <div className={draftRoomPriceTotalCardClass}>
                             <div className="text-xs uppercase tracking-wide text-neutral-500">До сплати</div>
                             <div className="mt-1 text-lg font-semibold text-neutral-900">{formatMoney(roomTotalPrice)}</div>
                           </div>
                         </div>
 
-                        <div className="mt-4 grid min-w-0 grid-cols-2 gap-3">
+                        <div className={draftRoomDatesGridClass}>
                           <label className="block min-w-0">
                             <span className="block text-center text-sm font-medium">Дата заїзду</span>
                             <DatePickerField
@@ -1163,7 +1182,7 @@ export function NewBookingForm({
                           </label>
                         </div>
 
-                        <div className="mt-4 grid gap-3 md:grid-cols-3">
+                        <div className={draftRoomCompositionGridClass}>
                           <CompositionField
                             label="Гості"
                             value={draftRoom.adultsCount}
@@ -1181,7 +1200,7 @@ export function NewBookingForm({
                           />
                         </div>
 
-                        <div className="mt-4 rounded-3xl border border-[var(--crm-wine-border)] bg-white px-3.5 py-3.5 shadow-sm sm:px-4 sm:py-4">
+                        <div className={draftRoomCertificateWrapClass}>
                           <label className="inline-flex min-h-11 items-center gap-3 text-sm font-semibold text-neutral-900">
                             <input
                               type="checkbox"
@@ -1200,7 +1219,7 @@ export function NewBookingForm({
                           </label>
 
                           {draftRoom.certificateApplied ? (
-                            <div className="mt-3 grid gap-3 md:grid-cols-2">
+                            <div className={draftRoomCertificateGridClass}>
                               <label className="block">
                                 <span className="text-sm font-medium">Сума сертифіката, грн</span>
                                 <input
@@ -1225,7 +1244,7 @@ export function NewBookingForm({
                           ) : null}
                         </div>
 
-                        <div className="mt-4 grid grid-cols-2 gap-3">
+                        <div className={draftRoomPriceGridClass}>
                           <label className="block">
                             <span className="text-sm font-medium">Вартість ном.</span>
                             <input type="text" inputMode="numeric" value={draftRoom.priceBaseTotal} onChange={(e) => updateDraftRoom(draftRoom.key, { priceBaseTotal: sanitizeIntegerInput(e.target.value) })} className={fieldClass} />
@@ -1234,7 +1253,7 @@ export function NewBookingForm({
                             <span className="text-sm font-medium">Доп. місця, грн</span>
                             <input type="text" inputMode="numeric" value={draftRoom.priceExtraTotal} onChange={(e) => updateDraftRoom(draftRoom.key, { priceExtraTotal: sanitizeIntegerInput(e.target.value) })} className={fieldClass} />
                           </label>
-                          <label className="block col-span-2">
+                          <label className={draftRoomPaymentFieldClass}>
                             <span className="text-sm font-medium">Оплата, грн</span>
                             <input
                               type="text"
@@ -1289,9 +1308,36 @@ export function NewBookingForm({
                 </label>
               </div>
             </section>
+            {useCompactBookingLayout ? (
+              <section className={sectionClass}>
+                <div className="text-base font-semibold sm:text-lg">ÐŸÑ–Ð´ÑÑƒÐ¼Ð¾Ðº</div>
+                <div className={compactInlineSummaryGridClass}>
+                  <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3 py-2.5 shadow-sm">
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-neutral-500">ÐÐ¾Ð¼ÐµÑ€Ñ–Ð²</div>
+                    <div className="mt-1.5 text-xl font-bold leading-none text-neutral-900">{draftRooms.length}</div>
+                  </div>
+                  <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3 py-2.5 shadow-sm">
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-neutral-500">Ð“Ð¾ÑÑ‚ÐµÐ¹</div>
+                    <div className="mt-1.5 text-xl font-bold leading-none text-neutral-900">{totalGuestsInBooking}</div>
+                  </div>
+                  <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-panel)] px-3 py-2.5 shadow-sm">
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-neutral-500">Ð”Ð¾Ð¿. Ð¼Ñ–ÑÑ†Ñ</div>
+                    <div className="mt-1.5 text-xl font-bold leading-none text-neutral-900">{totalExtraBedsInBooking}</div>
+                  </div>
+                  <div className="rounded-2xl border border-[var(--crm-wine-border)] bg-[var(--crm-wine-soft)] px-3 py-2.5 shadow-sm">
+                    <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--crm-wine-dark)]">Ð’Ð°Ñ€Ñ‚Ñ–ÑÑ‚ÑŒ</div>
+                    <div className="mt-1.5 text-base font-bold leading-tight text-[var(--crm-wine-dark)]">{formatMoney(totalPrice)}</div>
+                  </div>
+                </div>
+
+                <button type="submit" form="booking-form" disabled={saving} className={`mt-4 ${primaryButtonClass}`}>
+                  {saving ? 'Ð¡Ñ‚Ð²Ð¾Ñ€ÐµÐ½Ð½Ñ Ð±Ñ€Ð¾Ð½ÑŽÐ²Ð°Ð½Ð½Ñ...' : draftRooms.length > 1 ? 'Ð¡Ñ‚Ð²Ð¾Ñ€Ð¸Ñ‚Ð¸ Ð¾Ð´Ð½Ðµ Ð±Ñ€Ð¾Ð½ÑŽÐ²Ð°Ð½Ð½Ñ Ð½Ð° Ð²ÑÑ– Ð½Ð¾Ð¼ÐµÑ€Ð¸' : 'Ð¡Ñ‚Ð²Ð¾Ñ€Ð¸Ñ‚Ð¸ Ð±Ñ€Ð¾Ð½ÑŽÐ²Ð°Ð½Ð½Ñ'}
+                </button>
+              </section>
+            ) : null}
           </form>
 
-          <aside className="space-y-3 2xl:sticky 2xl:top-24">
+          {!useCompactBookingLayout ? <aside className="space-y-3 2xl:sticky 2xl:top-24">
             <section className={sectionClass}>
               <div className="text-base font-semibold sm:text-lg">Підсумок</div>
               <div className="mt-3 grid grid-cols-2 gap-2">
@@ -1317,7 +1363,7 @@ export function NewBookingForm({
                 {saving ? 'Створення бронювання...' : draftRooms.length > 1 ? 'Створити одне бронювання на всі номери' : 'Створити бронювання'}
               </button>
             </section>
-          </aside>
+          </aside> : null}
         </div>
       </div>
 
