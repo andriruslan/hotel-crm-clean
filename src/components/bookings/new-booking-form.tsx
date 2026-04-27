@@ -715,7 +715,7 @@ export function NewBookingForm({
     ? 'col-span-2 min-w-0 md:col-span-1'
     : 'min-w-0'
   const draftRoomCertificateInlineClass = useCompactBookingLayout
-    ? 'grid gap-2 md:grid-cols-[minmax(0,1fr)_12.5rem] md:items-end'
+    ? 'grid grid-cols-[minmax(0,1fr)_8.75rem] items-end gap-2'
     : 'grid gap-2 md:grid-cols-[minmax(0,1fr)_14rem] md:items-end'
   const draftRoomPriceGridClass = useCompactBookingLayout ? 'mt-3 grid grid-cols-3 gap-2' : 'mt-4 grid grid-cols-2 gap-3'
   const draftRoomPaymentFieldClass = useCompactBookingLayout ? 'block' : 'block col-span-2'
@@ -1253,14 +1253,12 @@ export function NewBookingForm({
                                   onChange={(e) =>
                                     updateDraftRoom(draftRoom.key, {
                                       certificateApplied: e.target.checked,
-                                      certificateAmount: e.target.checked
-                                        ? draftRoom.certificateAmount || draftRoom.priceBaseTotal
-                                        : '',
+                                      certificateAmount: e.target.checked ? draftRoom.certificateAmount : '',
                                       })
                                     }
-                                  className="h-5 w-5 rounded border-[var(--crm-wine-border)] text-[var(--crm-wine)] accent-[var(--crm-wine)]"
+                                  className="h-5 w-5 shrink-0 rounded border-[var(--crm-wine-border)] text-[var(--crm-wine)] accent-[var(--crm-wine)]"
                                 />
-                                Проживання по сертифікату
+                                <span className="min-w-0 leading-5">Проживання по сертифікату</span>
                               </label>
 
                               {draftRoom.certificateApplied ? (
